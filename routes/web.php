@@ -10,7 +10,6 @@ Route::get('/about', [PageController::class, 'about']);
 Route::get('/products', [PageController::class, 'products']);
 Route::get('/contact', [PageController::class, 'contact']);
 
-// Admin Login
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
 
@@ -18,13 +17,8 @@ Route::post('/admin/logout', [AuthController::class, 'logout'])
     ->middleware('auth:admin')
     ->name('admin.logout');
 
-
-
-// Admin Dashboard (protected)
 Route::get('/admin', [AuthController::class, 'dashboard'])->middleware('auth:admin')->name('admin.dashboard');
 
-
-// Admin placeholder pages
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::get('/pages', function () {
@@ -42,7 +36,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
 });
 
-
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::get('/menus', [MenuController::class, 'index'])->name('admin.menus');
@@ -52,3 +45,4 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
 });
 
+Route::post('/admin/menus/update-order', [MenuController::class, 'updateOrder'])->name('admin.menus.update-order');

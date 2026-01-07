@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -20,6 +21,10 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #f4f6f8;
             color: #333;
+            height: 100vh;
+            /* Force height */
+            overflow: hidden;
+            /* Hide global scrollbar */
         }
 
         .sidebar {
@@ -82,7 +87,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px;
+            padding: 20px 25px;
             position: fixed;
             width: calc(100% - 220px);
             top: 0;
@@ -107,8 +112,12 @@
 
         .main-content {
             margin-left: 220px;
-            margin-top: 60px;
-            padding: 25px;
+            margin-top: 65px;
+            padding: 20px 25px;
+            height: calc(100vh - 65px);
+            /* Calculate height excluding topbar */
+            display: flex;
+            flex-direction: column;
         }
 
         .card {
@@ -117,6 +126,15 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
+            max-height: 100%;
+            /* Ensure card doesn't overflow main-content */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scrollable-content {
+            overflow-y: auto;
+            flex: 1;
         }
 
         @media(max-width: 768px) {
@@ -194,8 +212,7 @@
         <div class="right">
             <form action="{{ route('admin.logout') }}" method="POST" style="display:inline;">
                 @csrf
-                <button type="submit"
-                    style="background:none;border:none;cursor:pointer;color:#ff0000;font-size:18px;"
+                <button type="submit" style="background:none;border:none;cursor:pointer;color:#ff0000;font-size:18px;"
                     title="Logout">
                     <i class="fas fa-arrow-right-from-bracket"></i>
                 </button>
@@ -222,11 +239,11 @@
             else if (hour < 18) greeting = 'Good Afternoon';
             else greeting = 'Good Evening';
 
-    const adminName = "{{ auth('admin')->user()->name }}";
+            const adminName = "{{ auth('admin')->user()->name }}";
 
-    document.getElementById('greetingText').innerHTML = 
-        `<span style="color: #999">${greeting}, </span><span style="color: #07426e">${adminName}</span>`;
-}
+            document.getElementById('greetingText').innerHTML =
+                `<span style="color: #999">${greeting}, </span><span style="color: #07426e">${adminName}</span>`;
+        }
 
         setGreeting();
         updateClock();
@@ -234,4 +251,5 @@
     </script>
 
 </body>
+
 </html>
