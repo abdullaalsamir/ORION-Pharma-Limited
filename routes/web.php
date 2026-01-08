@@ -25,7 +25,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         return view('admin.pages');
     })->name('admin.pages');
 
-
     Route::get('/products', function () {
         return view('admin.products');
     })->name('admin.products');

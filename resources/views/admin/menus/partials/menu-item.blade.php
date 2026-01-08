@@ -7,7 +7,7 @@
 
             @if($menu->children->count())
                 <button type="button" class="collapse-toggle" data-target="#children-{{ $menu->id }}">
-                    <i class="fas fa-chevron-right"></i> {{-- Changed from chevron-down --}}
+                    <i class="fas fa-chevron-right"></i>
                 </button>
             @else
                 <span style="width:24px;display:inline-block;"></span>
@@ -48,7 +48,7 @@
     </div>
 
     @if($menu->children->count())
-        <div id="children-{{ $menu->id }}" class="nested"> {{-- Removed "expanded" --}}
+        <div id="children-{{ $menu->id }}" class="nested">
             <ul style="list-style:none;padding-left:0;margin:0;">
                 @foreach($menu->children as $child)
                     @include('admin.menus.partials.menu-item', ['menu' => $child])

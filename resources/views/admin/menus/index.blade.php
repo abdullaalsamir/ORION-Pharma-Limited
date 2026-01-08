@@ -204,7 +204,7 @@
         }
 
         .nested {
-            margin-left: 18px;
+            margin-left: 35px;
             max-height: 0;
             overflow: hidden;
             opacity: 0;

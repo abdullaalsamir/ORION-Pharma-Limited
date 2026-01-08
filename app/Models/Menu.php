@@ -40,20 +40,16 @@ class Menu extends Model
         });
     }
 
-    // Add this method inside the Menu class
     public function isEffectivelyActive()
     {
-        // If the current menu is inactive, it's inactive
         if (!$this->is_active) {
             return false;
         }
 
-        // If it has a parent, check if the parent is effectively active
         if ($this->parent) {
             return $this->parent->isEffectivelyActive();
         }
 
-        // If it's a root menu and is_active is true
         return true;
     }
 }

@@ -22,9 +22,7 @@
             background: #f4f6f8;
             color: #333;
             height: 100vh;
-            /* Force height */
             overflow: hidden;
-            /* Hide global scrollbar */
         }
 
         .sidebar {
@@ -115,7 +113,6 @@
             margin-top: 65px;
             padding: 20px 25px;
             height: calc(100vh - 65px);
-            /* Calculate height excluding topbar */
             display: flex;
             flex-direction: column;
         }
@@ -127,7 +124,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
             max-height: 100%;
-            /* Ensure card doesn't overflow main-content */
             display: flex;
             flex-direction: column;
         }

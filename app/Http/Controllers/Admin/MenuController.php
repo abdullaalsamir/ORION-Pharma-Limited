@@ -44,7 +44,6 @@ class MenuController extends Controller
         $parentId = $request->parent_id;
         $isActive = $request->has('is_active');
 
-        // Logic check: If the parent is inactive, this child MUST be inactive
         if ($parentId) {
             $parent = Menu::find($parentId);
             if ($parent && !$parent->is_active) {
@@ -63,31 +62,25 @@ class MenuController extends Controller
 
     public function destroy(Menu $menu)
     {
-        // 1. Get current position and parent info
         $oldOrder = $menu->order;
         $parentId = $menu->parent_id;
 
-        // 2. Get the immediate children that need to be moved up
         $children = $menu->children()->orderBy('order')->get();
         $childCount = $children->count();
 
         if ($childCount > 0) {
-            // 3. Make a "hole" in the order sequence for siblings
-            // Shift every item that was AFTER the deleted menu down by the number of children we are inserting
             Menu::where('parent_id', $parentId)
                 ->where('order', '>', $oldOrder)
                 ->increment('order', $childCount);
 
-            // 4. Move children into that hole
             foreach ($children as $index => $child) {
                 $child->update([
                     'parent_id' => $parentId,
-                    'order' => $oldOrder + $index // Start at the deleted menu's position
+                    'order' => $oldOrder + $index
                 ]);
             }
         }
 
-        // 5. Finally, delete the menu
         $menu->delete();
 
         return back()->with('success', 'Menu deleted and hierarchy reorganized.');
