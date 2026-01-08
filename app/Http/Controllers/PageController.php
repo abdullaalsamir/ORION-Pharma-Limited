@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Menu;
 
 class PageController extends Controller
 {
@@ -23,4 +24,11 @@ class PageController extends Controller
     {
         return view('pages.contact');
     }
+
+    public function page(Menu $menu)
+    {
+        abort_if(!$menu->isEffectivelyActive(), 404);
+        return view('pages.dynamic', compact('menu'));
+    }
+
 }

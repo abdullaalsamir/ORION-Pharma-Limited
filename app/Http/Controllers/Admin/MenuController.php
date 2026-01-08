@@ -5,9 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
+    // Helper to generate slugs
+    private function generateSlug($name)
+    {
+        return Str::of($name)
+            ->replace('&', 'and')   // Replace "&" with "and"
+            ->lower()
+            ->slug('-');
+    }
+
     public function index()
     {
         $menus = Menu::whereNull('parent_id')
@@ -25,11 +35,15 @@ class MenuController extends Controller
             'parent_id' => 'nullable|exists:menus,id'
         ]);
 
-        Menu::create([
+        $menu = Menu::create([
             'name' => $request->name,
             'parent_id' => $request->parent_id,
-            'order' => Menu::where('parent_id', $request->parent_id)->max('order') + 1
+            'order' => Menu::where('parent_id', $request->parent_id)->max('order') + 1,
         ]);
+
+        // Generate slug
+        $menu->slug = $this->generateSlug($menu->name);
+        $menu->save();
 
         return back()->with('success', 'Menu created successfully');
     }
@@ -56,6 +70,10 @@ class MenuController extends Controller
             'parent_id' => $parentId,
             'is_active' => $isActive,
         ]);
+
+        // Regenerate slug if name changed
+        $menu->slug = $this->generateSlug($menu->name);
+        $menu->save();
 
         return back()->with('success', 'Menu updated successfully');
     }
@@ -107,5 +125,28 @@ class MenuController extends Controller
         Menu::reguard();
 
         return response()->json(['success' => true]);
+    }
+
+    public function updatePage(Request $request, Menu $menu)
+    {
+        $validated = $request->validate([
+            'content' => 'required|string'
+        ]);
+
+        $menu->update([
+            'content' => $validated['content']
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function pages()
+    {
+        $menus = Menu::whereNull('parent_id')
+            ->orderBy('order')
+            ->with('children.children')
+            ->get();
+
+        return view('admin.pages', compact('menus'));
     }
 }

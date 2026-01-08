@@ -245,7 +245,7 @@
         updateClock();
         setInterval(updateClock, 1000);
     </script>
-
+    @stack('scripts')
 </body>
 
 </html>

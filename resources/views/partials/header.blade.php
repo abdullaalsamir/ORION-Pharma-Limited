@@ -18,31 +18,33 @@
                 @foreach($menus as $menu)
                     @if($menu->is_active)
                         <li class="nav-item {{ $menu->children->count() ? 'has-dropdown' : '' }}">
-                            <a href="#" class="nav-link">
-                                {{ $menu->name }}
-                                @if($menu->children->count())
+                            @if($menu->children->count() === 0)
+                                <a href="{{ $menu->slug ? url($menu->slug) : 'javascript:void(0)' }}" class="nav-link">{{ $menu->name }}</a>
+                            @else
+                                <a href="javascript:void(0)" class="nav-link">{{ $menu->name }}
                                     <i class="fas fa-chevron-down icon-sm"></i>
-                                @endif
-                            </a>
+                                </a>
+                            @endif
 
                             @if($menu->children->count())
                                 <ul class="dropdown-menu">
                                     @foreach($menu->children as $submenu)
                                         @if($submenu->is_active)
                                             <li class="dropdown-item {{ $submenu->children->count() ? 'has-submenu' : '' }}">
-                                                <a href="#" class="dropdown-link">
-                                                    {{ $submenu->name }}
-                                                    @if($submenu->children->count())
+                                                @if($submenu->children->count() === 0)
+                                                    <a href="{{ $submenu->slug ? url($submenu->slug) : 'javascript:void(0)' }}" class="dropdown-link">{{ $submenu->name }}</a>
+                                                @else
+                                                    <a href="javascript:void(0)" class="dropdown-link">{{ $submenu->name }}
                                                         <i class="fas fa-chevron-right icon-sm"></i>
-                                                    @endif
-                                                </a>
+                                                    </a>
+                                                @endif
 
                                                 @if($submenu->children->count())
                                                     <ul class="sub-submenu">
                                                         @foreach($submenu->children as $subsubmenu)
                                                             @if($subsubmenu->is_active)
                                                                 <li>
-                                                                    <a href="#" class="dropdown-link">{{ $subsubmenu->name }}</a>
+                                                                    <a href="{{ $subsubmenu->slug ? url($subsubmenu->slug) : 'javascript:void(0)' }}" class="dropdown-link">{{ $subsubmenu->name }}</a>
                                                                 </li>
                                                             @endif
                                                         @endforeach
@@ -135,7 +137,7 @@
         background-color: #08519e;
         list-style: none;
         margin: 0;
-        padding: 0 0;
+        padding: 0;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         min-width: 220px;
         z-index: 10;

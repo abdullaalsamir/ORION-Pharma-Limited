@@ -21,9 +21,7 @@ Route::get('/admin', [AuthController::class, 'dashboard'])->middleware('auth:adm
 
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
-    Route::get('/pages', function () {
-        return view('admin.pages');
-    })->name('admin.pages');
+    Route::get('/pages', [MenuController::class, 'pages'])->name('admin.pages');
 
     Route::get('/products', function () {
         return view('admin.products');
@@ -35,6 +33,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
 });
 
+
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::get('/menus', [MenuController::class, 'index'])->name('admin.menus');
@@ -45,3 +44,15 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 });
 
 Route::post('/admin/menus/update-order', [MenuController::class, 'updateOrder'])->name('admin.menus.update-order');
+
+Route::put('/admin/pages/{menu}', [MenuController::class, 'updatePage'])
+    ->middleware('auth:admin')
+    ->name('admin.pages.update');
+
+Route::get('/{menu}', [PageController::class, 'page']);
+
+Route::get('/admin/pages', [MenuController::class, 'pages'])
+    ->middleware('auth:admin')
+    ->name('admin.pages');
+
+Route::get('/{menu:slug}', [PageController::class, 'page']);
