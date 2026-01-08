@@ -9,11 +9,10 @@ use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
-    // Helper to generate slugs
     private function generateSlug($name)
     {
         return Str::of($name)
-            ->replace('&', 'and')   // Replace "&" with "and"
+            ->replace('&', 'and')
             ->lower()
             ->slug('-');
     }
@@ -41,7 +40,6 @@ class MenuController extends Controller
             'order' => Menu::where('parent_id', $request->parent_id)->max('order') + 1,
         ]);
 
-        // Generate slug
         $menu->slug = $this->generateSlug($menu->name);
         $menu->save();
 
@@ -71,7 +69,6 @@ class MenuController extends Controller
             'is_active' => $isActive,
         ]);
 
-        // Regenerate slug if name changed
         $menu->slug = $this->generateSlug($menu->name);
         $menu->save();
 

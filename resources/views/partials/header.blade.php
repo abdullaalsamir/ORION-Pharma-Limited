@@ -16,35 +16,48 @@
                 </li>
 
                 @foreach($menus as $menu)
-                    @if($menu->is_active)
-                        <li class="nav-item {{ $menu->children->count() ? 'has-dropdown' : '' }}">
-                            @if($menu->children->count() === 0)
-                                <a href="{{ $menu->slug ? url($menu->slug) : 'javascript:void(0)' }}" class="nav-link">{{ $menu->name }}</a>
-                            @else
-                                <a href="javascript:void(0)" class="nav-link">{{ $menu->name }}
-                                    <i class="fas fa-chevron-down icon-sm"></i>
-                                </a>
-                            @endif
+                    @if($menu->isEffectivelyActive())
+                        @php $hasChildren = $menu->children->count() > 0; @endphp
 
-                            @if($menu->children->count())
+                        <li class="nav-item {{ $hasChildren ? 'has-dropdown' : '' }}">
+                            <a
+                                href="{{ !$hasChildren ? url($menu->full_slug) : 'javascript:void(0)' }}"
+                                class="nav-link"
+                            >
+                                {{ $menu->name }}
+                                @if($hasChildren)
+                                    <i class="fas fa-chevron-down icon-sm"></i>
+                                @endif
+                            </a>
+
+                            @if($hasChildren)
                                 <ul class="dropdown-menu">
                                     @foreach($menu->children as $submenu)
-                                        @if($submenu->is_active)
-                                            <li class="dropdown-item {{ $submenu->children->count() ? 'has-submenu' : '' }}">
-                                                @if($submenu->children->count() === 0)
-                                                    <a href="{{ $submenu->slug ? url($submenu->slug) : 'javascript:void(0)' }}" class="dropdown-link">{{ $submenu->name }}</a>
-                                                @else
-                                                    <a href="javascript:void(0)" class="dropdown-link">{{ $submenu->name }}
-                                                        <i class="fas fa-chevron-right icon-sm"></i>
-                                                    </a>
-                                                @endif
+                                        @if($submenu->isEffectivelyActive())
+                                            @php $hasSub = $submenu->children->count() > 0; @endphp
 
-                                                @if($submenu->children->count())
+                                            <li class="dropdown-item {{ $hasSub ? 'has-submenu' : '' }}">
+                                                <a
+                                                    href="{{ !$hasSub ? url($submenu->full_slug) : 'javascript:void(0)' }}"
+                                                    class="dropdown-link"
+                                                >
+                                                    {{ $submenu->name }}
+                                                    @if($hasSub)
+                                                        <i class="fas fa-chevron-right icon-sm"></i>
+                                                    @endif
+                                                </a>
+
+                                                @if($hasSub)
                                                     <ul class="sub-submenu">
                                                         @foreach($submenu->children as $subsubmenu)
-                                                            @if($subsubmenu->is_active)
+                                                            @if($subsubmenu->isEffectivelyActive())
                                                                 <li>
-                                                                    <a href="{{ $subsubmenu->slug ? url($subsubmenu->slug) : 'javascript:void(0)' }}" class="dropdown-link">{{ $subsubmenu->name }}</a>
+                                                                    <a
+                                                                        href="{{ url($subsubmenu->full_slug) }}"
+                                                                        class="dropdown-link"
+                                                                    >
+                                                                        {{ $subsubmenu->name }}
+                                                                    </a>
                                                                 </li>
                                                             @endif
                                                         @endforeach

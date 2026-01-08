@@ -49,10 +49,9 @@ Route::put('/admin/pages/{menu}', [MenuController::class, 'updatePage'])
     ->middleware('auth:admin')
     ->name('admin.pages.update');
 
-Route::get('/{menu}', [PageController::class, 'page']);
-
 Route::get('/admin/pages', [MenuController::class, 'pages'])
     ->middleware('auth:admin')
     ->name('admin.pages');
 
-Route::get('/{menu:slug}', [PageController::class, 'page']);
+Route::get('{slug}', [PageController::class, 'page'])
+    ->where('slug', '.*');

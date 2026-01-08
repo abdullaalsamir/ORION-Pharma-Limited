@@ -25,9 +25,14 @@ class PageController extends Controller
         return view('pages.contact');
     }
 
-    public function page(Menu $menu)
+    public function page(string $slug)
     {
-        abort_if(!$menu->isEffectivelyActive(), 404);
+        $menu = Menu::all()->first(function ($menu) use ($slug) {
+            return $menu->full_slug === $slug;
+        });
+
+        abort_if(!$menu || !$menu->isEffectivelyActive(), 404);
+
         return view('pages.dynamic', compact('menu'));
     }
 

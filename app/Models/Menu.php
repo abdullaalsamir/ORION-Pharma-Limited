@@ -9,7 +9,7 @@ class Menu extends Model
 {
     protected $fillable = [
         'name',
-        'slug', // add slug
+        'slug',
         'content',
         'parent_id',
         'order',
@@ -19,36 +19,66 @@ class Menu extends Model
     protected static function booted()
     {
         static::saving(function ($menu) {
-            // Only generate slug if the menu is a leaf (no children)
-            if ($menu->children()->count() == 0) {
-                $menu->slug = self::generateSlug($menu->name);
-            } else {
-                $menu->slug = null; // parents have no slug
-            }
-        });
 
-        static::saved(function ($menu) {
-            // After saving, if it has children, make sure parent's slug is null
-            if ($menu->children()->count() > 0) {
-                $menu->slug = null;
-                $menu->saveQuietly(); // prevent recursion
+            if ($menu->isDirty('name') || empty($menu->slug)) {
+                $menu->slug = self::generateUniqueSlug(
+                    $menu->name,
+                    $menu->parent_id,
+                    $menu->id
+                );
             }
         });
     }
 
-    public static function generateSlug($name)
+    public static function generateUniqueSlug(string $name, $parentId = null, $ignoreId = null): string
     {
-        $slug = Str::slug(str_replace('&', 'and', $name));
-        $original = $slug;
-        $counter = 1;
+        $baseSlug = Str::slug(str_replace('&', 'and', $name));
+        $slug = $baseSlug;
 
-        // Ensure slug uniqueness
-        while (self::where('slug', $slug)->exists()) {
-            $slug = $original . '-' . $counter;
-            $counter++;
+        $query = self::where('slug', $slug)
+            ->where('parent_id', $parentId);
+
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
         }
 
-        return $slug;
+        if (!$query->exists()) {
+            return $slug;
+        }
+
+        $counter = 2;
+
+        while (true) {
+            $slug = $baseSlug . '-' . $counter;
+
+            $query = self::where('slug', $slug)
+                ->where('parent_id', $parentId);
+
+            if ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            }
+
+            if (!$query->exists()) {
+                return $slug;
+            }
+
+            $counter++;
+        }
+    }
+
+    public function getFullSlugAttribute(): string
+    {
+        $segments = [];
+        $menu = $this;
+
+        while ($menu) {
+            if ($menu->slug) {
+                array_unshift($segments, $menu->slug);
+            }
+            $menu = $menu->parent;
+        }
+
+        return implode('/', $segments);
     }
 
     public function children()
