@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Menu;
 
 class PageController extends Controller
@@ -31,9 +32,12 @@ class PageController extends Controller
             return $menu->full_slug === $slug;
         });
 
-        abort_if(!$menu || !$menu->isEffectivelyActive(), 404);
+        abort_if(!$menu, 404);
+
+        abort_if(!$menu->isEffectivelyActive(), 404);
+
+        abort_if($menu->children()->exists(), 404);
 
         return view('pages.dynamic', compact('menu'));
     }
-
 }
