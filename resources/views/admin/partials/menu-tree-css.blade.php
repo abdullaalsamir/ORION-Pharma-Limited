@@ -75,7 +75,6 @@
         cursor: pointer;
         text-align: center;
         font-size: 13px;
-        font-weight: 600;
         color: #666;
         border: 1px solid transparent;
         border-radius: 6px;
@@ -86,9 +85,16 @@
 
     .segmented-control input[type="radio"]:checked+label {
         background: #fff;
-        color: crimson;
         border: 1px solid #ddd;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .segmented-control input[value="0"]:checked+label {
+        color: #07426e;
+    }
+
+    .segmented-control input[value="1"]:checked+label {
+        color: crimson;
     }
 
     .toggle-switch {
@@ -236,6 +242,24 @@
         border: 1px solid #ffe6e6;
     }
 
+    .functional-badge {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f9f9f9;
+        color: #1e7a43;
+        border: 1px solid #dff0e6;
+        text-transform: capitalize;
+    }
+
+    .functional-badge.type-functional {
+        color: #07426e;
+    }
+
+    .functional-badge.type-multi {
+        color: crimson;
+    }
+
     .menu-actions {
         display: flex;
         align-items: center;
@@ -320,5 +344,51 @@
 
     .menu-card.dragging {
         opacity: 0.6;
+    }
+
+    /* .content-status-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.status-empty {
+    background: #fdf2f2;
+    color: #9b1c1c;
+    border: 1px solid #f8d7da;
+}
+
+.status-added {
+    background: #e1effe;
+    color: #1e429f;
+    border: 1px solid #c3ddfd;
+} */
+
+    .content-preview {
+        font-size: 12px;
+        color: #555;
+        background: #f9fafb;
+        padding: 5px 12px;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        max-width: 350px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-left: auto;
+        margin-right: 20px;
+    }
+
+    .content-preview.is-empty {
+        color: #9ca3af;
+        background: #ffffff;
+        border: 1px dashed #d1d5db;
+        font-style: italic;
+    }
+
+    .content-preview i {
+        margin-right: 5px;
+        font-size: 11px;
     }
 </style>

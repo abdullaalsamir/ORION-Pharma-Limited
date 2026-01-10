@@ -23,6 +23,10 @@
         </div>
 
         <div style="display:flex;align-items:center;gap:10px;">
+            <span class="functional-badge {{ $menu->is_multifunctional ? 'type-multi' : 'type-functional' }}">
+                {{ $menu->is_multifunctional ? 'Multifunctional' : 'Functional' }}
+            </span>
+
             <div>
                 @if($menu->isEffectivelyActive())
                     <span class="menu-badge">Active</span>

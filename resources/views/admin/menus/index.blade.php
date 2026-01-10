@@ -23,7 +23,7 @@
                     @foreach($menus as $menu)
                         <option value="{{ $menu->id }}">{{ $menu->name }}</option>
                         @foreach($menu->children as $child)
-                            <option value="{{ $child->id }}">— {{ $child->name }}</option>
+                            <option value="{{ $child->id }}" style="color: gray;">— {{ $child->name }}</option>
                         @endforeach
                     @endforeach
                 </select>
@@ -57,7 +57,8 @@
                                 </div>
                             </div>
 
-                            <div style="margin-right:84px">
+                            <div style="margin-right:84px; display: flex; align-items: center; gap: 10px;">
+                                <span class="functional-badge type-functional">Functional</span>
                                 <span class="menu-badge">Active</span>
                             </div>
                         </div>
@@ -93,7 +94,7 @@
                     @foreach($menus as $m)
                         <option value="{{ $m->id }}" data-active="{{ $m->is_active ? '1' : '0' }}">{{ $m->name }}</option>
                         @foreach($m->children as $c)
-                            <option value="{{ $c->id }}" data-active="{{ $c->is_active ? '1' : '0' }}">
+                            <option value="{{ $c->id }}" data-active="{{ $c->is_active ? '1' : '0' }}" style="color: gray;">
                                 — {{ $c->name }}
                             </option>
                         @endforeach
@@ -163,11 +164,23 @@
 
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
-                    form.action = `/admin/menus/${this.dataset.id}`;
+                    const currentId = this.dataset.id;
+                    form.action = `/admin/menus/${currentId}`;
 
                     document.getElementById('editName').value = this.dataset.name;
                     editParent.value = this.dataset.parent || '';
                     toggleInput.checked = this.dataset.active == '1';
+
+                    Array.from(editParent.options).forEach(option => {
+                        if (option.value === currentId) {
+                            option.style.color = 'darkred';
+                            option.disabled = true;
+                        } else {
+                            const isSubmenu = option.text.includes('—');
+                            option.style.color = isSubmenu ? 'gray' : '';
+                            option.disabled = false;
+                        }
+                    });
 
                     if (this.dataset.multi == '1') {
                         document.getElementById('edit-type-multi').checked = true;

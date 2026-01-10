@@ -33,19 +33,18 @@ class MenuController extends Controller
         return view('admin.menus.index', compact('menus', 'homeMenu'));
     }
 
-    // Update Store
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
             'parent_id' => 'nullable|exists:menus,id',
-            'is_multifunctional' => 'nullable|boolean' // Add this
+            'is_multifunctional' => 'required|in:0,1'
         ]);
 
         $menu = Menu::create([
             'name' => $request->name,
             'parent_id' => $request->parent_id,
-            'is_multifunctional' => $request->has('is_multifunctional') ? 1 : 0, // Add this
+            'is_multifunctional' => $request->is_multifunctional,
             'order' => Menu::where('parent_id', $request->parent_id)->max('order') + 1,
         ]);
 
@@ -55,25 +54,22 @@ class MenuController extends Controller
         return back()->with('success', 'Menu created successfully');
     }
 
-    // Update Update
     public function update(Request $request, Menu $menu)
     {
         $request->validate([
             'name' => 'required|string',
             'parent_id' => 'nullable|exists:menus,id',
-            'is_multifunctional' => 'nullable|boolean' // Add this
+            'is_multifunctional' => 'required|in:0,1'
         ]);
 
         $parentId = $request->parent_id;
         $isActive = $request->has('is_active');
 
-        // ... existing logic for parent activity ...
-
         $menu->update([
             'name' => $request->name,
             'parent_id' => $parentId,
             'is_active' => $isActive,
-            'is_multifunctional' => $request->has('is_multifunctional') ? 1 : 0, // Add this
+            'is_multifunctional' => $request->is_multifunctional,
         ]);
 
         $menu->slug = $this->generateSlug($menu->name);
@@ -134,7 +130,7 @@ class MenuController extends Controller
     public function updatePage(Request $request, Menu $menu)
     {
         $validated = $request->validate([
-            'content' => 'required|string'
+            'content' => 'nullable|string'
         ]);
 
         $menu->update([
