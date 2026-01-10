@@ -11,10 +11,6 @@
 
         <nav class="nav-container">
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="{{ url('/') }}" class="nav-link">Home</a>
-                </li>
-
                 @foreach($menus as $menu)
                     @if($menu->isEffectivelyActive())
                         @php $hasChildren = $menu->children->count() > 0; @endphp

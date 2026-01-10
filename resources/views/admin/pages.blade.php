@@ -15,6 +15,25 @@
         <div class="card-body" style="margin-top:18px; flex: 1; overflow: hidden; display: flex; flex-direction: column;">
             <div class="menu-tree-wrapper">
                 <ul class="menu-tree">
+                    <li>
+                        <div class="menu-card">
+                            <div class="menu-left">
+                                <div style="margin-left:35px">
+                                    <div class="menu-title">Home</div>
+                                </div>
+                            </div>
+
+                            <div class="menu-actions">
+                                <button class="icon-btn edit-page" 
+                                    data-id="{{ $homeMenu->id }}" 
+                                    data-name="Home Page" 
+                                    data-content="{{ e($homeMenu->content) }}">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+
                     @foreach($menus as $menu)
                         @include('admin.pages.partials.page-item', ['menu' => $menu])
                     @endforeach

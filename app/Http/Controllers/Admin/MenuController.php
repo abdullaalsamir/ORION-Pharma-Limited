@@ -19,12 +19,18 @@ class MenuController extends Controller
 
     public function index()
     {
+        $homeMenu = Menu::firstOrCreate(
+            ['slug' => 'home'],
+            ['name' => 'Home', 'is_active' => 1, 'order' => -1]
+        );
+
         $menus = Menu::whereNull('parent_id')
+            ->where('slug', '!=', 'home')
             ->orderBy('order')
             ->with('children.children')
             ->get();
 
-        return view('admin.menus.index', compact('menus'));
+        return view('admin.menus.index', compact('menus', 'homeMenu'));
     }
 
     public function store(Request $request)
@@ -139,11 +145,17 @@ class MenuController extends Controller
 
     public function pages()
     {
+        $homeMenu = Menu::firstOrCreate(
+            ['slug' => 'home'],
+            ['name' => 'Home', 'is_active' => 1, 'order' => -1]
+        );
+
         $menus = Menu::whereNull('parent_id')
+            ->where('slug', '!=', 'home')
             ->orderBy('order')
             ->with('children.children')
             ->get();
 
-        return view('admin.pages', compact('menus'));
+        return view('admin.pages', compact('menus', 'homeMenu'));
     }
 }

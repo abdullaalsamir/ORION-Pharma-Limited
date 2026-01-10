@@ -42,6 +42,21 @@
                 @endif
 
                 <ul class="menu-tree">
+                    <li class="fixed-menu-item">
+                        <div class="menu-card">
+                            <div class="menu-left">
+                                <div style="margin-left:65px">
+                                    <div class="menu-title">{{ $homeMenu->name }}</div>
+                                    <div class="small-note">System Default Menu</div>
+                                </div>
+                            </div>
+
+                            <div style="margin-right:83px">
+                                <span class="menu-badge">Active</span>
+                            </div>
+                      </div>
+                    </li>
+
                     @foreach($menus as $menu)
                         @include('admin.menus.partials.menu-item', ['menu' => $menu])
                     @endforeach

@@ -1,3 +1,4 @@
+@if($menu->slug === 'home') @php return; @endphp @endif
 <li data-id="{{ $menu->id }}" data-parent="{{ $menu->parent_id ?? 'root' }}">
     <div class="menu-card">
         <div class="menu-left">

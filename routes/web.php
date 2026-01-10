@@ -5,10 +5,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\MenuController;
 
-Route::get('/', [PageController::class, 'home']);
-Route::get('/about', [PageController::class, 'about']);
-Route::get('/products', [PageController::class, 'products']);
-Route::get('/contact', [PageController::class, 'contact']);
+Route::get('/', [PageController::class, 'home'])->name('home');
 
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
@@ -32,7 +29,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     })->name('admin.settings');
 
 });
-
 
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
