@@ -20,10 +20,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::get('/pages', [MenuController::class, 'pages'])->name('admin.pages');
 
-    Route::get('/products', function () {
-        return view('admin.products');
-    })->name('admin.products');
-
     Route::get('/settings', function () {
         return view('admin.settings');
     })->name('admin.settings');

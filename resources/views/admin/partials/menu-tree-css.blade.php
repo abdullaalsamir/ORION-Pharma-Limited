@@ -57,6 +57,40 @@
         color: #333;
     }
 
+    .segmented-control {
+        display: flex;
+        background: #f9f9f9;
+        padding: 3px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+    }
+
+    .segmented-control input[type="radio"] {
+        display: none;
+    }
+
+    .segmented-control label {
+        flex: 1;
+        padding: 7px 15px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .segmented-control input[type="radio"]:checked+label {
+        background: #fff;
+        color: crimson;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
     .toggle-switch {
         position: relative;
         display: inline-block;

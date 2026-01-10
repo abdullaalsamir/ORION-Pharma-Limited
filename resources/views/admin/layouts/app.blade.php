@@ -1,3 +1,10 @@
+@php
+    $multifunctionalMenus = \App\Models\Menu::where('is_multifunctional', 1)
+        ->where('is_active', 1)
+        ->orderBy('order')
+        ->get();
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -180,12 +187,15 @@
                     <span>Pages</span>
                 </a>
             </li>
-            <li>
-                <a href="{{ route('admin.products') }}" class="{{ request()->is('admin/products*') ? 'active' : '' }}">
-                    <i class="fas fa-box"></i>
-                    <span>Products</span>
-                </a>
-            </li>
+            @foreach($multifunctionalMenus as $mMenu)
+                <li>
+                    <a href="{{ url('admin/' . $mMenu->slug) }}"
+                        class="{{ request()->is('admin/' . $mMenu->slug . '*') ? 'active' : '' }}">
+                        <i class="fas fa-th-large"></i>
+                        <span>{{ $mMenu->name }}</span>
+                    </a>
+                </li>
+            @endforeach
             <li>
                 <a href="{{ route('admin.settings') }}" class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
                     <i class="fas fa-cog"></i>
@@ -208,7 +218,7 @@
         <div class="right">
             <form action="{{ route('admin.logout') }}" method="POST" style="display:inline;">
                 @csrf
-                <button type="submit" style="background:none;border:none;cursor:pointer;color:#ff0000;font-size:18px;"
+                <button type="submit" style="background:none;border:none;cursor:pointer;color:red;font-size:18px;"
                     title="Logout">
                     <i class="fas fa-arrow-right-from-bracket"></i>
                 </button>

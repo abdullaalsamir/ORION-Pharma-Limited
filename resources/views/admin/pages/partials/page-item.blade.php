@@ -16,10 +16,16 @@
         </div>
 
         <div class="menu-actions">
-            <button class="icon-btn edit-page" data-id="{{ $menu->id }}" data-name="{{ $menu->name }}"
-                data-content="{{ e($menu->content) }}">
-                <i class="fas fa-pen"></i>
-            </button>
+            @if($menu->is_multifunctional)
+                <a href="{{ url('admin/' . $menu->slug) }}" class="icon-btn">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            @else
+                <button class="icon-btn edit-page" data-id="{{ $menu->id }}" data-name="{{ $menu->name }}"
+                    data-content="{{ e($menu->content) }}">
+                    <i class="fas fa-pen"></i>
+                </button>
+            @endif
         </div>
     </div>
 

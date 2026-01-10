@@ -13,7 +13,8 @@ class Menu extends Model
         'content',
         'parent_id',
         'order',
-        'is_active'
+        'is_active',
+        'is_multifunctional'
     ];
 
     protected static function booted()

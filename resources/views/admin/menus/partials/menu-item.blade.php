@@ -32,8 +32,12 @@
             </div>
 
             <div class="menu-actions">
-                <button type="button" class="icon-btn edit-btn" data-id="{{ $menu->id }}" data-name="{{ $menu->name }}"
-                    data-parent="{{ $menu->parent_id }}" data-active="{{ $menu->is_active ? '1' : '0' }}">
+                <button type="button" class="icon-btn edit-btn" 
+                    data-id="{{ $menu->id }}" 
+                    data-name="{{ $menu->name }}"
+                    data-parent="{{ $menu->parent_id }}" 
+                    data-active="{{ $menu->is_active ? '1' : '0' }}"
+                    data-multi="{{ $menu->is_multifunctional ? '1' : '0' }}">
                     <i class="fas fa-pen"></i>
                 </button>
 

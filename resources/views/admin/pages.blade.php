@@ -18,15 +18,13 @@
                     <li>
                         <div class="menu-card">
                             <div class="menu-left">
-                                <div style="margin-left:35px">
+                                <div style="margin-left:33px">
                                     <div class="menu-title">Home</div>
                                 </div>
                             </div>
 
                             <div class="menu-actions">
-                                <button class="icon-btn edit-page" 
-                                    data-id="{{ $homeMenu->id }}" 
-                                    data-name="Home Page" 
+                                <button class="icon-btn edit-page" data-id="{{ $homeMenu->id }}" data-name="Home Page"
                                     data-content="{{ e($homeMenu->content) }}">
                                     <i class="fas fa-pen"></i>
                                 </button>

@@ -27,8 +27,14 @@
                         @endforeach
                     @endforeach
                 </select>
+                <div class="segmented-control">
+                    <input type="radio" name="is_multifunctional" value="0" id="type-functional" checked>
+                    <label for="type-functional">Functional</label>
 
-                <button title="Add menu"
+                    <input type="radio" name="is_multifunctional" value="1" id="type-multi">
+                    <label for="type-multi">Multifunctional</label>
+                </div>
+                <button title="Add"
                     style="background:#0a3d62;border:none;color:#fff;padding:9px 11px;border-radius:6px;cursor:pointer;">
                     <i class="fas fa-plus"></i>
                 </button>
@@ -45,16 +51,16 @@
                     <li class="fixed-menu-item">
                         <div class="menu-card">
                             <div class="menu-left">
-                                <div style="margin-left:65px">
+                                <div style="margin-left:67px">
                                     <div class="menu-title">{{ $homeMenu->name }}</div>
                                     <div class="small-note">System Default Menu</div>
                                 </div>
                             </div>
 
-                            <div style="margin-right:83px">
+                            <div style="margin-right:84px">
                                 <span class="menu-badge">Active</span>
                             </div>
-                      </div>
+                        </div>
                     </li>
 
                     @foreach($menus as $menu)
@@ -93,6 +99,15 @@
                         @endforeach
                     @endforeach
                 </select>
+
+                <label style="font-size:13px;color:#555">Menu Type</label>
+                <div class="segmented-control" style="width: 100%; margin-bottom: 10px;">
+                    <input type="radio" name="is_multifunctional" value="0" id="edit-type-functional">
+                    <label for="edit-type-functional">Functional</label>
+
+                    <input type="radio" name="is_multifunctional" value="1" id="edit-type-multi">
+                    <label for="edit-type-multi">Multifunctional</label>
+                </div>
 
                 <label style="display:flex;align-items:center;gap:10px;margin-top:10px;">
                     <div class="toggle-switch">
@@ -153,6 +168,12 @@
                     document.getElementById('editName').value = this.dataset.name;
                     editParent.value = this.dataset.parent || '';
                     toggleInput.checked = this.dataset.active == '1';
+
+                    if (this.dataset.multi == '1') {
+                        document.getElementById('edit-type-multi').checked = true;
+                    } else {
+                        document.getElementById('edit-type-functional').checked = true;
+                    }
 
                     updateToggleState();
 

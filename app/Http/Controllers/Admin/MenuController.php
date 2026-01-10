@@ -33,16 +33,19 @@ class MenuController extends Controller
         return view('admin.menus.index', compact('menus', 'homeMenu'));
     }
 
+    // Update Store
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
-            'parent_id' => 'nullable|exists:menus,id'
+            'parent_id' => 'nullable|exists:menus,id',
+            'is_multifunctional' => 'nullable|boolean' // Add this
         ]);
 
         $menu = Menu::create([
             'name' => $request->name,
             'parent_id' => $request->parent_id,
+            'is_multifunctional' => $request->has('is_multifunctional') ? 1 : 0, // Add this
             'order' => Menu::where('parent_id', $request->parent_id)->max('order') + 1,
         ]);
 
@@ -52,27 +55,25 @@ class MenuController extends Controller
         return back()->with('success', 'Menu created successfully');
     }
 
+    // Update Update
     public function update(Request $request, Menu $menu)
     {
         $request->validate([
             'name' => 'required|string',
             'parent_id' => 'nullable|exists:menus,id',
+            'is_multifunctional' => 'nullable|boolean' // Add this
         ]);
 
         $parentId = $request->parent_id;
         $isActive = $request->has('is_active');
 
-        if ($parentId) {
-            $parent = Menu::find($parentId);
-            if ($parent && !$parent->is_active) {
-                $isActive = false;
-            }
-        }
+        // ... existing logic for parent activity ...
 
         $menu->update([
             'name' => $request->name,
             'parent_id' => $parentId,
             'is_active' => $isActive,
+            'is_multifunctional' => $request->has('is_multifunctional') ? 1 : 0, // Add this
         ]);
 
         $menu->slug = $this->generateSlug($menu->name);
