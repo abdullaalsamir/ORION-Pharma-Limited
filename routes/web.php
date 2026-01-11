@@ -16,7 +16,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware('auth:admin')
+    ->middleware(['auth:admin', 'no.cache'])
     ->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

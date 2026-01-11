@@ -29,7 +29,7 @@
                                     <span class="content-status-badge status-empty">No Content</span>
                                 </div>
                             @else
-                               <div class="content-preview menu-right" title="{{ strip_tags($homeMenu->content) }}">
+                                <div class="content-preview menu-right" title="{{ strip_tags($homeMenu->content) }}">
                                     {{ strip_tags($homeMenu->content) }}
                                 </div>
                             @endif
@@ -60,7 +60,7 @@
             <h3 style="margin:0 0 12px 0;color:#0a3d62">Edit Page Content</h3>
 
             <textarea id="pageContent"
-                style="width:100%;min-height:220px;padding:12px;border:1px solid #e6e9ee;border-radius:6px;"></textarea>
+                style="width:100%;min-height:220px;padding:12px;border:1px solid #e6e9ee;border-radius:6px;resize:none;"></textarea>
 
             <div style="text-align:right;margin-top:12px;">
                 <button id="savePage"
