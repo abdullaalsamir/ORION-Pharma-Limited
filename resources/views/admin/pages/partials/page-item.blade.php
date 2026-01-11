@@ -15,34 +15,23 @@
             </div>
         </div>
 
-                <!-- <div style="margin-left: auto; margin-right: 20px;">
-            @if(!$menu->is_multifunctional)
-                <span class="content-status-badge {{ empty($menu->content) ? 'status-empty' : 'status-added' }}">
-                    {{ empty($menu->content) ? 'Empty' : 'Added' }}
-                </span>
+        @if(!$menu->is_multifunctional)
+            @if(empty($menu->content))
+                <div class="menu-right">
+                    <span class="content-status-badge status-empty">Empty</span>
+                </div>
             @else
-                <span class="content-status-badge" style="background:#f9f9f9; color:#999; border:1px solid #ddd;">
+                <div class="content-preview menu-right" title="{{ strip_tags($menu->content) }}">
+                    {{ strip_tags($menu->content) }}
+                </div>
+            @endif
+        @else
+            <div class="menu-right">
+                <span class="content-status-badge status-na">
                     N/A (Multi)
                 </span>
-            @endif
-        </div> -->
-
-              @if(!$menu->is_multifunctional)
-            <div class="content-preview {{ empty($menu->content) ? 'is-empty' : '' }}">
-                @if(empty($menu->content))
-                    <i class="fas fa-pen-nib"></i> Empty
-                @else
-                    {{ strip_tags($menu->content) }}
-                @endif
-            </div>
-        @else
-            <div class="content-preview is-empty" style="max-width: 150px; border:none; background:none;">
-                <span style="font-size: 11px; color:#ccc;">(Multifunctional)</span>
             </div>
         @endif
-
-
-
 
         <div class="menu-actions">
             @if($menu->is_multifunctional)

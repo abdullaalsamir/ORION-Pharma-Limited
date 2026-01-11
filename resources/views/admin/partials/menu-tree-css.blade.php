@@ -346,24 +346,29 @@
         opacity: 0.6;
     }
 
-    /* .content-status-badge {
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-weight: 500;
-}
+    .content-status-badge {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
 
-.status-empty {
-    background: #fdf2f2;
-    color: #9b1c1c;
-    border: 1px solid #f8d7da;
-}
+    .menu-right {
+        margin-left: auto;
+        margin-right: 0;
+    }
 
-.status-added {
-    background: #e1effe;
-    color: #1e429f;
-    border: 1px solid #c3ddfd;
-} */
+    .status-empty {
+        background: #fdf2f2;
+        color: #9b1c1c;
+        border: 1px solid #f8d7da;
+    }
+
+    .status-na {
+        background: #f9f9f9;
+        color: #999;
+        border: 1px solid #ddd;
+    }
 
     .content-preview {
         font-size: 12px;
@@ -372,23 +377,9 @@
         padding: 5px 12px;
         border-radius: 6px;
         border: 1px solid #e5e7eb;
-        max-width: 350px;
+        max-width: 500px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        margin-left: auto;
-        margin-right: 20px;
-    }
-
-    .content-preview.is-empty {
-        color: #9ca3af;
-        background: #ffffff;
-        border: 1px dashed #d1d5db;
-        font-style: italic;
-    }
-
-    .content-preview i {
-        margin-right: 5px;
-        font-size: 11px;
     }
 </style>

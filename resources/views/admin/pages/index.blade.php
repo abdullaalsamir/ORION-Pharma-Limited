@@ -16,31 +16,6 @@
             <div class="menu-tree-wrapper">
                 <ul class="menu-tree">
 
-                <!-- <li>
-    <div class="menu-card">
-        <div class="menu-left">
-            <div style="margin-left:33px">
-                <div class="menu-title">Home</div>
-            </div>
-        </div>
-
-
-        <div style="margin-left: auto; margin-right: 20px;">
-            <span class="content-status-badge {{ empty($homeMenu->content) ? 'status-empty' : 'status-added' }}">
-                <i class="fas {{ empty($homeMenu->content) ? 'fa-pen-nib' : 'fa-check-circle' }}"></i>
-                {{ empty($homeMenu->content) ? 'No Content' : 'Content Added' }}
-            </span>
-        </div>
-
-        <div class="menu-actions">
-            <button class="icon-btn edit-page" data-id="{{ $homeMenu->id }}" data-name="Home Page"
-                data-content="{{ e($homeMenu->content) }}">
-                <i class="fas fa-pen"></i>
-            </button>
-        </div>
-    </div>
-</li> -->
-
                     <li>
                         <div class="menu-card">
                             <div class="menu-left">
@@ -49,13 +24,15 @@
                                 </div>
                             </div>
 
-                            <div class="content-preview {{ empty($homeMenu->content) ? 'is-empty' : '' }}">
-                                @if(empty($homeMenu->content))
-                                    <i class="fas fa-comment-slash"></i> No content added yet...
-                                @else
-                                    <i class="fas fa-align-left"></i> {{ strip_tags($homeMenu->content) }}
-                                @endif
-                            </div>
+                            @if(empty($homeMenu->content))
+                                <div class="menu-right">
+                                    <span class="content-status-badge status-empty">No Content</span>
+                                </div>
+                            @else
+                               <div class="content-preview menu-right" title="{{ strip_tags($homeMenu->content) }}">
+                                    {{ strip_tags($homeMenu->content) }}
+                                </div>
+                            @endif
 
                             <div class="menu-actions">
                                 <button class="icon-btn edit-page" data-id="{{ $homeMenu->id }}" data-name="Home Page"

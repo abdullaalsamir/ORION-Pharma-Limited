@@ -153,6 +153,6 @@ class MenuController extends Controller
             ->with('children.children')
             ->get();
 
-        return view('admin.pages', compact('menus', 'homeMenu'));
+        return view('admin.pages.index', compact('menus', 'homeMenu'));
     }
 }

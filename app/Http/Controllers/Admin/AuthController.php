@@ -10,7 +10,7 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('admin.login');
+        return view('admin.auth.login');
     }
 
     public function login(Request $request)
@@ -38,11 +38,5 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');
-    }
-
-
-    public function dashboard()
-    {
-        return view('admin.dashboard');
     }
 }
