@@ -4,7 +4,6 @@
 
 @section('content')
     <div class="card">
-
         <div class="card-header">
             <h3 style="margin:0 0 4px 0;">Page Management</h3>
             <small style="color:#666">
@@ -15,7 +14,6 @@
         <div class="card-body" style="margin-top:18px; flex: 1; overflow: hidden; display: flex; flex-direction: column;">
             <div class="menu-tree-wrapper">
                 <ul class="menu-tree">
-
                     <li>
                         <div class="menu-card">
                             <div class="menu-left">
@@ -52,18 +50,19 @@
     </div>
 
     <div id="pageModal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content"
+            style="width: 85%; max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
             <button class="modal-close" onclick="closePageModal()">
                 <i class="fas fa-times"></i>
             </button>
 
-            <h3 style="margin:0 0 12px 0;color:#0a3d62">Edit Page Content</h3>
+            <h3 id="modalTitle" style="margin:0 0 12px 0;color:#0a3d62"></h3>
 
-            <textarea id="pageContent"
-                style="width:100%;min-height:220px;padding:12px;border:1px solid #e6e9ee;border-radius:6px;resize:none;"></textarea>
+            <div id="ace-editor"
+                style="flex-grow: 1; width: 100%; border: 1px solid #e6e9ee; border-radius: 6px; font-size: 14px;"></div>
 
-            <div style="text-align:right;margin-top:12px;">
-                <button id="savePage"
+            <div style="display:flex;padding-top:15px;gap:8px;justify-content:flex-end;">
+                <button id="savePage" type="submit"
                     style="background:#0a3d62;color:#fff;border:none;padding:9px 14px;border-radius:8px;cursor:pointer;transition:0.3s;"
                     onmouseover="this.style.background='#1e6091'" onmouseout="this.style.background='#0a3d62'"
                     onmousedown="this.style.background='#074173'" onmouseup="this.style.background='#1e6091'">
@@ -74,11 +73,25 @@
     </div>
 
     @include('admin.partials.menu-tree-css')
+
     @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.js" type="text/javascript" charset="utf-8"></script>
+
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-
                 let currentPageId = null;
+
+                const editor = ace.edit("ace-editor");
+                editor.setTheme("ace/theme/github_light_default");
+                editor.session.setMode("ace/mode/php");
+                editor.setShowPrintMargin(false);
+                editor.setOptions({
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    useSoftTabs: true,
+                    navigateWithinSoftTabs: true,
+                    tabSize: 4
+                });
 
                 document.querySelectorAll('.collapse-toggle').forEach(btn => {
                     btn.addEventListener('click', function () {
@@ -88,11 +101,6 @@
                         if (target.classList.contains('expanded')) {
                             target.classList.remove('expanded');
                             this.innerHTML = '<i class="fas fa-chevron-right"></i>';
-
-                            target.querySelectorAll('.nested').forEach(c => c.classList.remove('expanded'));
-                            target.querySelectorAll('.collapse-toggle').forEach(b =>
-                                b.innerHTML = '<i class="fas fa-chevron-right"></i>'
-                            );
                         } else {
                             target.classList.add('expanded');
                             this.innerHTML = '<i class="fas fa-chevron-down"></i>';
@@ -103,7 +111,13 @@
                 document.querySelectorAll('.edit-page').forEach(btn => {
                     btn.addEventListener('click', () => {
                         currentPageId = btn.dataset.id;
-                        document.getElementById('pageContent').value = btn.dataset.content || '';
+                        document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
+
+                        const decoder = document.createElement('textarea');
+                        decoder.innerHTML = btn.dataset.content || '';
+                        const content = decoder.value;
+
+                        editor.setValue(decoder.value, -1);
                         openPageModal();
                     });
                 });
@@ -111,6 +125,8 @@
                 const saveBtn = document.getElementById('savePage');
                 if (saveBtn) {
                     saveBtn.addEventListener('click', () => {
+                        const updatedContent = editor.getValue();
+
                         fetch(`/admin/pages/${currentPageId}`, {
                             method: 'PUT',
                             headers: {
@@ -118,7 +134,7 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             body: JSON.stringify({
-                                content: document.getElementById('pageContent').value
+                                content: updatedContent
                             })
                         })
                             .then(response => {
@@ -127,14 +143,19 @@
                             })
                             .then(() => {
                                 window.location.reload();
-                            });
+                            })
+                            .catch(err => alert('Error: ' + err.message));
                     });
                 }
 
                 window.openPageModal = function () {
                     const modal = document.getElementById('pageModal');
                     modal.style.display = 'flex';
-                    setTimeout(() => modal.classList.add('active'), 10);
+                    setTimeout(() => {
+                        modal.classList.add('active');
+                        editor.resize();
+                        editor.focus();
+                    }, 10);
                 };
 
                 window.closePageModal = function () {
@@ -142,7 +163,6 @@
                     modal.classList.remove('active');
                     setTimeout(() => modal.style.display = 'none', 300);
                 };
-
             });
         </script>
     @endpush

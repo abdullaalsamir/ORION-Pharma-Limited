@@ -3,5 +3,7 @@
 @section('content')
     <h1>{{ $menu->name }}</h1>
 
-    {!! nl2br(e($menu->content)) !!}
+    <div class="page-content">
+        {!! $menu->content !!}
+    </div>
 @endsection

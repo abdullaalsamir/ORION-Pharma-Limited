@@ -20,8 +20,8 @@
 
     .modal-content {
         background: #fff;
-        width: 480px;
-        max-width: 96%;
+        width: 800px;
+        max-width: 800px;
         padding: 22px;
         border-radius: 10px;
         position: relative;
@@ -384,5 +384,9 @@
         width: 500px;
         overflow: hidden;
         white-space: nowrap;
+    }
+
+    .ace_scroller.ace_scroll-left:after {
+        box-shadow: none;
     }
 </style>

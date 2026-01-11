@@ -4,7 +4,8 @@
         ->get();
 
     if (!function_exists('sortMenusByTree')) {
-        function sortMenusByTree($menus, $parentId = null) {
+        function sortMenusByTree($menus, $parentId = null)
+        {
             $branch = collect();
             foreach ($menus->where('parent_id', $parentId) as $menu) {
                 $branch->push($menu);
@@ -15,7 +16,7 @@
         }
     }
 
-    $multifunctionalMenus = sortMenusByTree($allMenus)->filter(function($menu) {
+    $multifunctionalMenus = sortMenusByTree($allMenus)->filter(function ($menu) {
         return $menu->is_multifunctional == 1 && $menu->isEffectivelyActive();
     });
 @endphp
@@ -66,19 +67,16 @@
             font-size: 18px;
         }
 
-  .sidebar ul {
+        .sidebar ul {
             list-style: none;
             flex: 1;
             padding-top: 20px;
-            
-            /* Scrollbar settings */
             overflow-y: auto;
             overflow-x: hidden;
             scrollbar-gutter: stable;
             -ms-overflow-style: none;
             scrollbar-width: thin;
-            /* Using white transparency for visibility on dark background */
-            scrollbar-color: rgba(255, 255, 255, 0.1) transparent; 
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
             transition: all 0.2s ease-in-out;
         }
 
