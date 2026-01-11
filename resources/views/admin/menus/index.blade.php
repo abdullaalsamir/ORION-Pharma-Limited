@@ -9,7 +9,7 @@
             <div style="display:flex;align-items:center;gap:12px;">
                 <div>
                     <h3 style="margin:0 0 4px 0;">Menu Management</h3>
-                    <small style="color:#666">Create and organize site menus, submenus and sub-submenus.</small>
+                    <small style="color:#666">Create and organize site menus, and it's childs.</small>
                 </div>
             </div>
 
@@ -43,10 +43,6 @@
 
         <div class="card-body" style="margin-top:18px; flex: 1; overflow: hidden; display: flex; flex-direction: column;">
             <div class="menu-tree-wrapper">
-                @if($menus->count() == 0)
-                    <p style="color:#666">No menus yet — add your first menu using the form above.</p>
-                @endif
-
                 <ul class="menu-tree">
                     <li class="fixed-menu-item">
                         <div class="menu-card">

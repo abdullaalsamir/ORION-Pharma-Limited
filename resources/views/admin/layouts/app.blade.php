@@ -1,12 +1,23 @@
 @php
-    $multifunctionalMenus = \App\Models\Menu::where('is_multifunctional', 1)
-        ->where('is_active', 1)
-        ->doesntHave('children')
+    $allMenus = \App\Models\Menu::where('is_active', 1)
         ->orderBy('order')
-        ->get()
-        ->filter(function($menu) {
-            return $menu->isEffectivelyActive();
-        });
+        ->get();
+
+    if (!function_exists('sortMenusByTree')) {
+        function sortMenusByTree($menus, $parentId = null) {
+            $branch = collect();
+            foreach ($menus->where('parent_id', $parentId) as $menu) {
+                $branch->push($menu);
+                $children = sortMenusByTree($menus, $menu->id);
+                $branch = $branch->merge($children);
+            }
+            return $branch;
+        }
+    }
+
+    $multifunctionalMenus = sortMenusByTree($allMenus)->filter(function($menu) {
+        return $menu->is_multifunctional == 1 && $menu->isEffectivelyActive();
+    });
 @endphp
 
 <!DOCTYPE html>
@@ -40,7 +51,7 @@
             position: fixed;
             left: 0;
             top: 0;
-            width: 220px;
+            width: 260px;
             height: 100%;
             background: #0a3d62;
             color: #fff;
@@ -55,10 +66,42 @@
             font-size: 18px;
         }
 
-        .sidebar ul {
+  .sidebar ul {
             list-style: none;
             flex: 1;
             padding-top: 20px;
+            
+            /* Scrollbar settings */
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
+            -ms-overflow-style: none;
+            scrollbar-width: thin;
+            /* Using white transparency for visibility on dark background */
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent; 
+            transition: all 0.2s ease-in-out;
+        }
+
+        .sidebar ul::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar ul::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar ul::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar ul:hover::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar ul::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4) !important;
         }
 
         .sidebar ul li {
@@ -90,7 +133,7 @@
         }
 
         .topbar {
-            margin-left: 220px;
+            margin-left: 260px;
             background: #ffffff;
             border-bottom: 1px solid #ddd;
             display: flex;
@@ -98,7 +141,7 @@
             justify-content: space-between;
             padding: 20px 25px;
             position: fixed;
-            width: calc(100% - 220px);
+            width: calc(100% - 260px);
             top: 0;
             z-index: 10;
         }
@@ -120,7 +163,7 @@
         }
 
         .main-content {
-            margin-left: 220px;
+            margin-left: 260px;
             margin-top: 65px;
             padding: 20px 25px;
             height: calc(100vh - 65px);
@@ -233,11 +276,15 @@
     <div class="main-content">
         @yield('content')
     </div>
-
     <script>
         function updateClock() {
             const now = new Date();
-            const time = now.toLocaleTimeString();
+            const time = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
             document.getElementById('clock').innerText = time;
         }
 

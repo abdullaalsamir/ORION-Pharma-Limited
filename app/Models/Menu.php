@@ -100,4 +100,20 @@ class Menu extends Model
             return $this->parent->isEffectivelyActive();
         return true;
     }
+
+    public static function getTreeOrderedMultifunctional()
+    {
+        $all = self::where('is_active', 1)->orderBy('order')->get();
+
+        $flatten = function ($items, $parentId = null) use (&$flatten) {
+            $list = collect();
+            foreach ($items->where('parent_id', $parentId) as $item) {
+                $list->push($item);
+                $list = $list->merge($flatten($items, $item->id));
+            }
+            return $list;
+        };
+
+        return $flatten($all)->where('is_multifunctional', 1);
+    }
 }
