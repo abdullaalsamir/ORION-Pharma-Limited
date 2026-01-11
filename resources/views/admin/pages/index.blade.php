@@ -75,12 +75,14 @@
     @include('admin.partials.menu-tree-css')
 
     @push('scripts')
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="{{ asset('js/ace/src-min-noconflict/ace.js') }}" type="text/javascript" charset="utf-8"></script>
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+
                 let currentPageId = null;
 
+                ace.config.set('basePath', "{{ asset('js/ace/src-min-noconflict') }}");
                 const editor = ace.edit("ace-editor");
                 editor.setTheme("ace/theme/github_light_default");
                 editor.session.setMode("ace/mode/php");
