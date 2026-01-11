@@ -228,6 +228,8 @@
     }
 
     .menu-badge {
+        display: flex;
+        align-items: center;
         font-size: 12px;
         padding: 4px 8px;
         border-radius: 999px;
@@ -347,15 +349,16 @@
     }
 
     .content-status-badge {
-        font-size: 11px;
+        font-size: 12px;
         padding: 3px 10px;
         border-radius: 6px;
-        font-weight: 500;
     }
 
     .menu-right {
         margin-left: auto;
         margin-right: 0;
+        display: flex;
+        align-items: center;
     }
 
     .status-empty {
@@ -364,10 +367,11 @@
         border: 1px solid #f8d7da;
     }
 
-    .status-na {
+    .status-multi {
         background: #f9f9f9;
-        color: #999;
+        color: #07426e;
         border: 1px solid #ddd;
+        padding: 4px 8px;
     }
 
     .content-preview {
@@ -377,9 +381,8 @@
         padding: 5px 12px;
         border-radius: 6px;
         border: 1px solid #e5e7eb;
-        max-width: 500px;
+        width: 500px;
         overflow: hidden;
-        text-overflow: ellipsis;
         white-space: nowrap;
     }
 </style>

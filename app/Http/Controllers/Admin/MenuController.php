@@ -155,4 +155,17 @@ class MenuController extends Controller
 
         return view('admin.pages.index', compact('menus', 'homeMenu'));
     }
+
+    public function showMultifunctional($slug)
+    {
+        $menu = Menu::where('slug', $slug)
+            ->where('is_multifunctional', 1)
+            ->doesntHave('children')
+            ->first();
+
+        abort_if(!$menu, 404);
+        abort_if(!$menu->isEffectivelyActive(), 404);
+
+        return view('admin.multifunctional.placeholder', compact('menu'));
+    }
 }

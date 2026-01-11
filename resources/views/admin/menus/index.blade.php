@@ -9,7 +9,7 @@
             <div style="display:flex;align-items:center;gap:12px;">
                 <div>
                     <h3 style="margin:0 0 4px 0;">Menu Management</h3>
-                    <small style="color:#666">Create and organize your site menus, submenus and sub-submenus.</small>
+                    <small style="color:#666">Create and organize site menus, submenus and sub-submenus.</small>
                 </div>
             </div>
 

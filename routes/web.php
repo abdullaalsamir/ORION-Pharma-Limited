@@ -34,6 +34,8 @@ Route::prefix('admin')
             return view('admin.settings.index');
         })->name('settings');
 
+        Route::get('/{slug}', [MenuController::class, 'showMultifunctional'])->name('multifunctional');
+
     });
 
 Route::get('/', [PageController::class, 'home'])->name('home');

@@ -1,8 +1,12 @@
 @php
     $multifunctionalMenus = \App\Models\Menu::where('is_multifunctional', 1)
         ->where('is_active', 1)
+        ->doesntHave('children')
         ->orderBy('order')
-        ->get();
+        ->get()
+        ->filter(function($menu) {
+            return $menu->isEffectivelyActive();
+        });
 @endphp
 
 <!DOCTYPE html>

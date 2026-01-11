@@ -15,34 +15,36 @@
             </div>
         </div>
 
-        @if(!$menu->is_multifunctional)
-            @if(empty($menu->content))
-                <div class="menu-right">
-                    <span class="content-status-badge status-empty">Empty</span>
-                </div>
-            @else
-                <div class="content-preview menu-right" title="{{ strip_tags($menu->content) }}">
-                    {{ strip_tags($menu->content) }}
-                </div>
+        <div class="menu-right">
+            @if($menu->children->isEmpty())
+                @if(!$menu->is_multifunctional)
+                    @if(empty($menu->content))
+                        <span class="content-status-badge status-empty">Empty</span>
+                    @else
+                        <div class="content-preview" title="{{ strip_tags($menu->content) }}">
+                            {{ strip_tags($menu->content) }}
+                        </div>
+                    @endif
+                @else
+                    <span class="content-status-badge status-multi">
+                        Multifunctional
+                    </span>
+                @endif
             @endif
-        @else
-            <div class="menu-right">
-                <span class="content-status-badge status-na">
-                    N/A (Multi)
-                </span>
-            </div>
-        @endif
+        </div>
 
         <div class="menu-actions">
-            @if($menu->is_multifunctional)
-                <a href="{{ url('admin/' . $menu->slug) }}" class="icon-btn">
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
-            @else
-                <button class="icon-btn edit-page" data-id="{{ $menu->id }}" data-name="{{ $menu->name }}"
-                    data-content="{{ e($menu->content) }}">
-                    <i class="fas fa-pen"></i>
-                </button>
+            @if($menu->children->isEmpty())
+                @if($menu->is_multifunctional)
+                    <a href="{{ url('admin/' . $menu->slug) }}" class="icon-btn">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                @else
+                    <button class="icon-btn edit-page" data-id="{{ $menu->id }}" data-name="{{ $menu->name }}"
+                        data-content="{{ e($menu->content) }}">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                @endif
             @endif
         </div>
     </div>
