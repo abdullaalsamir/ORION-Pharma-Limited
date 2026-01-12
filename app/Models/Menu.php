@@ -116,4 +116,44 @@ class Menu extends Model
 
         return $flatten($all)->where('is_multifunctional', 1);
     }
+
+    public function images()
+    {
+        return $this->hasMany(MenuImage::class);
+    }
+
+    public static function getFunctionalLeafMenus()
+    {
+        $all = self::where('is_active', 1)
+            ->where('is_multifunctional', 0)
+            ->where('slug', '!=', 'home')
+            ->orderBy('order')
+            ->get();
+
+        $orderedList = collect();
+
+        $flatten = function ($items, $parentId = null) use (&$flatten, &$orderedList) {
+            foreach ($items->where('parent_id', $parentId) as $item) {
+                $orderedList->push($item);
+                $flatten($items, $item->id);
+            }
+        };
+
+        $flatten($all);
+
+        return $orderedList->filter(function ($menu) {
+            return $menu->children->isEmpty();
+        });
+    }
+
+    public function getParentPathAttribute()
+    {
+        $path = [];
+        $parent = $this->parent;
+        while ($parent) {
+            array_unshift($path, $parent->name);
+            $parent = $parent->parent;
+        }
+        return implode(' <i class="fas fa-chevron-right" style="font-size:8px;margin:0 3px"></i> ', $path);
+    }
 }

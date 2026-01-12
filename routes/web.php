@@ -5,6 +5,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\ImageController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -29,6 +30,12 @@ Route::prefix('admin')
 
         Route::get('/pages', [MenuController::class, 'pages'])->name('pages');
         Route::put('/pages/{menu}', [MenuController::class, 'updatePage'])->name('pages.update');
+
+        Route::get('/images', [ImageController::class, 'index'])->name('images');
+        Route::get('/images/fetch/{menu}', [ImageController::class, 'getImages'])->name('images.fetch');
+        Route::post('/images/upload/{menu}', [ImageController::class, 'store'])->name('images.upload');
+        Route::match(['post', 'put'], '/images/{image}', [ImageController::class, 'update'])->name('images.update');
+        Route::delete('/images/{image}', [ImageController::class, 'destroy'])->name('images.delete');
 
         Route::get('/settings', function () {
             return view('admin.settings.index');

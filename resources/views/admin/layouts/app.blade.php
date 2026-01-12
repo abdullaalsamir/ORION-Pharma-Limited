@@ -232,6 +232,12 @@
                     <span>Pages</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.images') }}" class="{{ request()->is('admin/images*') ? 'active' : '' }}">
+                    <i class="fas fa-images"></i>
+                    <span>Images</span>
+                </a>
+            </li>
             @foreach($multifunctionalMenus as $mMenu)
                 <li>
                     <a href="{{ url('admin/' . $mMenu->slug) }}"
