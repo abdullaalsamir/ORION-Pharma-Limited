@@ -51,23 +51,21 @@
 
     <div id="pageModal" class="modal-overlay">
         <div class="modal-content"
-            style="width: 85%; max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
+            style="width: 85%; max-width: 900px; height: 90vh; display: flex; flex-direction: column;">
             <button class="modal-close" onclick="closePageModal()">
                 <i class="fas fa-times"></i>
             </button>
 
-            <h3 id="modalTitle" style="margin:0 0 12px 0;color:#0a3d62"></h3>
+            <h3 id="modalTitle" style="margin:0 0 12px 0; color:#0a3d62"></h3>
+
+            <div id="imageStrip" class="editor-image-strip">
+            </div>
 
             <div id="ace-editor"
                 style="flex-grow: 1; width: 100%; border: 1px solid #e6e9ee; border-radius: 6px; font-size: 14px;"></div>
 
-            <div style="display:flex;padding-top:15px;gap:8px;justify-content:flex-end;">
-                <button id="savePage" type="submit"
-                    style="background:#0a3d62;color:#fff;border:none;padding:9px 14px;border-radius:8px;cursor:pointer;transition:0.3s;"
-                    onmouseover="this.style.background='#1e6091'" onmouseout="this.style.background='#0a3d62'"
-                    onmousedown="this.style.background='#074173'" onmouseup="this.style.background='#1e6091'">
-                    Update
-                </button>
+            <div style="display:flex; padding-top:15px; gap:8px; justify-content:flex-end;">
+                <button id="savePage" type="submit" ...>Update</button>
             </div>
         </div>
     </div>
@@ -115,11 +113,38 @@
                         currentPageId = btn.dataset.id;
                         document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
 
+                        const strip = document.getElementById('imageStrip');
+                        strip.innerHTML = '<div style="font-size:12px; color:#999; padding:10px;">Loading images...</div>';
+
+                        fetch(`/admin/images/get-for-editor/${currentPageId}`)
+                            .then(res => res.json())
+                            .then(images => {
+                                if (images.length === 0) {
+                                    strip.innerHTML = '<div style="font-size:12px; color:#999; padding:10px;">No images uploaded for this menu.</div>';
+                                    return;
+                                }
+
+                                strip.innerHTML = '';
+                                images.forEach(img => {
+                                    const div = document.createElement('div');
+                                    div.className = 'strip-item';
+                                    div.title = "Click to insert into editor";
+                                    div.innerHTML = `<img src="${img.url}">`;
+
+                                    div.onclick = () => {
+                                        const imgHtml = `<img src="${img.url}" alt="${btn.dataset.name}" style="width:100%; height:auto; margin: 20px 0;">\n`;
+
+                                        editor.insert(imgHtml);
+                                        editor.focus();
+                                    };
+                                    strip.appendChild(div);
+                                });
+                            });
+
                         const decoder = document.createElement('textarea');
                         decoder.innerHTML = btn.dataset.content || '';
-                        const content = decoder.value;
-
                         editor.setValue(decoder.value, -1);
+
                         openPageModal();
                     });
                 });

@@ -37,15 +37,12 @@ class ImageController extends Controller
             $fileName = time() . '.webp';
             $relativeDir = "menu_images/{$menu->slug}";
 
-            // Ensure directory exists in storage/app/public
             if (!Storage::disk('public')->exists($relativeDir)) {
                 Storage::disk('public')->makeDirectory($relativeDir);
             }
 
-            // Get absolute path for GD library
             $fullPath = storage_path("app/public/{$relativeDir}/{$fileName}");
 
-            // Pass the real temporary path to the processing function
             $this->processImage($file->getRealPath(), $fullPath);
 
             MenuImage::create([
@@ -57,7 +54,6 @@ class ImageController extends Controller
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {
-            // Return the actual error message for debugging
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
@@ -86,7 +82,6 @@ class ImageController extends Controller
 
     private function processImage($sourcePath, $destinationPath)
     {
-        // Increase memory limit for large images
         ini_set('memory_limit', '1024M');
 
         if (!extension_loaded('gd')) {
@@ -120,7 +115,6 @@ class ImageController extends Controller
             throw new Exception('Failed to load image resource.');
         }
 
-        // Maintain transparency for PNGs before processing
         imagepalettetotruecolor($src);
         imagealphablending($src, true);
         imagesavealpha($src, true);
@@ -148,7 +142,6 @@ class ImageController extends Controller
 
         $dst = imagecreatetruecolor($finalWidth, $finalHeight);
 
-        // Prepare destination canvas for transparency if needed
         imagealphablending($dst, false);
         imagesavealpha($dst, true);
 
@@ -167,5 +160,47 @@ class ImageController extends Controller
         Storage::disk('public')->delete($image->file_path);
         $image->delete();
         return response()->json(['success' => true]);
+    }
+
+    public function getImagesForEditor(Menu $menu)
+    {
+        $images = $menu->images()->where('is_active', 1)->orderBy('created_at', 'asc')->get();
+        $fullSlug = $menu->full_slug;
+
+        return response()->json($images->map(function ($img) use ($fullSlug) {
+            return [
+                'url' => '/' . ltrim($fullSlug, '/') . '/' . $img->file_name,
+                'name' => $img->file_name
+            ];
+        }));
+    }
+
+    public function servePublicImage($path, $filename)
+    {
+        $menu = Menu::all()->first(function ($m) use ($path) {
+            return $m->full_slug === $path;
+        });
+
+        if (!$menu) {
+            $menu = Menu::where('slug', $path)->whereNull('parent_id')->first();
+        }
+
+        if (!$menu)
+            abort(404);
+
+        $image = $menu->images()->where('file_name', $filename)->first();
+
+        if (!$image)
+            abort(404);
+
+        $storagePath = storage_path('app/public/' . $image->file_path);
+
+        if (!file_exists($storagePath))
+            abort(404);
+
+        return response()->file($storagePath, [
+            'Content-Type' => 'image/webp',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 }

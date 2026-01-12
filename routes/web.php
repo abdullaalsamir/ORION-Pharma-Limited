@@ -33,6 +33,7 @@ Route::prefix('admin')
 
         Route::get('/images', [ImageController::class, 'index'])->name('images');
         Route::get('/images/fetch/{menu}', [ImageController::class, 'getImages'])->name('images.fetch');
+        Route::get('/images/get-for-editor/{menu}', [ImageController::class, 'getImagesForEditor']);
         Route::post('/images/upload/{menu}', [ImageController::class, 'store'])->name('images.upload');
         Route::match(['post', 'put'], '/images/{image}', [ImageController::class, 'update'])->name('images.update');
         Route::delete('/images/{image}', [ImageController::class, 'destroy'])->name('images.delete');
@@ -46,6 +47,10 @@ Route::prefix('admin')
     });
 
 Route::get('/', [PageController::class, 'home'])->name('home');
+
+Route::get('{path}/{filename}', [ImageController::class, 'servePublicImage'])
+    ->where('path', '.*')
+    ->where('filename', '^[0-9]+\.webp$');
 
 Route::get('{slug}', [PageController::class, 'page'])
     ->where('slug', '.*');

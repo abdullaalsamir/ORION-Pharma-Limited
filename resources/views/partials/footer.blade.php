@@ -29,7 +29,6 @@
     footer {
         background-color: #0a3d62;
         color: #ffffff;
-        margin-top: 50px;
     }
 
     .footer-top {

@@ -382,11 +382,58 @@
         border-radius: 6px;
         border: 1px solid #e5e7eb;
         width: 500px;
+        height: 25px;
         overflow: hidden;
         white-space: nowrap;
     }
 
     .ace_scroller.ace_scroll-left:after {
         box-shadow: none;
+    }
+
+
+    .editor-image-strip {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px;
+        background: #f8fafc;
+        border: 1px solid #e6e9ee;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        scrollbar-width: thin;
+        /* For Firefox */
+    }
+
+    /* Using your existing scrollbar style */
+    .editor-image-strip::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .editor-image-strip::-webkit-scrollbar-thumb {
+        background: rgba(10, 61, 98, 0.2);
+        border-radius: 10px;
+    }
+
+    .strip-item {
+        flex: 0 0 auto;
+        width: 120px;
+        aspect-ratio: 48/9;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: 0.2s;
+        background: #fff;
+    }
+
+    .strip-item:hover {
+        border-color: #0a3d62;
+    }
+
+    .strip-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 </style>
