@@ -5,7 +5,7 @@
                 
                 <div class="flex-shrink-0">
                     <a href="{{ url('/') }}" class="flex items-center">
-                        <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="h-16 w-auto">
+                        <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="h-17 w-auto">
                     </a>
                 </div>
 
@@ -17,7 +17,7 @@
 
                                 <li class="relative group flex items-center h-[90px]">
                                     <a href="{{ !$hasChildren ? url($menu->full_slug) : 'javascript:void(0)' }}" 
-                                    class="relative z-50 px-4 h-full text-[15px] font-semibold text-orion-blue group-hover:bg-orion-blue group-hover:text-white flex items-center gap-1 transition-all duration-200">
+                                    class="relative z-50 px-3 h-full text-[15px] font-semibold text-orion-blue group-hover:bg-orion-blue group-hover:text-white flex items-center gap-1 transition-all duration-200">
                                         {{ $menu->name }}
                                         @if($hasChildren)
                                             <i class="fa-solid fa-chevron-down text-[10px] transition-transform group-hover:rotate-180"></i>
@@ -35,7 +35,7 @@
 
                                                         <li class="relative group/sub">
                                                             <a href="{{ !$hasSub ? url($submenu->full_slug) : 'javascript:void(0)' }}" 
-                                                            class="relative z-30 bg-orion-blue flex items-center justify-between px-6 py-4 text-sm text-white group-hover/sub:bg-[#1a62ae] transition-colors border-b border-white/10">
+                                                            class="relative z-30 bg-orion-blue flex items-center justify-between px-6 py-3 text-sm text-white group-hover/sub:bg-[#1a62ae] transition-colors border-b border-white/10">
                                                                 {{ $submenu->name }}
                                                                 @if($hasSub)
                                                                     <i class="fa-solid fa-chevron-right text-[10px] sub-chevron"></i>
@@ -47,7 +47,7 @@
                                                                     @foreach($submenu->children as $subsubmenu)
                                                                         <li class="border-b border-white/5 last:border-0">
                                                                             <a href="{{ url($subsubmenu->full_slug) }}" 
-                                                                            class="block px-6 py-4 text-sm text-white hover:bg-[#2576c7] transition-colors duration-200">
+                                                                            class="block px-6 py-3 text-sm text-white hover:bg-[#2576c7] transition-colors duration-200">
                                                                                 {{ $subsubmenu->name }}
                                                                             </a>
                                                                         </li>
