@@ -132,7 +132,7 @@
                                     div.innerHTML = `<img src="${img.url}">`;
 
                                     div.onclick = () => {
-                                        const imgHtml = `<img src="${img.url}" alt="${btn.dataset.name}" style="width:100%; height:auto; margin: 20px 0;">\n`;
+                                        const imgHtml = `<div class="img-shine">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`;
 
                                         editor.insert(imgHtml);
                                         editor.focus();

@@ -1,11 +1,89 @@
-@import 'tailwindcss';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@import "tailwindcss";
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --color-orion-blue: #08519e;
+    --color-orion-hover: #06407c;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    @apply bg-slate-50 text-slate-800 font-sans;
+}
+
+.container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+h2 {
+    @apply flex items-center text-center text-orion-blue text-xl font-bold my-10;
+}
+h2::before, h2::after {
+    content: "";
+    @apply flex-1 h-px bg-slate-300;
+}
+h2::before { @apply mr-4; }
+h2::after { @apply ml-4; }
+
+@layer utilities {
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+}
+
+footer {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+@layer components {
+    .level-2-menu {
+        transform: translateY(-100%) !important;
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.2s ease-in-out, opacity 0.2s, visibility 0.2s !important;
+        z-index: 10;
+    }
+
+    .group:hover > div > .level-2-menu {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0%) !important;
+    }
+
+    .level-3-menu {
+        left: 100% !important;
+        right: auto !important;
+        transform: translateX(-100%) !important;
+        clip-path: inset(-100px -1000px -100px 0px) !important;
+        transition: none !important;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 10;
+    }
+
+    .level-3-menu.is-flipped {
+        left: auto !important;
+        right: 100% !important;
+        transform: translateX(100%) !important;
+        clip-path: inset(-100px 0px -100px -1000px) !important;
+    }
+
+    .level-3-menu.is-ready {
+        transition: transform 0.2s ease-in-out, opacity 0.2s, visibility 0.2s !important;
+    }
+
+    .level-3-menu.is-active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateX(0%) !important;
+    }
 }

@@ -1,216 +1,82 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<header class="relative z-[100]">
+    <div class="relative z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div class="container-custom">
+            <div class="flex justify-between items-center h-[90px]">
+                
+                <div class="flex-shrink-0">
+                    <a href="{{ url('/') }}" class="flex items-center">
+                        <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="h-16 w-auto">
+                    </a>
+                </div>
 
-<header class="main-header">
-    <div class="row header-inner">
+                <nav class="hidden lg:flex h-full">
+                    <ul class="flex h-full">
+                        @foreach($menus as $menu)
+                            @if($menu->isEffectivelyActive())
+                                @php $hasChildren = $menu->children->count() > 0; @endphp
 
-        <div class="logo-area">
-            <a href="{{ url('/') }}">
-                <img src="{{ asset('images/logo.svg') }}" alt="ORION Pharma Limited Logo">
-            </a>
-        </div>
-
-        <nav class="nav-container">
-            <ul class="nav-menu">
-                @foreach($menus as $menu)
-                    @if($menu->isEffectivelyActive())
-                        @php $hasChildren = $menu->children->count() > 0; @endphp
-
-                        <li class="nav-item {{ $hasChildren ? 'has-dropdown' : '' }}">
-                            <a
-                                href="{{ !$hasChildren ? url($menu->full_slug) : 'javascript:void(0)' }}"
-                                class="nav-link"
-                            >
-                                {{ $menu->name }}
-                                @if($hasChildren)
-                                    <i class="fas fa-chevron-down icon-sm"></i>
-                                @endif
-                            </a>
-
-                            @if($hasChildren)
-                                <ul class="dropdown-menu">
-                                    @foreach($menu->children as $submenu)
-                                        @if($submenu->isEffectivelyActive())
-                                            @php $hasSub = $submenu->children->count() > 0; @endphp
-
-                                            <li class="dropdown-item {{ $hasSub ? 'has-submenu' : '' }}">
-                                                <a
-                                                    href="{{ !$hasSub ? url($submenu->full_slug) : 'javascript:void(0)' }}"
-                                                    class="dropdown-link"
-                                                >
-                                                    {{ $submenu->name }}
-                                                    @if($hasSub)
-                                                        <i class="fas fa-chevron-right icon-sm"></i>
-                                                    @endif
-                                                </a>
-
-                                                @if($hasSub)
-                                                    <ul class="sub-submenu">
-                                                        @foreach($submenu->children as $subsubmenu)
-                                                            @if($subsubmenu->isEffectivelyActive())
-                                                                <li>
-                                                                    <a
-                                                                        href="{{ url($subsubmenu->full_slug) }}"
-                                                                        class="dropdown-link"
-                                                                    >
-                                                                        {{ $subsubmenu->name }}
-                                                                    </a>
-                                                                </li>
-                                                            @endif
-                                                        @endforeach
-                                                    </ul>
-                                                @endif
-                                            </li>
+                                <li class="relative group flex items-center h-[90px]">
+                                    <a href="{{ !$hasChildren ? url($menu->full_slug) : 'javascript:void(0)' }}" 
+                                    class="relative z-50 px-4 h-full text-[15px] font-semibold text-orion-blue group-hover:bg-orion-blue group-hover:text-white flex items-center gap-1 transition-all duration-200">
+                                        {{ $menu->name }}
+                                        @if($hasChildren)
+                                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform group-hover:rotate-180"></i>
                                         @endif
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </li>
-                    @endif
-                @endforeach
-            </ul>
-        </nav>
+                                    </a>
 
+                                    @if($hasChildren)
+                                        <div class="absolute top-full left-0 w-56 pointer-events-none group-hover:pointer-events-auto" 
+                                            style="clip-path: inset(0px -1000px -1000px -1000px);">
+                                            
+                                            <ul class="level-2-menu w-full bg-orion-blue shadow-xl py-0 border-t border-white/10 relative">
+                                                @foreach($menu->children as $submenu)
+                                                    @if($submenu->isEffectivelyActive())
+                                                        @php $hasSub = $submenu->children->count() > 0; @endphp
+
+                                                        <li class="relative group/sub">
+                                                            <a href="{{ !$hasSub ? url($submenu->full_slug) : 'javascript:void(0)' }}" 
+                                                            class="relative z-30 bg-orion-blue flex items-center justify-between px-6 py-4 text-sm text-white group-hover/sub:bg-[#1a62ae] transition-colors border-b border-white/10">
+                                                                {{ $submenu->name }}
+                                                                @if($hasSub)
+                                                                    <i class="fa-solid fa-chevron-right text-[10px] sub-chevron"></i>
+                                                                @endif
+                                                            </a>
+
+                                                            @if($hasSub)
+                                                                <ul class="level-3-menu absolute top-0 w-56 bg-[#1a62ae] shadow-xl py-0 opacity-0 invisible z-10">
+                                                                    @foreach($submenu->children as $subsubmenu)
+                                                                        <li class="border-b border-white/5 last:border-0">
+                                                                            <a href="{{ url($subsubmenu->full_slug) }}" 
+                                                                            class="block px-6 py-4 text-sm text-white hover:bg-[#2576c7] transition-colors duration-200">
+                                                                                {{ $subsubmenu->name }}
+                                                                            </a>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endif
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </li>
+                            @endif
+                        @endforeach
+                    </ul>
+                </nav>
+
+                <button class="lg:hidden p-2 text-orion-blue" onclick="document.getElementById('mobile-nav').classList.toggle('hidden')">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="mobile-nav" class="hidden lg:hidden bg-white border-t border-gray-100 relative z-[60]">
+        <div class="px-4 py-4 space-y-1">
+            @foreach($menus as $menu)
+                <a href="{{ url($menu->full_slug) }}" class="block px-3 py-2 text-base font-medium text-orion-blue hover:bg-gray-50">{{ $menu->name }}</a>
+            @endforeach
+        </div>
     </div>
 </header>
-
-<style>
-    .main-header {
-        height: 90px;
-        background: #ffffff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-    }
-
-    .header-inner {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        height: 100%;
-    }
-
-    .logo-area img {
-        height: 70px;
-        display: block;
-    }
-
-    .nav-container {
-        margin-left: 20px;
-        height: 100%;
-    }
-
-    .nav-menu {
-        display: flex;
-        align-items: center;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        height: 100%;
-    }
-
-    .nav-item {
-        position: relative;
-        height: 100%;
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0 10px;
-        height: 100%;
-        text-decoration: none;
-        color: #08519e;
-        font-weight: 600;
-        font-size: 14px;
-        transition: all 0.2s ease;
-    }
-
-    .nav-item:hover>.nav-link {
-        background-color: #08519e;
-        color: #ffffff !important;
-    }
-
-    .icon-sm {
-        font-size: 11px;
-    }
-
-    .dropdown-menu,
-    .sub-submenu {
-        position: absolute;
-        background-color: #08519e;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        min-width: 220px;
-        z-index: 10;
-    }
-
-    .dropdown-link {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 20px;
-        text-decoration: none;
-        color: #ffffff;
-        font-size: 14px;
-        font-weight: 400;
-        transition: all 0.2s ease;
-    }
-
-    .dropdown-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        padding-left: 25px;
-    }
-
-    .dropdown-menu li:not(:last-child),
-    .sub-submenu li:not(:last-child) {
-        border-bottom: 1px solid #2163a8;
-    }
-
-    .dropdown-menu {
-        top: 90px;
-        left: 0;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-30px);
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .nav-item:hover>.dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    .dropdown-item {
-        position: relative;
-    }
-
-    .sub-submenu {
-        top: 0;
-        left: 100%;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(-30px);
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .has-submenu:hover>.sub-submenu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(0);
-    }
-
-    .dropdown-link .icon-sm {
-        color: #ffffff;
-        opacity: 0.8;
-    }
-</style>
