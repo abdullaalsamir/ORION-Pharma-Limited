@@ -14,7 +14,7 @@
 
     @include('partials.header')
 
-    <main class="flex-grow w-full">
+    <main class="flex-grow w-full pt-[90px]">
         <div class="container-custom py-10">
             @yield('content')
         </div>

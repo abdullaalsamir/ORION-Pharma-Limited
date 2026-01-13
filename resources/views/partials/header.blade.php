@@ -1,4 +1,4 @@
-<header class="relative z-[100]">
+<header class="fixed top-0 left-0 w-full z-[100]">
     <div class="relative z-50 bg-white border-b border-gray-200 shadow-sm">
         <div class="container-custom">
             <div class="flex justify-between items-center h-[90px]">
