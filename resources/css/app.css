@@ -1,11 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-    --color-orion-blue: #08519e;
-    --color-orion-hover: #06407c;
+    --color-orion-blue: #0054a6;
 }
 
-/* Prevent horizontal overflow */
 html, body {
     max-width: 100%;
     overflow-x: hidden;
@@ -17,11 +15,6 @@ body {
     @apply bg-slate-50 text-slate-800 font-sans;
 }
 
-/* ===============================
-   GLOBAL 90% WIDTH LAYOUT RULE
-   =============================== */
-
-/* Center and constrain header, main content, and footer */
 header > * > *,
 main > *,
 footer > * > * {
@@ -29,10 +22,6 @@ footer > * > * {
     margin-left: auto;
     margin-right: auto;
 }
-
-/* ===============================
-   TYPOGRAPHY & UTILITIES
-   =============================== */
 
 h2 {
     @apply flex items-center text-center text-orion-blue text-xl font-bold my-10;
@@ -60,10 +49,6 @@ h2::after {
     }
 }
 
-/* ===============================
-   FOOTER
-   =============================== */
-
 header,
 footer {
     width: 100%;
@@ -74,10 +59,6 @@ footer {
     position: relative;
     overflow: hidden;
 }
-
-/* ===============================
-   NAVIGATION / MENUS
-   =============================== */
 
 @layer components {
     .level-2-menu {
