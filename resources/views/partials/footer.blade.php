@@ -59,18 +59,19 @@
                     @foreach($quickLinks as $link)
                         <li>                        <a href="#" class="text-base opacity-90 hover:opacity-100 hover:translate-x-1 transition-all inline-block hover:text-white">
                             {{ $link }}
-                            </a>
-                        </li>
+                                </a>
+                            </li>
                     @endforeach
                 </ul>
             </div>
-
+ 
             <div class="lg:col-span-1">
-                <h1 class="border-b-2 border-white/30 pb-4">Follow Us</h1>
+<h1 class="border-b-2 border-white/30 pb-4">Follow Us</h1>
 
-                
+
+                                
                 <p class="text-base mb-6 text-gray-200 opacity-90">Stay updated wit
-    h                    our latest healthcare innovations.</p>
+ h                       our latest healthcare innovations.</p>
                 <div class="flex flex-wrap gap-4">
                     <a href="https://facebook.com/OrionPharmaLtdbd" target="_blank" class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-orion-blue transition-all group shadow-sm hover:shadow-lg">
                         <i class="fa-brands fa-facebook-f text-base"></i>

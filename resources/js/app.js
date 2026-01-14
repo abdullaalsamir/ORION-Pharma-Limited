@@ -1,4 +1,11 @@
 import './bootstrap';
+import Swiper from 'swiper';
+import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 document.addEventListener('DOMContentLoaded', () => {
     const subMenuItems = document.querySelectorAll('.group\\/sub');
@@ -47,4 +54,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    if (document.querySelector('.homeSwiper')) {
+        new Swiper('.homeSwiper', {
+            modules: [Navigation, Pagination, Autoplay, EffectFade],
+            
+            loop: true,
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+    }
 });

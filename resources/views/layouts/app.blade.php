@@ -14,7 +14,11 @@
 
     @include('partials.header')
 
-    <main class="flex-grow w-full pt-[90px] pb-10">
+    @if(request()->is('/'))
+        @include('partials.swiper-slider')
+    @endif
+
+    <main class="flex-grow w-full {{ request()->is('/') ? 'pt-0' : 'pt-[90px]' }} pb-10">
         <div class="container mx-auto w-[90%] max-w-[1400px]">
             @isset($menu)
                 <div class="flex flex-col">
@@ -37,6 +41,7 @@
     </main>
 
     @include('partials.footer')
+
 </body>
 
 </html>
