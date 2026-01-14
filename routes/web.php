@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\ImageController;
+use App\Http\Controllers\Admin\SliderController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -37,6 +38,12 @@ Route::prefix('admin')
         Route::post('/images/upload/{menu}', [ImageController::class, 'store'])->name('images.upload');
         Route::match(['post', 'put'], '/images/{image}', [ImageController::class, 'update'])->name('images.update');
         Route::delete('/images/{image}', [ImageController::class, 'destroy'])->name('images.delete');
+
+        Route::get('/sliders', [SliderController::class, 'index'])->name('sliders.index');
+        Route::post('/sliders', [SliderController::class, 'store'])->name('sliders.store');
+        Route::put('/sliders/{slider}', [SliderController::class, 'update'])->name('sliders.update');
+        Route::delete('/sliders/{slider}', [SliderController::class, 'destroy'])->name('sliders.delete');
+        Route::post('/sliders/update-order', [SliderController::class, 'updateOrder'])->name('sliders.update-order');
 
         Route::get('/settings', function () {
             return view('admin.settings.index');

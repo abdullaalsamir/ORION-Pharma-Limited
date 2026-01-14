@@ -1,7 +1,8 @@
 import './bootstrap';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 import Swiper from 'swiper';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -59,8 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
         new Swiper('.homeSwiper', {
             modules: [Navigation, Pagination, Autoplay, EffectFade],
             
+            simulateTouch: false,
             loop: true,
             effect: 'fade',
+            speed: 1000,
             fadeEffect: {
                 crossFade: true
             },

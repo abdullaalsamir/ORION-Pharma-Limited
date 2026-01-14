@@ -9,8 +9,8 @@ class PageController extends Controller
     public function home()
     {
         $menu = Menu::where('slug', 'home')->first();
-
-        return view('layouts.app', compact('menu'));
+        $sliders = \App\Models\Slider::where('is_active', 1)->orderBy('order')->get();
+        return view('layouts.app', compact('menu', 'sliders'));
     }
 
     public function page(string $slug)

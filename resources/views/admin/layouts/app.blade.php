@@ -238,6 +238,12 @@
                     <span>Images</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.sliders.index') }}" class="{{ request()->is('admin/sliders*') ? 'active' : '' }}">
+                    <i class="fas fa-film"></i>
+                    <span>Swiper Slider</span>
+                </a>
+            </li>
             @foreach($multifunctionalMenus as $mMenu)
                 <li>
                     <a href="{{ url('admin/' . $mMenu->slug) }}"
