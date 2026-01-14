@@ -15,12 +15,27 @@
     @include('partials.header')
 
     <main class="flex-grow w-full pt-[90px] pb-10">
-        <div class="container-custom">
-            @yield('content')
+        <div class="container mx-auto w-[90%] max-w-[1400px]">
+            @isset($menu)
+                <div class="flex flex-col">
+                    <div class="w-full">
+                        <h2 class="w-full">
+                            <span class="px-4 {{ request()->is('/') ? 'text-4xl' : '' }}">
+                                {{ request()->is('/') ? 'Welcome to Orion Pharma' : $menu->name }}
+                            </span>
+                        </h2>
+                    </div>
+
+                    <div class="page-content prose max-w-none text-slate-700 leading-relaxed">
+                        {!! $menu->content !!}
+                    </div>
+                </div>
+            @else
+                @yield('content')
+            @endisset
         </div>
     </main>
 
     @include('partials.footer')
 </body>
-
 </html>

@@ -10,7 +10,7 @@ class PageController extends Controller
     {
         $menu = Menu::where('slug', 'home')->first();
 
-        return view('pages.dynamic', compact('menu'));
+        return view('layouts.app', compact('menu'));
     }
 
     public function page(string $slug)
@@ -24,8 +24,9 @@ class PageController extends Controller
 
         abort_if(!$menu, 404);
         abort_if(!$menu->isEffectivelyActive(), 404);
+
         abort_if($menu->children()->exists(), 404);
 
-        return view('pages.dynamic', compact('menu'));
+        return view('layouts.app', compact('menu'));
     }
 }

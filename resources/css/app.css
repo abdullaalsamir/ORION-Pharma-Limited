@@ -15,21 +15,12 @@ body {
     @apply bg-slate-50 text-slate-800 font-sans;
 }
 
-header > * > *,
-main > *,
-footer > * > * {
-    width: 90%;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .page-content {
     @apply w-full text-base text-justify;
 }
 
 h2 {
-    @apply flex items-center text-center text-orion-blue text-lg uppercase font-bold my-8;
+    @apply flex items-center text-center text-orion-blue text-2xl uppercase font-bold my-8;
 }
 
 h2::before,
@@ -38,12 +29,15 @@ h2::after {
     @apply flex-1 h-px bg-slate-300;
 }
 
-h2::before {
-    @apply mr-4;
+footer h2 {
+    display: block !important;
+    text-align: left !important;
+    @apply text-white text-lg uppercase font-bold mb-6 mt-0;
 }
 
-h2::after {
-    @apply ml-4;
+footer h2::before,
+footer h2::after {
+    content: none !important;
 }
 
 @layer utilities {
