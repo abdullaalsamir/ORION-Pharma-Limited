@@ -19,11 +19,11 @@
             @isset($menu)
                 <div class="flex flex-col">
                     <div class="w-full">
-                        <h2 class="w-full">
+                        <h1 class="w-full">
                             <span class="px-4 {{ request()->is('/') ? 'text-4xl' : '' }}">
                                 {{ request()->is('/') ? 'Welcome to Orion Pharma' : $menu->name }}
                             </span>
-                        </h2>
+                        </h1>
                     </div>
 
                     <div class="page-content prose max-w-none text-slate-700 leading-relaxed">
@@ -38,4 +38,5 @@
 
     @include('partials.footer')
 </body>
+
 </html>

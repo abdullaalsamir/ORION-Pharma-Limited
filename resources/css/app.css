@@ -19,24 +19,24 @@ body {
     @apply w-full text-base text-justify;
 }
 
-h2 {
+h1 {
     @apply flex items-center text-center text-orion-blue text-2xl uppercase font-bold my-8;
 }
 
-h2::before,
-h2::after {
+h1::before,
+h1::after {
     content: "";
     @apply flex-1 h-px bg-slate-300;
 }
 
-footer h2 {
+footer h1 {
     display: block !important;
     text-align: left !important;
     @apply text-white text-lg uppercase font-bold mb-6 mt-0;
 }
 
-footer h2::before,
-footer h2::after {
+footer h1::before,
+footer h1::after {
     content: none !important;
 }
 

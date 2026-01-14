@@ -3,12 +3,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-8">
 
             <div class="lg:col-span-2">
-                <h2 class="border-b-2 border-white/30 pb-4">Contact Us</h2>
+                <h1 class="border-b-2 border-white/30 pb-4">Contact Us</h1>
 
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="flex-1 space-y-5">
                         <div class="space-y-1 opacity-90">
-                            <h2 class="normal-case tracking-normal mb-2">Orion Pharma Ltd.</h2>
+                            <h1 class="!normal-case tracking-normal mb-2">Orion Pharma Ltd.</h1>
                         </div>
 
                         <div class="flex items-start gap-4 opacity-90 hover:opacity-100 transition-opacity group">
@@ -50,7 +50,7 @@
             </div>
 
             <div class="lg:col-span-1 lg:pl-8">
-                <h2 class="border-b-2 border-white/30 pb-4">Quick Links</h2>
+                <h1 class="border-b-2 border-white/30 pb-4">Quick Links</h1>
 
                 <ul class="space-y-4">
                     @php 
@@ -66,7 +66,7 @@
             </div>
 
             <div class="lg:col-span-1">
-                <h2 class="border-b-2 border-white/30 pb-4">Follow Us</h2>
+                <h1 class="border-b-2 border-white/30 pb-4">Follow Us</h1>
 
                 
                 <p class="text-base mb-6 text-gray-200 opacity-90">Stay updated wit
