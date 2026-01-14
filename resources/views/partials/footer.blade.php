@@ -3,7 +3,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-8">
             
             <div class="lg:col-span-2">
-                <h3 class="text-white font-bold text-xl mb-4 uppercase tracking-wider">
+                <h3 class="text-white font-bold text-lg mb-4 uppercase tracking-wider">
                     Contact Us
                 </h3>
                 <div class="h-[2px] bg-white/30 w-full mb-8"></div>
@@ -52,7 +52,7 @@
             </div>
 
             <div class="lg:col-span-1 lg:pl-8">
-                <h3 class="text-white font-bold text-xl mb-4 uppercase tracking-wider">
+                <h3 class="text-white font-bold text-lg mb-4 uppercase tracking-wider">
                     Quick Links
                 </h3>
                 <div class="h-[2px] bg-white/30 w-full mb-8"></div>
@@ -72,7 +72,7 @@
             </div>
 
             <div class="lg:col-span-1">
-                <h3 class="text-white font-bold text-xl mb-4 uppercase tracking-wider">
+                <h3 class="text-white font-bold text-lg mb-4 uppercase tracking-wider">
                     Follow Us
                 </h3>
                 <div class="h-[2px] bg-white/30 w-full mb-8"></div>

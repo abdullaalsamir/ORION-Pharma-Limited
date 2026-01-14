@@ -19,12 +19,17 @@ header > * > *,
 main > *,
 footer > * > * {
     width: 90%;
+    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
 }
 
+.page-content {
+    @apply w-full text-base text-justify;
+}
+
 h2 {
-    @apply flex items-center text-center text-orion-blue text-xl font-bold my-10;
+    @apply flex items-center text-center text-orion-blue text-lg uppercase font-bold my-8;
 }
 
 h2::before,
@@ -47,17 +52,6 @@ h2::after {
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 300ms;
     }
-}
-
-header,
-footer {
-    width: 100%;
-}
-
-footer {
-    width: 100%;
-    position: relative;
-    overflow: hidden;
 }
 
 @layer components {

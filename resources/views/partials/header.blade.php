@@ -25,7 +25,7 @@
                                     </a>
 
                                     @if($hasChildren)
-                                        <div class="absolute top-full left-0 w-56 pointer-events-none group-hover:pointer-events-auto" 
+                                        <div class="absolute top-full left-0 w-64 pointer-events-none group-hover:pointer-events-auto" 
                                             style="clip-path: inset(0px -1000px -1000px -1000px);">
                                             
                                             <ul class="level-2-menu w-full bg-orion-blue shadow-xl py-0 border-t border-white/10 relative">
@@ -43,7 +43,7 @@
                                                             </a>
 
                                                             @if($hasSub)
-                                                                <ul class="level-3-menu absolute top-0 w-56 bg-[#1a62ae] shadow-xl py-0 opacity-0 invisible z-10">
+                                                                <ul class="level-3-menu absolute top-0 w-64 bg-[#1a62ae] shadow-xl py-0 opacity-0 invisible z-10">
                                                                     @foreach($submenu->children as $subsubmenu)
                                                                         <li class="border-b border-white/5 last:border-0">
                                                                             <a href="{{ url($subsubmenu->full_slug) }}" 

@@ -10,18 +10,17 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="flex flex-col min-h-full overflow-x-hidden">
+<body class="flex flex-col min-h-screen overflow-x-hidden bg-slate-50">
 
     @include('partials.header')
 
-    <main class="flex-grow w-full pt-[90px]">
+    <main class="flex-grow w-full pt-[90px] pb-10">
         <div class="container-custom">
             @yield('content')
         </div>
     </main>
 
     @include('partials.footer')
-
 </body>
 
 </html>
