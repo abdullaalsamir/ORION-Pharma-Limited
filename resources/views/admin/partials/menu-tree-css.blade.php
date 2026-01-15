@@ -151,7 +151,6 @@
     }
 
     .nested.expanded {
-        max-height: 2000px;
         opacity: 1;
     }
 

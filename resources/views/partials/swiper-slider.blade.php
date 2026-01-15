@@ -3,11 +3,10 @@
         <div class="swiper-wrapper">
             @foreach($sliders as $slider)
                 <div class="swiper-slide relative aspect-[10/4] overflow-hidden">
-                    <img src="{{ asset('storage/' . $slider->image_path) }}" 
-                         class="w-full h-full object-cover" 
-                         alt="{{ $slider->header_1 }}">
-                    
-                    <div class="absolute inset-0 bg-linear-to-r from-black/60 to-transparent flex items-center">
+                    <img src="{{ asset($slider->image_path) }}" class="w-full h-full object-cover"
+                        alt="{{ $slider->header_1 }}">
+
+                    <div class="absolute inset-0 bg-linear-to-r from-black/75 to-transparent to-50% flex items-center">
                         <div class="container mx-auto w-[90%] max-w-[1400px]">
                             <div class="max-w-2xl text-white space-y-4 slide-content">
                                 <h2 class="text-4xl md:text-6xl font-bold leading-tight">
@@ -19,8 +18,8 @@
                                 </p>
                                 <div class="pt-4">
                                     <a href="{{ $slider->link_url }}"
-                                       class="bg-orion-blue hover:bg-white hover:text-orion-blue text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 inline-block">
-                                       Explore More
+                                        class="bg-orion-blue hover:bg-white hover:text-orion-blue text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 inline-block">
+                                        {{ $slider->button_text }}
                                     </a>
                                 </div>
                             </div>

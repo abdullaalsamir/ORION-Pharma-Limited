@@ -14,58 +14,89 @@ class SliderController extends Controller
     public function index()
     {
         $sliders = Slider::orderBy('order')->get();
-        $links = Menu::getFunctionalLeafMenus();
-        return view('admin.sliders.index', compact('sliders', 'links'));
+
+        $menus = Menu::whereNull('parent_id')
+            ->where('slug', '!=', 'home')
+            ->orderBy('order')
+            ->with('children.children')
+            ->get();
+
+        $allMenus = Menu::all();
+
+        return view('admin.sliders.index', compact('sliders', 'menus', 'allMenus'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:5120',
-            'header_1' => 'required|string',
-            'header_2' => 'required|string',
-            'description' => 'required|string',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'header_1' => 'required|string|max:22',
+            'header_2' => 'required|string|max:22',
+            'description' => 'required|string|max:150',
+            'button_text' => 'required|string|max:15',
             'link_url' => 'required|string',
         ]);
 
-        $file = $request->file('image');
-        $fileName = time() . '.webp';
-        $path = "sliders/{$fileName}";
+        try {
+            if (!Storage::disk('public')->exists('sliders')) {
+                Storage::disk('public')->makeDirectory('sliders');
+            }
 
-        $this->processSliderImage($file->getRealPath(), storage_path("app/public/{$path}"));
+            $file = $request->file('image');
+            $fileName = time() . '.webp';
+            $path = "sliders/{$fileName}";
+            $fullPath = storage_path("app/public/{$path}");
 
-        Slider::create([
-            'image_path' => $path,
-            'header_1' => $request->header_1,
-            'header_2' => $request->header_2,
-            'description' => $request->description,
-            'link_url' => $request->link_url,
-            'order' => Slider::max('order') + 1
-        ]);
+            $this->processSliderImage($file->getRealPath(), $fullPath);
 
-        return back()->with('success', 'Slider added successfully');
+            Slider::create([
+                'image_path' => $path,
+                'header_1' => $request->header_1,
+                'header_2' => $request->header_2,
+                'description' => $request->description,
+                'button_text' => $request->button_text,
+                'link_url' => $request->link_url,
+                'order' => (Slider::max('order') ?? 0) + 1
+            ]);
+
+            return back()->with('success', 'Slider added successfully');
+        } catch (Exception $e) {
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function update(Request $request, Slider $slider)
     {
-        $data = $request->validate([
-            'header_1' => 'required|string',
-            'header_2' => 'required|string',
-            'description' => 'required|string',
+        $request->validate([
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'header_1' => 'required|string|max:22',
+            'header_2' => 'required|string|max:22',
+            'description' => 'required|string|max:150',
+            'button_text' => 'required|string|max:15',
             'link_url' => 'required|string',
-            'is_active' => 'required|boolean'
+            'is_active' => 'required'
         ]);
 
-        if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($slider->image_path);
-            $fileName = time() . '.webp';
-            $path = "sliders/{$fileName}";
-            $this->processSliderImage($request->file('image')->getRealPath(), storage_path("app/public/{$path}"));
-            $slider->image_path = $path;
-        }
+        try {
+            if ($request->hasFile('image')) {
+                Storage::disk('public')->delete($slider->image_path);
+                $fullPath = storage_path("app/public/{$slider->image_path}");
+                $this->processSliderImage($request->file('image')->getRealPath(), $fullPath);
+            }
 
-        $slider->update($data);
-        return response()->json(['success' => true]);
+            $slider->update([
+                'header_1' => $request->header_1,
+                'header_2' => $request->header_2,
+                'description' => $request->description,
+                'button_text' => $request->button_text,
+                'link_url' => $request->link_url,
+                'is_active' => $request->is_active
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function updateOrder(Request $request)
@@ -78,23 +109,58 @@ class SliderController extends Controller
 
     public function destroy(Slider $slider)
     {
-        Storage::disk('public')->delete($slider->image_path);
+        $currentOrder = $slider->order;
+
+        if (Storage::disk('public')->exists($slider->image_path)) {
+            Storage::disk('public')->delete($slider->image_path);
+        }
+
         $slider->delete();
-        return back()->with('success', 'Slider deleted');
+
+        Slider::where('order', '>', $currentOrder)->decrement('order');
+
+        return back()->with('success', 'Slider deleted and sequence reorganized');
     }
 
-    private function processSliderImage($source, $destination)
+    private function processSliderImage($sourcePath, $destinationPath)
     {
-        $info = getimagesize($source);
-        $src = match ($info[2]) {
-            IMAGETYPE_JPEG => imagecreatefromjpeg($source),
-            IMAGETYPE_PNG => imagecreatefrompng($source),
-            IMAGETYPE_WEBP => imagecreatefromwebp($source),
-            default => throw new Exception('Unsupported image type'),
-        };
+        ini_set('memory_limit', '1024M');
+
+        if (!extension_loaded('gd')) {
+            throw new Exception('GD library is not installed or enabled.');
+        }
+
+        $info = getimagesize($sourcePath);
+        if (!$info) {
+            throw new Exception('Invalid image file.');
+        }
 
         $width = $info[0];
         $height = $info[1];
+        $type = $info[2];
+
+        switch ($type) {
+            case IMAGETYPE_JPEG:
+                $src = imagecreatefromjpeg($sourcePath);
+                break;
+            case IMAGETYPE_PNG:
+                $src = imagecreatefrompng($sourcePath);
+                break;
+            case IMAGETYPE_WEBP:
+                $src = imagecreatefromwebp($sourcePath);
+                break;
+            default:
+                throw new Exception('Unsupported image type.');
+        }
+
+        if (!$src) {
+            throw new Exception('Failed to load image resource.');
+        }
+
+        imagepalettetotruecolor($src);
+        imagealphablending($src, true);
+        imagesavealpha($src, true);
+
         $targetRatio = 10 / 4;
         $currentRatio = $width / $height;
 
@@ -110,12 +176,38 @@ class SliderController extends Controller
             $srcY = ($height - $cropHeight) / 2;
         }
 
-        $dst = imagecreatetruecolor(1400, 560);
+        $finalWidth = $cropWidth;
+        if ($finalWidth > 2000) {
+            $finalWidth = 2000;
+        }
+        $finalHeight = $finalWidth / $targetRatio;
+
+        $dst = imagecreatetruecolor($finalWidth, $finalHeight);
+
         imagealphablending($dst, false);
         imagesavealpha($dst, true);
-        imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, 1400, 560, $cropWidth, $cropHeight);
-        imagewebp($dst, $destination, 85);
+
+        imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $finalWidth, $finalHeight, $cropWidth, $cropHeight);
+
+        if (!imagewebp($dst, $destinationPath, 70)) {
+            throw new Exception('Failed to save WebP image. Check if WebP support is enabled in GD.');
+        }
+
         imagedestroy($src);
         imagedestroy($dst);
+    }
+
+    public function serveSliderImage($filename)
+    {
+        $path = storage_path('app/public/sliders/' . $filename);
+
+        if (!file_exists($path)) {
+            abort(404);
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'image/webp',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 }

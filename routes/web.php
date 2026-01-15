@@ -55,6 +55,9 @@ Route::prefix('admin')
 
 Route::get('/', [PageController::class, 'home'])->name('home');
 
+Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
+    ->where('filename', '^[0-9]+\.webp$');
+
 Route::get('{path}/{filename}', [ImageController::class, 'servePublicImage'])
     ->where('path', '.*')
     ->where('filename', '^[0-9]+\.webp$');

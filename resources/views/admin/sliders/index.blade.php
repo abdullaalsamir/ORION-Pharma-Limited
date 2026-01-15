@@ -63,23 +63,58 @@
         <div class="card-body">
             <div id="slider-list">
                 @foreach($sliders as $slider)
-                    <div class="slider-row" data-id="{{ $slider->id }}">
-                        <div class="drag-handle"><i class="fas fa-bars"></i></div>
-                        <img src="{{ asset('storage/' . $slider->image_path) }}" class="slider-preview">
-                        <div style="flex:1">
-                            <div style="font-weight:600">{{ $slider->header_1 }}</div>
-                            <div style="font-size:12px; color:#0054a6">{{ $slider->header_2 }}</div>
+                    <div class="slider-row" data-id="{{ $slider->id }}"
+                        style="display: flex; align-items: center; gap: 15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eef1f6; margin-bottom: 10px;">
+
+                        <div class="drag-handle" style="cursor: move; color: #ccc; padding: 10px 5px;"><i
+                                class="fas fa-bars"></i></div>
+
+                        <img src="{{ asset('storage/' . $slider->image_path) }}"
+                            style="width: 200px; aspect-ratio: 10/4; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; flex-shrink: 0;">
+
+                        <div
+                            style="flex: 1; align-self: flex-start; display: flex; flex-direction: column; gap: 2px; padding-top: 2px; min-width: 0;">
+                            <div style="font-weight:700; font-size: 16px; color: #1e293b; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                title="{{ $slider->header_1 }}">
+                                {{ $slider->header_1 }}
+                            </div>
+                            <div style="color:#0054a6; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                title="{{ $slider->header_2 }}">
+                                {{ $slider->header_2 }}
+                            </div>
+                            <div style="font-size:13px; color:#64748b; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                title="{{ $slider->description }}">
+                                {{ $slider->description }}
+                            </div>
                         </div>
-                        <div>
+
+                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                            @php
+                                $cleanUrl = ltrim($slider->link_url, '/');
+                                $linkedMenu = $allMenus->first(function ($m) use ($cleanUrl) {
+                                    return $m->full_slug === $cleanUrl;
+                                });
+                            @endphp
+
+                            @if($linkedMenu)
+                                <span class="link-badge" title="URL: {{ $slider->link_url }}"
+                                    style="display: flex; align-items: center; font-size: 12px; padding: 4px 12px; border-radius: 999px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; white-space: nowrap;">
+                                    <i class="fas fa-link" style="font-size: 10px; margin-right: 7px; color: #0054a6;"></i>
+                                    {{ $linkedMenu->name }}
+                                </span>
+                            @endif
+
                             @if($slider->is_active)
                                 <span class="menu-badge">Active</span>
                             @else
                                 <span class="menu-badge inactive">Inactive</span>
                             @endif
                         </div>
-                        <div class="menu-actions">
-                            <button class="icon-btn" onclick="openEditModal({{ json_encode($slider) }})"><i
-                                    class="fas fa-pen"></i></button>
+
+                        <div class="menu-actions" style="flex-shrink: 0; display: flex; align-items: center; gap: 5px;">
+                            <button class="icon-btn" onclick="openEditModal({{ json_encode($slider) }})">
+                                <i class="fas fa-pen"></i>
+                            </button>
                             <form action="{{ route('admin.sliders.delete', $slider) }}" method="POST" style="display:inline"
                                 onsubmit="return confirm('Delete slider?')">
                                 @csrf @method('DELETE')
@@ -102,22 +137,60 @@
                 <input type="file" name="image" required onchange="preview(this, 'addPreview')"
                     style="margin: 10px 0; width: 100%;">
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <input type="text" name="header_1" placeholder="Header Line 1" required
-                        style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-                    <input type="text" name="header_2" placeholder="Header Line 2 (Highlight)" required
-                        style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-                </div>
-                <textarea name="description" placeholder="Paragraph description" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:10px;"></textarea>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:10px;">
+                    <div style="position: relative;">
+                        <input type="text" name="header_1" placeholder="Header Line 1" maxlength="22" required
+                            oninput="updateCount(this, 'addC1', 22)"
+                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
+                        <span id="addC1"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                    </div>
 
-                <select name="link_url" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
-                    <option value="">Select Hyperlink Menu</option>
-                    @foreach($links as $link)
-                        <option value="/{{ $link->full_slug }}">{{ $link->name }} ({{ $link->full_slug }})</option>
-                    @endforeach
-                </select>
+                    <div style="position: relative;">
+                        <input type="text" name="header_2" placeholder="Header Line 2 (Highlight)" maxlength="22" required
+                            oninput="updateCount(this, 'addC2', 22)"
+                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
+                        <span id="addC2"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                    </div>
+                </div>
+
+                <div style="position: relative; margin-bottom:10px;">
+                    <textarea name="description" placeholder="Description" maxlength="150" required
+                        oninput="updateCount(this, 'addCD', 150)"
+                        style="width:100%; height:50px; line-height:1.2; padding:8px 10px 18px 10px; border:1px solid #ddd; border-radius:6px; resize: none; overflow:hidden;"></textarea>
+                    <span id="addCD"
+                        style="position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: #999; pointer-events: none;">0/150</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px; margin-bottom:15px;">
+                    <div style="position: relative;">
+                        <input type="text" name="button_text" value="Explore More" placeholder="Button Name" maxlength="15"
+                            required oninput="updateCount(this, 'addCBT', 15)"
+                            style="width:100%; padding:9px 45px 9px 10px; border:1px solid #e6e9ee; border-radius:6px;">
+                        <span id="addCBT"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">12/15</span>
+                    </div>
+
+                    <select name="link_url" id="addLink" required
+                        style="padding:9px 12px; border:1px solid #e6e9ee; border-radius:6px; width:100%;">
+                        <option value="">⁝⁝⁝ Select Link ⁝⁝⁝</option>
+                        @foreach($menus as $m)
+                            @php $mIsCat = $m->children->count() > 0; @endphp
+                            <option value="/{{ $m->full_slug }}" {{ $mIsCat ? 'disabled' : '' }}
+                                style="{{ $mIsCat ? 'color: darkred; font-weight: bold;' : '' }}">{{ $m->name }}</option>
+                            @foreach($m->children as $c)
+                                @php $cIsCat = $c->children->count() > 0; @endphp
+                                <option value="/{{ $c->full_slug }}" {{ $cIsCat ? 'disabled' : '' }}
+                                    style="{{ $cIsCat ? 'color: darkred;' : 'color: gray;' }}">— {{ $c->name }}</option>
+                                @foreach($c->children as $sc)
+                                    <option value="/{{ $sc->full_slug }}" style="color: gray;">&nbsp;&nbsp;&nbsp;— {{ $sc->name }}
+                                    </option>
+                                @endforeach
+                            @endforeach
+                        @endforeach
+                    </select>
+                </div>
 
                 <button type="submit"
                     style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Upload
@@ -135,24 +208,64 @@
                 <input type="file" name="image" onchange="preview(this, 'editPreview')"
                     style="margin: 10px 0; width: 100%;">
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <input type="text" name="header_1" id="editH1" required
-                        style="padding:10px; border:1px solid #ddd; border-radius:6px;">
-                    <input type="text" name="header_2" id="editH2" required
-                        style="padding:10px; border:1px solid #ddd; border-radius:6px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:10px;">
+                    <div style="position: relative;">
+                        <input type="text" name="header_1" placeholder="Header Line 1" id="editH1" maxlength="22" required
+                            oninput="updateCount(this, 'editC1', 22)"
+                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
+                        <span id="editC1"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                    </div>
+
+                    <div style="position: relative;">
+                        <input type="text" name="header_2" placeholder="Header Line 2 (Highlight)" id="editH2"
+                            maxlength="22" required oninput="updateCount(this, 'editC2', 22)"
+                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
+                        <span id="editC2"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                    </div>
                 </div>
-                <textarea name="description" id="editDesc" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:10px;"></textarea>
 
-                <select name="link_url" id="editLink" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
-                    @foreach($links as $link)
-                        <option value="/{{ $link->full_slug }}">{{ $link->name }}</option>
-                    @endforeach
-                </select>
+                <div style="position: relative; margin-bottom:10px;">
+                    <textarea name="description" id="editDesc" placeholder="Description" maxlength="150" required
+                        oninput="updateCount(this, 'editCD', 150)"
+                        style="width:100%; height:50px; line-height:1.2; padding:8px 10px 18px 10px; border:1px solid #ddd; border-radius:6px; resize: none; overflow:hidden;"></textarea>
+                    <span id="editCD"
+                        style="position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: #999; pointer-events: none;">0/150</span>
+                </div>
 
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                    <input type="checkbox" name="is_active" id="editActive"> Active
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px; margin-bottom:15px;">
+                    <div style="position: relative;">
+                        <input type="text" name="button_text" id="editBT" placeholder="Button Name" maxlength="15" required
+                            oninput="updateCount(this, 'editCBT', 15)"
+                            style="width:100%; padding:9px 45px 9px 10px; border:1px solid #e6e9ee; border-radius:6px;">
+                        <span id="editCBT"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/15</span>
+                    </div>
+
+                    <select name="link_url" id="addLink" required
+                        style="padding:9px 12px; border:1px solid #e6e9ee; border-radius:6px; width:100%;">
+                        <option value="">⁝⁝⁝ Select Link ⁝⁝⁝</option>
+                        @foreach($menus as $m)
+                            @php $mIsCat = $m->children->count() > 0; @endphp
+                            <option value="/{{ $m->full_slug }}" {{ $mIsCat ? 'disabled' : '' }}
+                                style="{{ $mIsCat ? 'color: darkred; font-weight: bold;' : '' }}">{{ $m->name }}</option>
+                            @foreach($m->children as $c)
+                                @php $cIsCat = $c->children->count() > 0; @endphp
+                                <option value="/{{ $c->full_slug }}" {{ $cIsCat ? 'disabled' : '' }}
+                                    style="{{ $cIsCat ? 'color: darkred;' : 'color: gray;' }}">— {{ $c->name }}</option>
+                                @foreach($c->children as $sc)
+                                    <option value="/{{ $sc->full_slug }}" style="color: gray;">&nbsp;&nbsp;&nbsp;— {{ $sc->name }}
+                                    </option>
+                                @endforeach
+                            @endforeach
+                        @endforeach
+                    </select>
+                </div>
+
+                <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px; cursor:pointer;">
+                    <input type="checkbox" name="is_active" id="editActive">
+                    <span style="font-weight:600; font-size:14px;">Active Status</span>
                 </label>
 
                 <button type="submit"
@@ -183,20 +296,46 @@
             let currentEditId = null;
             function openEditModal(slider) {
                 currentEditId = slider.id;
-                document.getElementById('editH1').value = slider.header_1;
-                document.getElementById('editH2').value = slider.header_2;
-                document.getElementById('editDesc').value = slider.description;
-                document.getElementById('editLink').value = slider.link_url;
-                document.getElementById('editActive').checked = slider.is_active;
+
+                const h1 = document.getElementById('editH1');
+                const h2 = document.getElementById('editH2');
+                const desc = document.getElementById('editDesc');
+                const bt = document.getElementById('editBT');
+                const link = document.getElementById('editLink');
+                const active = document.getElementById('editActive');
+
+                h1.value = slider.header_1;
+                h2.value = slider.header_2;
+                desc.value = slider.description;
+                bt.value = slider.button_text;
+
+                if (link) link.value = slider.link_url;
+                if (active) active.checked = (slider.is_active == 1);
+
+                updateCount(h1, 'editC1', 22);
+                updateCount(h2, 'editC2', 22);
+                updateCount(desc, 'editCD', 150);
+                updateCount(bt, 'editCBT', 15);
+
                 document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}">`;
 
-                document.getElementById('editModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('editModal').classList.add('active'), 10);
+                const modal = document.getElementById('editModal');
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
             }
 
             function closeModal(id) {
                 document.getElementById(id).classList.remove('active');
                 setTimeout(() => document.getElementById(id).style.display = 'none', 300);
+            }
+
+            function updateCount(el, counterId, limit) {
+                const len = el.value.length;
+                const counter = document.getElementById(counterId);
+                if (counter) {
+                    counter.innerText = `${len}/${limit}`;
+                    counter.style.color = (len >= limit) ? '#e11d48' : '#999';
+                }
             }
 
             document.getElementById('editForm').onsubmit = function (e) {
@@ -218,13 +357,26 @@
                 onEnd: function () {
                     let orders = [];
                     document.querySelectorAll('.slider-row').forEach((el, index) => {
-                        orders.push({ id: el.dataset.id, order: index });
+                        orders.push({
+                            id: el.dataset.id,
+                            order: index + 1
+                        });
                     });
+
                     fetch('{{ route("admin.sliders.update-order") }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
                         body: JSON.stringify({ orders })
-                    });
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Order updated successfully');
+                            }
+                        });
                 }
             });
         </script>
