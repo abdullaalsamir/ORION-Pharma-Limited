@@ -233,13 +233,14 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.images') }}" class="{{ request()->is('admin/images*') ? 'active' : '' }}">
+                <a href="{{ route('admin.banners') }}" class="{{ request()->is('admin/banners*') ? 'active' : '' }}">
                     <i class="fas fa-images"></i>
-                    <span>Images</span>
+                    <span>Banners</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.sliders.index') }}" class="{{ request()->is('admin/sliders*') ? 'active' : '' }}">
+                <a href="{{ route('admin.sliders.index') }}"
+                    class="{{ request()->is('admin/sliders*') ? 'active' : '' }}">
                     <i class="fas fa-film"></i>
                     <span>Swiper Slider</span>
                 </a>

@@ -5,7 +5,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuController;
-use App\Http\Controllers\Admin\ImageController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\SliderController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -32,12 +32,12 @@ Route::prefix('admin')
         Route::get('/pages', [MenuController::class, 'pages'])->name('pages');
         Route::put('/pages/{menu}', [MenuController::class, 'updatePage'])->name('pages.update');
 
-        Route::get('/images', [ImageController::class, 'index'])->name('images');
-        Route::get('/images/fetch/{menu}', [ImageController::class, 'getImages'])->name('images.fetch');
-        Route::get('/images/get-for-editor/{menu}', [ImageController::class, 'getImagesForEditor']);
-        Route::post('/images/upload/{menu}', [ImageController::class, 'store'])->name('images.upload');
-        Route::match(['post', 'put'], '/images/{image}', [ImageController::class, 'update'])->name('images.update');
-        Route::delete('/images/{image}', [ImageController::class, 'destroy'])->name('images.delete');
+        Route::get('/banners', [BannerController::class, 'index'])->name('banners');
+        Route::get('/banners/fetch/{menu}', [BannerController::class, 'getBanners'])->name('banners.fetch');
+        Route::get('/banners/get-for-editor/{menu}', [BannerController::class, 'getBannersForEditor']);
+        Route::post('/banners/upload/{menu}', [BannerController::class, 'store'])->name('banners.upload');
+        Route::match(['post', 'put'], '/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
+        Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.delete');
 
         Route::get('/sliders', [SliderController::class, 'index'])->name('sliders.index');
         Route::post('/sliders', [SliderController::class, 'store'])->name('sliders.store');
@@ -58,7 +58,7 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
     ->where('filename', '^[0-9]+\.webp$');
 
-Route::get('{path}/{filename}', [ImageController::class, 'servePublicImage'])
+Route::get('{path}/{filename}', [BannerController::class, 'serveBannerImage'])
     ->where('path', '.*')
     ->where('filename', '^[0-9]+\.webp$');
 

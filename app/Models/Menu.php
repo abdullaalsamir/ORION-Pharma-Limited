@@ -117,9 +117,9 @@ class Menu extends Model
         return $flatten($all)->where('is_multifunctional', 1);
     }
 
-    public function images()
+    public function banners()
     {
-        return $this->hasMany(MenuImage::class);
+        return $this->hasMany(Banner::class);
     }
 
     public static function getFunctionalLeafMenus()

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MenuImage extends Model
+class Banner extends Model
 {
     protected $fillable = ['menu_id', 'file_path', 'file_name', 'is_active'];
 

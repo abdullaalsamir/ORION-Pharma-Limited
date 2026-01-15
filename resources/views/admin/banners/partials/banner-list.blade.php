@@ -78,21 +78,21 @@
     </style>
 
     <div class="image-grid-48-9">
-        @forelse($images as $img)
-            <div class="image-card-wide {{ !$img->is_active ? 'is-inactive' : '' }}">
-                <img src="{{ asset('storage/' . $img->file_path) }}?v={{ time() }}" alt="image">
+        @forelse($banners as $banner)
+            <div class="image-card-wide {{ !$banner->is_active ? 'is-inactive' : '' }}">
+                <img src="{{ asset('storage/' . $banner->file_path) }}?v={{ time() }}" alt="banner">
 
                 <div class="card-actions">
                     <button class="action-btn"
-                        onclick="openEditModal({{ $img->id }}, '{{ $img->file_name }}', '{{ $img->file_path }}', {{ $img->is_active }})">
+                        onclick="openEditModal({{ $banner->id }}, '{{ $banner->file_name }}', '{{ $banner->file_path }}', {{ $banner->is_active }})">
                         <i class="fas fa-pen"></i>
                     </button>
-                    <button class="action-btn" style="color:#e11d48" onclick="deleteImage({{ $img->id }})">
+                    <button class="action-btn" style="color:#e11d48" onclick="deleteImage({{ $banner->id }})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
 
-                @if(!$img->is_active)
+                @if(!$banner->is_active)
                     <div
                         style="position:absolute; bottom:10px; left:10px; background:rgba(192, 57, 43, 0.9); color:#fff; font-size:10px; font-weight:bold; padding:3px 10px; border-radius:4px; z-index: 5; text-transform: uppercase;">
                         Inactive
@@ -103,7 +103,7 @@
             <div
                 style="padding: 60px; text-align: center; color: #94a3b8; border: 2px dashed #f1f5f9; border-radius: 12px; margin-top:20px;">
                 <i class="fas fa-cloud-upload-alt" style="font-size: 40px; margin-bottom: 10px;"></i>
-                <p>No images found. Upload your first 48:9 image.</p>
+                <p>No banners found. Upload your first 48:9 banner.</p>
             </div>
         @endforelse
     </div>

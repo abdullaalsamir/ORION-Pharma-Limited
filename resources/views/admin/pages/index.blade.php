@@ -116,7 +116,7 @@
                         const strip = document.getElementById('imageStrip');
                         strip.innerHTML = '<div style="font-size:12px; color:#999; padding:10px;">Loading images...</div>';
 
-                        fetch(`/admin/images/get-for-editor/${currentPageId}`)
+                        fetch(`/admin/banners/get-for-editor/${currentPageId}`)
                             .then(res => res.json())
                             .then(images => {
                                 if (images.length === 0) {

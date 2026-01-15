@@ -232,7 +232,7 @@
                     el.classList.add('active');
                 }
                 currentMenuId = menuId;
-                fetch(`/admin/images/fetch/${menuId}`).then(res => res.json()).then(data => {
+                fetch(`/admin/banners/fetch/${menuId}`).then(res => res.json()).then(data => {
                     document.getElementById('imageArea').innerHTML = data.html;
                 });
             }
@@ -246,10 +246,10 @@
                         img.onload = function () {
                             document.getElementById(containerId).innerHTML = `<img src="${e.target.result}">`;
                             document.getElementById(metaId).innerHTML = `
-                                                                                                        <span>Size: ${(file.size / 1024).toFixed(1)}KB</span>
-                                                                                                        <span>Res: ${this.width}x${this.height}px</span>
-                                                                                                        <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
-                                                                                                    `;
+                                                                                                                                                                                                                                                                                                                                        <span>Size: ${(file.size / 1024).toFixed(1)}KB</span>
+                                                                                                                                                                                                                                                                                                                                        <span>Res: ${this.width}x${this.height}px</span>
+                                                                                                                                                                                                                                                                                                                                        <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
+                                                                                                                                                                                                                                                                                                                                    `;
                             if (isEdit) checkEditChanges();
                         };
                         img.src = e.target.result;
@@ -268,9 +268,9 @@
                 previewImg.onload = function () {
                     document.getElementById('editPreviewContainer').innerHTML = `<img src="${previewImg.src}">`;
                     document.getElementById('editMeta').innerHTML = `
-                                                                                                <span>Res: ${this.width}x${this.height}px</span>
-                                                                                                <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
-                                                                                            `;
+                                                                                                                                                                                                                                                                                                                                <span>Res: ${this.width}x${this.height}px</span>
+                                                                                                                                                                                                                                                                                                                                <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
+                                                                                                                                                                                                                                                                                                                            `;
                 };
                 previewImg.src = `/storage/${path}?t=${Date.now()}`;
 
@@ -311,7 +311,7 @@
 
             document.getElementById('uploadForm').onsubmit = function (e) {
                 e.preventDefault();
-                fetch(`/admin/images/upload/${currentMenuId}`, {
+                fetch(`/admin/banners/upload/${currentMenuId}`, {
                     method: 'POST', body: new FormData(this), headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                 }).then(() => { closeModal('uploadModal'); loadImages(currentMenuId); });
             };
@@ -320,7 +320,7 @@
                 e.preventDefault();
                 const formData = new FormData(this);
                 formData.append('is_active', document.getElementById('editActiveToggle').checked ? 1 : 0);
-                fetch(`/admin/images/${currentImageData.id}`, {
+                fetch(`/admin/banners/${currentImageData.id}`, {
                     method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                 }).then(res => res.json()).then(() => {
                     closeModal('editModal');
@@ -329,7 +329,7 @@
             };
 
             function deleteImage(id) {
-                if (confirm('Delete?')) fetch(`/admin/images/${id}`, {
+                if (confirm('Delete?')) fetch(`/admin/banners/${id}`, {
                     method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                 }).then(() => loadImages(currentMenuId));
             }

@@ -243,19 +243,28 @@
                             style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/15</span>
                     </div>
 
-                    <select name="link_url" id="addLink" required
-                        style="padding:9px 12px; border:1px solid #e6e9ee; border-radius:6px; width:100%;">
+                    <select name="link_url" id="editLink" required
+                        style="padding:9px 12px; border:1px solid #e6e9ee; border-radius:6px; width:100%; margin-bottom:15px; font-size: 14px;">
+
                         <option value="">⁝⁝⁝ Select Link ⁝⁝⁝</option>
+
                         @foreach($menus as $m)
                             @php $mIsCat = $m->children->count() > 0; @endphp
                             <option value="/{{ $m->full_slug }}" {{ $mIsCat ? 'disabled' : '' }}
-                                style="{{ $mIsCat ? 'color: darkred; font-weight: bold;' : '' }}">{{ $m->name }}</option>
+                                style="{{ $mIsCat ? 'color: darkred; font-weight: bold;' : '' }}">
+                                {{ $m->name }}
+                            </option>
+
                             @foreach($m->children as $c)
                                 @php $cIsCat = $c->children->count() > 0; @endphp
                                 <option value="/{{ $c->full_slug }}" {{ $cIsCat ? 'disabled' : '' }}
-                                    style="{{ $cIsCat ? 'color: darkred;' : 'color: gray;' }}">— {{ $c->name }}</option>
+                                    style="{{ $cIsCat ? 'color: darkred;' : 'color: gray;' }}">
+                                    — {{ $c->name }}
+                                </option>
+
                                 @foreach($c->children as $sc)
-                                    <option value="/{{ $sc->full_slug }}" style="color: gray;">&nbsp;&nbsp;&nbsp;— {{ $sc->name }}
+                                    <option value="/{{ $sc->full_slug }}" style="color: gray;">
+                                        &nbsp;&nbsp;&nbsp;— {{ $sc->name }}
                                     </option>
                                 @endforeach
                             @endforeach
@@ -307,15 +316,20 @@
                 h1.value = slider.header_1;
                 h2.value = slider.header_2;
                 desc.value = slider.description;
-                bt.value = slider.button_text;
+                if (bt) bt.value = slider.button_text;
 
-                if (link) link.value = slider.link_url;
-                if (active) active.checked = (slider.is_active == 1);
+                if (link) {
+                    link.value = slider.link_url;
+                }
+
+                if (active) {
+                    active.checked = (slider.is_active == 1);
+                }
 
                 updateCount(h1, 'editC1', 22);
                 updateCount(h2, 'editC2', 22);
                 updateCount(desc, 'editCD', 150);
-                updateCount(bt, 'editCBT', 15);
+                if (bt) updateCount(bt, 'editCBT', 15);
 
                 document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}">`;
 

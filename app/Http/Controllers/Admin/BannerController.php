@@ -4,25 +4,25 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
-use App\Models\MenuImage;
+use App\Models\Banner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 
-class ImageController extends Controller
+class BannerController extends Controller
 {
     public function index()
     {
         $leafMenus = Menu::getFunctionalLeafMenus();
-        return view('admin.images.index', compact('leafMenus'));
+        return view('admin.banners.index', compact('leafMenus'));
     }
 
-    public function getImages(Menu $menu)
+    public function getBanners(Menu $menu)
     {
-        $images = $menu->images()->orderBy('created_at', 'asc')->get();
+        $banners = $menu->banners()->orderBy('created_at', 'asc')->get();
 
         return response()->json([
-            'html' => view('admin.images.partials.image-list', compact('images', 'menu'))->render()
+            'html' => view('admin.banners.partials.banner-list', compact('banners', 'menu'))->render()
         ]);
     }
 
@@ -35,7 +35,7 @@ class ImageController extends Controller
         try {
             $file = $request->file('image');
             $fileName = time() . '.webp';
-            $relativeDir = "menu_images/{$menu->slug}";
+            $relativeDir = "banners/{$menu->slug}";
 
             if (!Storage::disk('public')->exists($relativeDir)) {
                 Storage::disk('public')->makeDirectory($relativeDir);
@@ -43,9 +43,9 @@ class ImageController extends Controller
 
             $fullPath = storage_path("app/public/{$relativeDir}/{$fileName}");
 
-            $this->processImage($file->getRealPath(), $fullPath);
+            $this->processBanner($file->getRealPath(), $fullPath);
 
-            MenuImage::create([
+            Banner::create([
                 'menu_id' => $menu->id,
                 'file_name' => $fileName,
                 'file_path' => "{$relativeDir}/{$fileName}",
@@ -58,7 +58,7 @@ class ImageController extends Controller
         }
     }
 
-    public function update(Request $request, MenuImage $image)
+    public function update(Request $request, Banner $banner)
     {
         $request->validate([
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
@@ -66,21 +66,21 @@ class ImageController extends Controller
         ]);
 
         try {
-            $image->is_active = $request->is_active;
+            $banner->is_active = $request->is_active;
 
             if ($request->hasFile('image')) {
-                $fullPath = storage_path("app/public/{$image->file_path}");
-                $this->processImage($request->file('image')->getRealPath(), $fullPath);
+                $fullPath = storage_path("app/public/{$banner->file_path}");
+                $this->processBanner($request->file('image')->getRealPath(), $fullPath);
             }
 
-            $image->save();
+            $banner->save();
             return response()->json(['success' => true]);
         } catch (Exception $e) {
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
-    private function processImage($sourcePath, $destinationPath)
+    private function processBanner($sourcePath, $destinationPath)
     {
         ini_set('memory_limit', '1024M');
 
@@ -148,34 +148,34 @@ class ImageController extends Controller
         imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $finalWidth, $finalHeight, $cropWidth, $cropHeight);
 
         if (!imagewebp($dst, $destinationPath, 70)) {
-            throw new Exception('Failed to save WebP image. Check if WebP support is enabled in GD.');
+            throw new Exception('Failed to save WebP image.');
         }
 
         imagedestroy($src);
         imagedestroy($dst);
     }
 
-    public function destroy(MenuImage $image)
+    public function destroy(Banner $banner)
     {
-        Storage::disk('public')->delete($image->file_path);
-        $image->delete();
+        Storage::disk('public')->delete($banner->file_path);
+        $banner->delete();
         return response()->json(['success' => true]);
     }
 
-    public function getImagesForEditor(Menu $menu)
+    public function getBannersForEditor(Menu $menu)
     {
-        $images = $menu->images()->where('is_active', 1)->orderBy('created_at', 'asc')->get();
+        $banners = $menu->banners()->where('is_active', 1)->orderBy('created_at', 'asc')->get();
         $fullSlug = $menu->full_slug;
 
-        return response()->json($images->map(function ($img) use ($fullSlug) {
+        return response()->json($banners->map(function ($banner) use ($fullSlug) {
             return [
-                'url' => '/' . ltrim($fullSlug, '/') . '/' . $img->file_name,
-                'name' => $img->file_name
+                'url' => '/' . ltrim($fullSlug, '/') . '/' . $banner->file_name,
+                'name' => $banner->file_name
             ];
         }));
     }
 
-    public function servePublicImage($path, $filename)
+    public function serveBannerImage($path, $filename)
     {
         $menu = Menu::all()->first(function ($m) use ($path) {
             return $m->full_slug === $path;
@@ -188,12 +188,12 @@ class ImageController extends Controller
         if (!$menu)
             abort(404);
 
-        $image = $menu->images()->where('file_name', $filename)->first();
+        $banner = $menu->banners()->where('file_name', $filename)->first();
 
-        if (!$image)
+        if (!$banner)
             abort(404);
 
-        $storagePath = storage_path('app/public/' . $image->file_path);
+        $storagePath = storage_path('app/public/' . $banner->file_path);
 
         if (!file_exists($storagePath))
             abort(404);

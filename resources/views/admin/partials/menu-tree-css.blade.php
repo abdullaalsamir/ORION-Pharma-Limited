@@ -152,6 +152,7 @@
 
     .nested.expanded {
         opacity: 1;
+        max-height: 2000px;
     }
 
     .menu-tree-wrapper {
