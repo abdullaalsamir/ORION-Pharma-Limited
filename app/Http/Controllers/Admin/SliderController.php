@@ -161,7 +161,7 @@ class SliderController extends Controller
         imagealphablending($src, true);
         imagesavealpha($src, true);
 
-        $targetRatio = 10 / 4;
+        $targetRatio = 23 / 9;
         $currentRatio = $width / $height;
 
         if ($currentRatio > $targetRatio) {

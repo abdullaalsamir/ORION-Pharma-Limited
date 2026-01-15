@@ -2,7 +2,7 @@
     <div class="swiper homeSwiper w-full">
         <div class="swiper-wrapper">
             @foreach($sliders as $slider)
-                <div class="swiper-slide relative aspect-[10/4] overflow-hidden">
+                <div class="swiper-slide relative aspect-[23/9] overflow-hidden">
                     <img src="{{ asset($slider->image_path) }}" class="w-full h-full object-cover"
                         alt="{{ $slider->header_1 }}">
 

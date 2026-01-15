@@ -17,7 +17,7 @@
 
         .slider-preview {
             width: 200px;
-            aspect-ratio: 10/4;
+            aspect-ratio: 23/9;
             object-fit: cover;
             border-radius: 4px;
             border: 1px solid #ddd;
@@ -25,7 +25,7 @@
 
         .ratio-10-4 {
             width: 100%;
-            aspect-ratio: 10/4;
+            aspect-ratio: 23/9;
             background: #f8fafc;
             border: 2px dashed #cbd5e1;
             border-radius: 8px;
@@ -52,7 +52,7 @@
         <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
             <div>
                 <h3 style="margin:0">Swiper Slider Management</h3>
-                <small style="color:#666">Manage home page slider images and content (10:4 Ratio)</small>
+                <small style="color:#666">Manage home page slider images and content (23:9 Ratio)</small>
             </div>
             <button onclick="openAddModal()"
                 style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
@@ -70,7 +70,7 @@
                                 class="fas fa-bars"></i></div>
 
                         <img src="{{ asset('storage/' . $slider->image_path) }}"
-                            style="width: 200px; aspect-ratio: 10/4; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; flex-shrink: 0;">
+                            style="width: 200px; aspect-ratio: 23/9; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; flex-shrink: 0;">
 
                         <div
                             style="flex: 1; align-self: flex-start; display: flex; flex-direction: column; gap: 2px; padding-top: 2px; min-width: 0;">
@@ -133,7 +133,7 @@
             <h3>Add New Slider</h3>
             <form action="{{ route('admin.sliders.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="ratio-10-4" id="addPreview"><span style="color:#94a3b8">10:4 Ratio Preview</span></div>
+                <div class="ratio-10-4" id="addPreview"><span style="color:#94a3b8">23:9 Ratio Preview</span></div>
                 <input type="file" name="image" required onchange="preview(this, 'addPreview')"
                     style="margin: 10px 0; width: 100%;">
 

@@ -17,7 +17,7 @@
 
                                 <li class="relative group flex items-center h-[90px]">
                                     <a href="{{ !$hasChildren ? url($menu->full_slug) : 'javascript:void(0)' }}" 
-                                    class="relative z-50 px-3 h-full text-base font-semibold text-orion-blue group-hover:bg-orion-blue group-hover:text-white flex items-center gap-1 transition-all duration-200">
+                                    class="relative z-50 px-3 h-full text-[15px] font-semibold text-orion-blue group-hover:bg-orion-blue group-hover:text-white flex items-center gap-1 transition-all duration-200">
                                         {{ $menu->name }}
                                         @if($hasChildren)
                                             <i class="fa-solid fa-chevron-down text-[10px] transition-transform group-hover:rotate-180"></i>
@@ -25,7 +25,7 @@
                                     </a>
 
                                     @if($hasChildren)
-                                        <div class="absolute top-full left-0 w-64 pointer-events-none group-hover:pointer-events-auto" 
+                                        <div class="absolute top-full left-0 w-56 pointer-events-none group-hover:pointer-events-auto" 
                                             style="clip-path: inset(0px -1000px -1000px -1000px);">
                                             
                                             <ul class="level-2-menu w-full bg-orion-blue shadow-xl py-0 border-t border-white/10 relative">
@@ -35,7 +35,7 @@
 
                                                         <li class="relative group/sub">
                                                             <a href="{{ !$hasSub ? url($submenu->full_slug) : 'javascript:void(0)' }}" 
-                                                            class="relative z-30 bg-orion-blue flex items-center justify-between px-6 py-3 text-base text-white group-hover/sub:bg-[#1a62ae] transition-colors border-b border-white/10">
+                                                            class="relative z-30 bg-orion-blue flex items-center justify-between px-5 py-3 text-[15px] text-white group-hover/sub:bg-[#1a62ae] transition-colors border-b border-white/10">
                                                                 {{ $submenu->name }}
                                                                 @if($hasSub)
                                                                     <i class="fa-solid fa-chevron-right text-[10px] sub-chevron"></i>
@@ -43,11 +43,11 @@
                                                             </a>
 
                                                             @if($hasSub)
-                                                                <ul class="level-3-menu absolute top-0 w-64 bg-[#1a62ae] shadow-xl py-0 opacity-0 invisible z-10">
+                                                                <ul class="level-3-menu absolute top-0 w-56 bg-[#1a62ae] shadow-xl py-0 opacity-0 invisible z-10">
                                                                     @foreach($submenu->children as $subsubmenu)
                                                                         <li class="border-b border-white/5 last:border-0">
                                                                             <a href="{{ url($subsubmenu->full_slug) }}" 
-                                                                            class="block px-6 py-3 text-base text-white hover:bg-[#2576c7] transition-colors duration-200">
+                                                                            class="block px-5 py-3 text-[15px] text-white hover:bg-[#2576c7] transition-colors duration-200">
                                                                                 {{ $subsubmenu->name }}
                                                                             </a>
                                                                         </li>
