@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\CsrController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -45,6 +46,12 @@ Route::prefix('admin')
         Route::delete('/sliders/{slider}', [SliderController::class, 'destroy'])->name('sliders.delete');
         Route::post('/sliders/update-order', [SliderController::class, 'updateOrder'])->name('sliders.update-order');
 
+        Route::get('/csr-list', [CsrController::class, 'index'])->name('csr.index');
+        Route::post('/csr-list', [CsrController::class, 'store'])->name('csr.store');
+        Route::put('/csr-list/{csrItem}', [CsrController::class, 'update'])->name('csr.update');
+        Route::delete('/csr-list/{csrItem}', [CsrController::class, 'destroy'])->name('csr.delete');
+        Route::post('/csr-list/update-order', [CsrController::class, 'updateOrder'])->name('csr.update-order');
+
         Route::get('/settings', function () {
             return view('admin.settings.index');
         })->name('settings');
@@ -56,6 +63,9 @@ Route::prefix('admin')
 Route::get('/', [PageController::class, 'home'])->name('home');
 
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
+    ->where('filename', '^[0-9]+\.webp$');
+
+Route::get('csr/{filename}', [CsrController::class, 'serveCsrImage'])
     ->where('filename', '^[0-9]+\.webp$');
 
 Route::get('{path}/{filename}', [BannerController::class, 'serveBannerImage'])
