@@ -7,8 +7,9 @@
             @foreach($items as $item)
                 <div
                     class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col">
-                    <a href="{{ route('csr.show', $item->id) }}" class="relative block aspect-[16/9] overflow-hidden">
-                        <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}"
+                    <a href="{{ url($menu->full_slug . '/' . $item->slug) }}"
+                        class="relative block aspect-[16/9] overflow-hidden">
+                        <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}"
                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                         <div class="absolute top-4 left-4">
                             <span class="bg-orion-blue text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
@@ -31,7 +32,7 @@
                                 <i class="fa-regular fa-calendar"></i>
                                 {{ $item->csr_date->format('F d, Y') }}
                             </span>
-                            <a href="{{ route('csr.show', $item->id) }}"
+                            <a href="{{ url($menu->full_slug . '/' . $item->slug) }}"
                                 class="text-orion-blue font-bold text-sm flex items-center gap-2 group/btn">
                                 Read More
                                 <i

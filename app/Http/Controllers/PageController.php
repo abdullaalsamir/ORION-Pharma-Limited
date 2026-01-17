@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\CsrController;
 
 class PageController extends Controller
 {
@@ -18,15 +20,41 @@ class PageController extends Controller
         if ($slug === 'home')
             return redirect('/', 301);
 
-        $menu = Menu::all()->first(function ($menu) use ($slug) {
-            return $menu->full_slug === $slug;
-        });
+        $menu = Menu::all()->first(fn($m) => $m->full_slug === $slug);
 
-        abort_if(!$menu, 404);
-        abort_if(!$menu->isEffectivelyActive(), 404);
+        if ($menu) {
+            abort_if(!$menu->isEffectivelyActive(), 404);
 
-        abort_if($menu->children()->exists(), 404);
+            if ($menu->is_multifunctional && $menu->slug === 'csr-list') {
+                return (new CsrController)->frontendIndex($menu);
+            }
 
-        return view('layouts.app', compact('menu'));
+            abort_if($menu->children()->exists(), 404);
+            return view('layouts.app', compact('menu'));
+        }
+
+        $segments = explode('/', $slug);
+        $itemSlug = array_pop($segments);
+        $parentPath = implode('/', $segments);
+
+        $parentMenu = Menu::all()->first(fn($m) => $m->full_slug === $parentPath);
+        if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'csr-list') {
+            return (new CsrController)->frontendShow($parentMenu, $itemSlug);
+        }
+
+        abort(404);
+    }
+
+    public function image($path, $filename)
+    {
+        $menu = Menu::all()->first(fn($m) => $m->full_slug === $path);
+        if (!$menu)
+            abort(404);
+
+        if ($menu->is_multifunctional && $menu->slug === 'csr-list') {
+            return (new CsrController)->serveCsrImage($filename);
+        }
+
+        return (new BannerController)->serveBannerImage($menu, $filename);
     }
 }

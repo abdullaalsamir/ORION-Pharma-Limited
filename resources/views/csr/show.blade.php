@@ -6,11 +6,11 @@
             <nav class="flex items-center gap-2 text-sm font-medium text-slate-500">
                 <a href="{{ url('/') }}" class="hover:text-orion-blue">Home</a>
                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                <a href="{{ route('csr.index') }}" class="hover:text-orion-blue">CSR List</a>
+                <a href="{{ url($menu->full_slug) }}" class="hover:text-orion-blue">CSR List</a>
                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
                 <span class="text-orion-blue truncate max-w-[200px]">{{ $item->title }}</span>
             </nav>
-            <a href="{{ route('csr.index') }}"
+            <a href="{{ url($menu->full_slug) }}"
                 class="text-slate-600 hover:text-orion-blue transition-colors flex items-center gap-2 font-semibold">
                 <i class="fa-solid fa-circle-arrow-left"></i> Back to List
             </a>
@@ -19,7 +19,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <article class="lg:col-span-8">
                 <div class="rounded-3xl overflow-hidden shadow-2xl mb-8 aspect-[16/9] bg-slate-200">
-                    <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}"
+                    <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}" alt="{{ $item->title }}"
                         class="w-full h-full object-cover">
                 </div>
 
@@ -68,7 +68,7 @@
 
                     <div class="space-y-6">
                         @foreach($related as $rel)
-                            <a href="{{ route('csr.show', $rel->id) }}" class="group flex items-start gap-4">
+                            <a href="{{ url($menu->full_slug . '/' . $rel->slug) }}" class="group flex items-start gap-4">
                                 <div class="w-24 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
                                     <img src="{{ asset('storage/' . $rel->image_path) }}"
                                         class="w-full h-full object-cover transition-transform group-hover:scale-110">
@@ -86,7 +86,7 @@
                         @endforeach
                     </div>
 
-                    <a href="{{ route('csr.index') }}"
+                    <a href="{{ url($menu->full_slug) }}"
                         class="mt-8 block text-center bg-white text-orion-blue font-bold py-3 rounded-xl border border-orion-blue/20 hover:bg-orion-blue hover:text-white transition-all duration-300">
                         View All Stories
                     </a>

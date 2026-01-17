@@ -173,22 +173,13 @@ class CsrController extends Controller
 
     public function serveCsrImage($filename)
     {
-        $path = storage_path('app/public/csr/' . $filename);
-
-        if (!file_exists($path)) {
-            abort(404);
-        }
-
-        return response()->file($path, [
-            'Content-Type' => 'image/webp',
-            'Cache-Control' => 'public, max-age=86400',
-        ]);
+        $storagePath = storage_path('app/public/csr/' . $filename);
+        abort_if(!file_exists($storagePath), 404);
+        return response()->file($storagePath);
     }
 
-    public function frontendIndex()
+    public function frontendIndex($menu)
     {
-        $menu = Menu::where('slug', 'csr-list')->first();
-
         $items = CsrItem::where('is_active', 1)
             ->orderBy('csr_date', 'desc')
             ->orderBy('order', 'asc')
@@ -197,13 +188,12 @@ class CsrController extends Controller
         return view('csr.index', compact('items', 'menu'));
     }
 
-    public function frontendShow($id)
+    public function frontendShow($menu, $slug)
     {
-        $menu = Menu::where('slug', 'csr-list')->first();
-        $item = CsrItem::where('is_active', 1)->findOrFail($id);
+        $item = CsrItem::where('slug', $slug)->where('is_active', 1)->firstOrFail();
 
         $related = CsrItem::where('is_active', 1)
-            ->where('id', '!=', $id)
+            ->where('id', '!=', $item->id)
             ->latest('csr_date')
             ->take(3)
             ->get();

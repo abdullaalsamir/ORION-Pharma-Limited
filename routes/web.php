@@ -44,11 +44,12 @@ Route::prefix('admin')
         Route::delete('/sliders/{slider}', [SliderController::class, 'destroy'])->name('sliders.delete');
         Route::post('/sliders/update-order', [SliderController::class, 'updateOrder'])->name('sliders.update-order');
 
-        Route::get('/csr-list', [CsrController::class, 'index'])->name('csr.index');
-        Route::post('/csr-list', [CsrController::class, 'store'])->name('csr.store');
-        Route::put('/csr-list/{csrItem}', [CsrController::class, 'update'])->name('csr.update');
-        Route::delete('/csr-list/{csrItem}', [CsrController::class, 'destroy'])->name('csr.delete');
-        Route::post('/csr-list/update-order', [CsrController::class, 'updateOrder'])->name('csr.update-order');
+        Route::prefix('csr-actions')->name('csr.')->group(function () {
+            Route::post('/store', [CsrController::class, 'store'])->name('store');
+            Route::put('/{csrItem}', [CsrController::class, 'update'])->name('update');
+            Route::delete('/{csrItem}', [CsrController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [CsrController::class, 'updateOrder'])->name('update-order');
+        });
 
         Route::get('/settings', function () {
             return view('admin.settings.index');
@@ -57,19 +58,15 @@ Route::prefix('admin')
         Route::get('/{slug}', [MenuController::class, 'showMultifunctional'])->name('multifunctional');
     });
 
-Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/', [PageController::class, 'home'])
+    ->name('home');
 
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
     ->where('filename', '^[0-9]+\.webp$');
 
-Route::get('csr/{filename}', [CsrController::class, 'serveCsrImage'])
-    ->where('filename', '^[0-9]+\.webp$');
-
-Route::get('csr/csr-list', [CsrController::class, 'frontendIndex'])->name('csr.index');
-Route::get('csr/csr-list/{id}', [CsrController::class, 'frontendShow'])->name('csr.show');
-
-Route::get('{path}/{filename}', [BannerController::class, 'serveBannerImage'])
+Route::get('{path}/{filename}', [PageController::class, 'image'])
     ->where('path', '.*')
     ->where('filename', '^[0-9]+\.webp$');
 
-Route::get('{slug}', [PageController::class, 'page'])->where('slug', '.*');
+Route::get('{slug}', [PageController::class, 'page'])
+    ->where('slug', '.*');

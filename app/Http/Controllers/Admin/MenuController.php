@@ -160,11 +160,13 @@ class MenuController extends Controller
     {
         $menu = Menu::where('slug', $slug)
             ->where('is_multifunctional', 1)
-            ->doesntHave('children')
             ->first();
 
         abort_if(!$menu, 404);
-        abort_if(!$menu->isEffectivelyActive(), 404);
+
+        if ($menu->slug === 'csr-list') {
+            return (new CsrController)->index();
+        }
 
         return view('admin.multifunctional.placeholder', compact('menu'));
     }

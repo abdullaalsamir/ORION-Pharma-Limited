@@ -175,32 +175,13 @@ class BannerController extends Controller
         }));
     }
 
-    public function serveBannerImage($path, $filename)
+    public function serveBannerImage($menu, $filename)
     {
-        $menu = Menu::all()->first(function ($m) use ($path) {
-            return $m->full_slug === $path;
-        });
-
-        if (!$menu) {
-            $menu = Menu::where('slug', $path)->whereNull('parent_id')->first();
-        }
-
-        if (!$menu)
-            abort(404);
-
         $banner = $menu->banners()->where('file_name', $filename)->first();
-
-        if (!$banner)
-            abort(404);
+        abort_if(!$banner, 404);
 
         $storagePath = storage_path('app/public/' . $banner->file_path);
-
-        if (!file_exists($storagePath))
-            abort(404);
-
-        return response()->file($storagePath, [
-            'Content-Type' => 'image/webp',
-            'Cache-Control' => 'public, max-age=86400',
-        ]);
+        abort_if(!file_exists($storagePath), 404);
+        return response()->file($storagePath);
     }
 }
