@@ -126,7 +126,7 @@
         </div>
     </div>
 
-    @include('admin.partials.menu-tree-css')
+    @include('admin.partials.css')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

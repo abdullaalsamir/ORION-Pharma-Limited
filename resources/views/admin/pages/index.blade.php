@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    @include('admin.partials.menu-tree-css')
+    @include('admin.partials.css')
 
     @push('scripts')
         <script src="{{ asset('js/ace/src-min-noconflict/ace.js') }}" type="text/javascript" charset="utf-8"></script>

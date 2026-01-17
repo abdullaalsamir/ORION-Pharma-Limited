@@ -23,7 +23,7 @@
             border: 1px solid #ddd;
         }
 
-        .ratio-10-4 {
+        .ratio-23-9 {
             width: 100%;
             aspect-ratio: 23/9;
             background: #f8fafc;
@@ -35,7 +35,7 @@
             overflow: hidden;
         }
 
-        .ratio-10-4 img {
+        .ratio-23-9 img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -133,7 +133,7 @@
             <h3>Add New Slider</h3>
             <form action="{{ route('admin.sliders.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="ratio-10-4" id="addPreview"><span style="color:#94a3b8">23:9 Ratio Preview</span></div>
+                <div class="ratio-23-9" id="addPreview"><span style="color:#94a3b8">23:9 Ratio Preview</span></div>
                 <input type="file" name="image" required onchange="preview(this, 'addPreview')"
                     style="margin: 10px 0; width: 100%;">
 
@@ -204,7 +204,7 @@
             <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
             <h3>Edit Slider</h3>
             <form id="editForm">
-                <div class="ratio-10-4" id="editPreview"></div>
+                <div class="ratio-23-9" id="editPreview"></div>
                 <input type="file" name="image" onchange="preview(this, 'editPreview')"
                     style="margin: 10px 0; width: 100%;">
 
@@ -284,7 +284,7 @@
         </div>
     </div>
 
-    @include('admin.partials.menu-tree-css')
+    @include('admin.partials.css')
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>

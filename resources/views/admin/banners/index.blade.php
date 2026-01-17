@@ -219,7 +219,7 @@
         </div>
     </div>
 
-    @include('admin.partials.menu-tree-css')
+    @include('admin.partials.css')
 
     @push('scripts')
         <script>
@@ -246,10 +246,10 @@
                         img.onload = function () {
                             document.getElementById(containerId).innerHTML = `<img src="${e.target.result}">`;
                             document.getElementById(metaId).innerHTML = `
-                                                                                                                                                                                                                                                                                                                                        <span>Size: ${(file.size / 1024).toFixed(1)}KB</span>
-                                                                                                                                                                                                                                                                                                                                        <span>Res: ${this.width}x${this.height}px</span>
-                                                                                                                                                                                                                                                                                                                                        <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
-                                                                                                                                                                                                                                                                                                                                    `;
+                                                                                                                                                                                                                                                                                                                                                        <span>Size: ${(file.size / 1024).toFixed(1)}KB</span>
+                                                                                                                                                                                                                                                                                                                                                        <span>Res: ${this.width}x${this.height}px</span>
+                                                                                                                                                                                                                                                                                                                                                        <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
+                                                                                                                                                                                                                                                                                                                                                    `;
                             if (isEdit) checkEditChanges();
                         };
                         img.src = e.target.result;
@@ -268,9 +268,9 @@
                 previewImg.onload = function () {
                     document.getElementById('editPreviewContainer').innerHTML = `<img src="${previewImg.src}">`;
                     document.getElementById('editMeta').innerHTML = `
-                                                                                                                                                                                                                                                                                                                                <span>Res: ${this.width}x${this.height}px</span>
-                                                                                                                                                                                                                                                                                                                                <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
-                                                                                                                                                                                                                                                                                                                            `;
+                                                                                                                                                                                                                                                                                                                                                <span>Res: ${this.width}x${this.height}px</span>
+                                                                                                                                                                                                                                                                                                                                                <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
+                                                                                                                                                                                                                                                                                                                                            `;
                 };
                 previewImg.src = `/storage/${path}?t=${Date.now()}`;
 
