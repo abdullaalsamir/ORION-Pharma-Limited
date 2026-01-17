@@ -10,11 +10,9 @@ use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\CsrController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
-
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 });
 
 Route::prefix('admin')
@@ -57,7 +55,6 @@ Route::prefix('admin')
         })->name('settings');
 
         Route::get('/{slug}', [MenuController::class, 'showMultifunctional'])->name('multifunctional');
-
     });
 
 Route::get('/', [PageController::class, 'home'])->name('home');
@@ -68,9 +65,11 @@ Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
 Route::get('csr/{filename}', [CsrController::class, 'serveCsrImage'])
     ->where('filename', '^[0-9]+\.webp$');
 
+Route::get('csr/csr-list', [CsrController::class, 'frontendIndex'])->name('csr.index');
+Route::get('csr/csr-list/{id}', [CsrController::class, 'frontendShow'])->name('csr.show');
+
 Route::get('{path}/{filename}', [BannerController::class, 'serveBannerImage'])
     ->where('path', '.*')
     ->where('filename', '^[0-9]+\.webp$');
 
-Route::get('{slug}', [PageController::class, 'page'])
-    ->where('slug', '.*');
+Route::get('{slug}', [PageController::class, 'page'])->where('slug', '.*');

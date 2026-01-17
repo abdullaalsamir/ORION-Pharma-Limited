@@ -122,7 +122,6 @@ class CsrController extends Controller
         imagealphablending($src, true);
         imagesavealpha($src, true);
 
-        // 16:9 Ratio for CSR
         $targetRatio = 16 / 9;
         $currentRatio = $width / $height;
 
@@ -180,7 +179,35 @@ class CsrController extends Controller
             abort(404);
         }
 
-        return response()->file($path);
+        return response()->file($path, [
+            'Content-Type' => 'image/webp',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 
+    public function frontendIndex()
+    {
+        $menu = Menu::where('slug', 'csr-list')->first();
+
+        $items = CsrItem::where('is_active', 1)
+            ->orderBy('csr_date', 'desc')
+            ->orderBy('order', 'asc')
+            ->paginate(9);
+
+        return view('csr.index', compact('items', 'menu'));
+    }
+
+    public function frontendShow($id)
+    {
+        $menu = Menu::where('slug', 'csr-list')->first();
+        $item = CsrItem::where('is_active', 1)->findOrFail($id);
+
+        $related = CsrItem::where('is_active', 1)
+            ->where('id', '!=', $id)
+            ->latest('csr_date')
+            ->take(3)
+            ->get();
+
+        return view('csr.show', compact('item', 'related', 'menu'));
+    }
 }
