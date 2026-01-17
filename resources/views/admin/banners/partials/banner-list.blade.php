@@ -80,11 +80,11 @@
     <div class="image-grid-48-9">
         @forelse($banners as $banner)
             <div class="image-card-wide {{ !$banner->is_active ? 'is-inactive' : '' }}">
-                <img src="{{ asset('storage/' . $banner->file_path) }}?v={{ time() }}" alt="banner">
+                <img src="{{ url($menu->full_slug . '/' . $banner->file_name) }}?v={{ time() }}" alt="banner">
 
                 <div class="card-actions">
                     <button class="action-btn"
-                        onclick="openEditModal({{ $banner->id }}, '{{ $banner->file_name }}', '{{ $banner->file_path }}', {{ $banner->is_active }})">
+                        onclick="openEditModal({{ $banner->id }}, '{{ $banner->file_name }}', '{{ $menu->full_slug }}', {{ $banner->is_active }})">
                         <i class="fas fa-pen"></i>
                     </button>
                     <button class="action-btn" style="color:#e11d48" onclick="deleteImage({{ $banner->id }})">

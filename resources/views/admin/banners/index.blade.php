@@ -224,6 +224,7 @@
     @push('scripts')
         <script>
             let currentMenuId = null;
+            let currentMenuSlug = null;
             let currentImageData = null;
 
             function loadImages(menuId, el) {
@@ -246,10 +247,10 @@
                         img.onload = function () {
                             document.getElementById(containerId).innerHTML = `<img src="${e.target.result}">`;
                             document.getElementById(metaId).innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                        <span>Size: ${(file.size / 1024).toFixed(1)}KB</span>
-                                                                                                                                                                                                                                                                                                                                                        <span>Res: ${this.width}x${this.height}px</span>
-                                                                                                                                                                                                                                                                                                                                                        <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
-                                                                                                                                                                                                                                                                                                                                                    `;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <span>Size: ${(file.size / 1024).toFixed(1)}KB</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <span>Res: ${this.width}x${this.height}px</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `;
                             if (isEdit) checkEditChanges();
                         };
                         img.src = e.target.result;
@@ -268,11 +269,13 @@
                 previewImg.onload = function () {
                     document.getElementById('editPreviewContainer').innerHTML = `<img src="${previewImg.src}">`;
                     document.getElementById('editMeta').innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                <span>Res: ${this.width}x${this.height}px</span>
-                                                                                                                                                                                                                                                                                                                                                <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
-                                                                                                                                                                                                                                                                                                                                            `;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <span>Res: ${this.width}x${this.height}px</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <span>Ratio: ${(this.width / this.height).toFixed(2)}:1</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `;
                 };
-                previewImg.src = `/storage/${path}?t=${Date.now()}`;
+
+                const activeMenuPath = document.querySelector('.leaf-menu-item.active .parent-path').innerText.replace(/ /g, '').toLowerCase();
+                previewImg.src = `/${fullSlug}/${name}?t=${Date.now()}`;
 
                 const toggle = document.getElementById('editActiveToggle');
                 toggle.checked = (isActive == 1);
