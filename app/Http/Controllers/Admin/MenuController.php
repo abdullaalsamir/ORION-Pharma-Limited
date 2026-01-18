@@ -168,6 +168,14 @@ class MenuController extends Controller
             return (new CsrController)->index();
         }
 
+        if (view()->exists("admin.{$slug}.index")) {
+            $controllerName = 'App\\Http\\Controllers\\Admin\\' . Str::studly($slug) . 'Controller';
+
+            if (class_exists($controllerName)) {
+                return (new $controllerName)->index();
+            }
+        }
+
         return view('admin.multifunctional.placeholder', compact('menu'));
     }
 }

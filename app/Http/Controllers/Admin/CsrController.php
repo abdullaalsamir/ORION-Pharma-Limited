@@ -97,8 +97,9 @@ class CsrController extends Controller
         }
 
         $info = getimagesize($sourcePath);
-        if (!$info)
+        if (!$info) {
             throw new Exception('Invalid image file.');
+        }
 
         $width = $info[0];
         $height = $info[1];
@@ -116,6 +117,10 @@ class CsrController extends Controller
                 break;
             default:
                 throw new Exception('Unsupported image type.');
+        }
+
+        if (!$src) {
+            throw new Exception('Failed to load image resource.');
         }
 
         imagepalettetotruecolor($src);
@@ -138,11 +143,13 @@ class CsrController extends Controller
         }
 
         $finalWidth = $cropWidth;
-        if ($finalWidth > 2000)
+        if ($finalWidth > 2000) {
             $finalWidth = 2000;
+        }
         $finalHeight = $finalWidth / $targetRatio;
 
         $dst = imagecreatetruecolor($finalWidth, $finalHeight);
+
         imagealphablending($dst, false);
         imagesavealpha($dst, true);
 

@@ -190,7 +190,7 @@ class SliderController extends Controller
         imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $finalWidth, $finalHeight, $cropWidth, $cropHeight);
 
         if (!imagewebp($dst, $destinationPath, 70)) {
-            throw new Exception('Failed to save WebP image. Check if WebP support is enabled in GD.');
+            throw new Exception('Failed to save WebP image.');
         }
 
         imagedestroy($src);

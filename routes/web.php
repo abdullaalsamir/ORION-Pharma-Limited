@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\CsrController;
+use App\Http\Controllers\Admin\ScholarshipController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -43,6 +44,13 @@ Route::prefix('admin')
         Route::put('/sliders/{slider}', [SliderController::class, 'update'])->name('sliders.update');
         Route::delete('/sliders/{slider}', [SliderController::class, 'destroy'])->name('sliders.delete');
         Route::post('/sliders/update-order', [SliderController::class, 'updateOrder'])->name('sliders.update-order');
+
+        Route::prefix('scholarship-actions')->name('scholarship.')->group(function () {
+            Route::post('/store', [ScholarshipController::class, 'store'])->name('store');
+            Route::put('/{scholarship}', [ScholarshipController::class, 'update'])->name('update');
+            Route::delete('/{scholarship}', [ScholarshipController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [ScholarshipController::class, 'updateOrder'])->name('update-order'); // Add this
+        });
 
         Route::prefix('csr-actions')->name('csr.')->group(function () {
             Route::post('/store', [CsrController::class, 'store'])->name('store');
