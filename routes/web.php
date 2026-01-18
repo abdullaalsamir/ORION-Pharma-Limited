@@ -74,7 +74,7 @@ Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
 
 Route::get('{path}/{filename}', [PageController::class, 'image'])
     ->where('path', '.*')
-    ->where('filename', '^[0-9]+\.webp$');
+    ->where('filename', '^[a-zA-Z0-9-]+\.webp$');
 
 Route::get('{slug}', [PageController::class, 'page'])
     ->where('slug', '.*');

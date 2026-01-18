@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Menu;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CsrController;
+use App\Http\Controllers\Admin\ScholarshipController;
 
 class PageController extends Controller
 {
@@ -29,6 +30,10 @@ class PageController extends Controller
                 return (new CsrController)->frontendIndex($menu);
             }
 
+            if ($menu->slug === 'scholarship') {
+                return (new ScholarshipController)->frontendIndex($menu);
+            }
+
             abort_if($menu->children()->exists(), 404);
             return view('layouts.app', compact('menu'));
         }
@@ -51,8 +56,14 @@ class PageController extends Controller
         if (!$menu)
             abort(404);
 
-        if ($menu->is_multifunctional && $menu->slug === 'csr-list') {
-            return (new CsrController)->serveCsrImage($filename);
+        if ($menu->is_multifunctional) {
+            if ($menu->slug === 'csr-list') {
+                return (new CsrController)->serveCsrImage($filename);
+            }
+
+            if ($menu->slug === 'scholarship') {
+                return (new ScholarshipController)->serveScholarImage($filename);
+            }
         }
 
         return (new BannerController)->serveBannerImage($menu, $filename);

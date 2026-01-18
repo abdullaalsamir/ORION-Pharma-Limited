@@ -185,4 +185,25 @@ class ScholarshipController extends Controller
         imagedestroy($src);
         imagedestroy($dst);
     }
+
+    public function frontendIndex($menu)
+    {
+        $items = Scholarship::where('is_active', 1)
+            ->orderBy('order', 'asc')
+            ->get();
+
+        return view('scholarship.index', compact('items', 'menu'));
+    }
+
+    public function serveScholarImage($filename)
+    {
+        $storagePath = storage_path('app/public/scholarship/' . $filename);
+
+        abort_if(!file_exists($storagePath), 404);
+
+        return response()->file($storagePath, [
+            'Content-Type' => 'image/webp',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
 }
