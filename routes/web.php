@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\CsrController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
 
@@ -68,6 +69,13 @@ Route::prefix('admin')
             Route::put('/{csrItem}', [CsrController::class, 'update'])->name('update');
             Route::delete('/{csrItem}', [CsrController::class, 'delete'])->name('delete');
             Route::post('/update-order', [CsrController::class, 'updateOrder'])->name('update-order');
+        });
+
+        Route::prefix('news-actions')->name('news.')->group(function () {
+            Route::post('/store', [NewsController::class, 'store'])->name('store');
+            Route::put('/{newsItem}', [NewsController::class, 'update'])->name('update');
+            Route::delete('/{newsItem}', [NewsController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [NewsController::class, 'updateOrder'])->name('update-order');
         });
 
         Route::get('/settings', function () {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Menu;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CsrController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
 
@@ -29,6 +30,10 @@ class PageController extends Controller
 
             if ($menu->is_multifunctional && $menu->slug === 'csr-list') {
                 return (new CsrController)->frontendIndex($menu);
+            }
+
+            if ($menu->is_multifunctional && $menu->slug === 'news-and-announcements') {
+                return (new NewsController)->frontendIndex($menu);
             }
 
             if ($menu->slug === 'scholarship') {
@@ -63,6 +68,10 @@ class PageController extends Controller
             return (new CsrController)->frontendShow($parentMenu, $itemSlug);
         }
 
+        if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'news-and-announcements') {
+            return (new NewsController)->frontendShow($parentMenu, $itemSlug);
+        }
+
         abort(404);
     }
 
@@ -80,6 +89,9 @@ class PageController extends Controller
         if ($menu->is_multifunctional) {
             if ($menu->slug === 'csr-list') {
                 return (new CsrController)->serveCsrImage($filename);
+            }
+            if ($menu->slug === 'news-and-announcements') {
+                return (new NewsController)->serveNewsImage($filename);
             }
             if ($menu->slug === 'scholarship') {
                 return (new ScholarshipController)->serveScholarImage($filename);

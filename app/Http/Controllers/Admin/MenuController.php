@@ -168,6 +168,10 @@ class MenuController extends Controller
             return (new CsrController)->index();
         }
 
+        if ($menu->slug === 'news-and-announcements') {
+            return (new NewsController)->index();
+        }
+
         if ($menu->slug === 'products') {
             return (new ProductController)->index();
         }
