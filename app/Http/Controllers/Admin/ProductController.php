@@ -29,9 +29,16 @@ class ProductController extends Controller
 
     public function storeGeneric(Request $request)
     {
-        $request->validate(['name' => 'required|unique:generics,name']);
+        $validator = \Validator::make($request->all(), [
+            'name' => 'required|unique:generics,name'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->errors()->first()], 422);
+        }
+
         Generic::create(['name' => $request->name, 'is_active' => 1]);
-        return back()->with('success', 'Generic added');
+        return response()->json(['success' => true]);
     }
 
     public function updateGeneric(Request $request, Generic $generic)
@@ -46,14 +53,28 @@ class ProductController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function deleteGeneric(Generic $generic)
+    {
+        try {
+            $directory = "products/{$generic->slug}";
+            if (Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->deleteDirectory($directory);
+            }
+
+            $generic->delete();
+
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function storeProduct(Request $request, Generic $generic)
     {
-        $request->validate([
-            'trade_name' => 'required',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120'
-        ]);
+        $request->validate(['trade_name' => 'required', 'image' => 'required|image']);
 
-        $path = $this->handleImage($request->file('image'), $request->trade_name);
+        $path = $this->handleImage($request->file('image'), $request->trade_name, $generic->slug);
+
         $data = $request->except(['image']);
         $data['image_path'] = $path;
         $data['generic_id'] = $generic->id;
@@ -66,14 +87,13 @@ class ProductController extends Controller
     public function updateProduct(Request $request, Product $product)
     {
         $data = $request->except(['image', '_method', 'is_active']);
-
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image')) {
             if (Storage::disk('public')->exists($product->image_path)) {
                 Storage::disk('public')->delete($product->image_path);
             }
-            $data['image_path'] = $this->handleImage($request->file('image'), $request->trade_name);
+            $data['image_path'] = $this->handleImage($request->file('image'), $request->trade_name, $product->generic->slug);
         }
 
         $product->update($data);
@@ -87,12 +107,15 @@ class ProductController extends Controller
         return response()->json(['success' => true]);
     }
 
-    private function handleImage($file, $name)
+    private function handleImage($file, $name, $genericSlug)
     {
-        $fileName = \Illuminate\Support\Str::slug($name) . '-' . time() . '.webp';
-        $path = "products/{$fileName}";
-        if (!Storage::disk('public')->exists('products'))
-            Storage::disk('public')->makeDirectory('products');
+        $fileName = \Illuminate\Support\Str::slug($name) . '.webp';
+        $relativeDir = "products/{$genericSlug}";
+        $path = "{$relativeDir}/{$fileName}";
+
+        if (!Storage::disk('public')->exists($relativeDir)) {
+            Storage::disk('public')->makeDirectory($relativeDir);
+        }
 
         $this->processImage($file->getRealPath(), storage_path("app/public/{$path}"), 16 / 9);
         return $path;
@@ -132,5 +155,35 @@ class ProductController extends Controller
         imagesavealpha($dst, true);
         imagecopyresampled($dst, $src, 0, 0, $sx, $sy, 800, 450, $cw, $ch);
         imagewebp($dst, $dest, 80);
+    }
+
+    public function frontendIndex($menu)
+    {
+        $products = Product::where('is_active', 1)
+            ->whereHas('generic', fn($q) => $q->where('is_active', 1))
+            ->with('generic')
+            ->get();
+
+        return view('products.index', compact('products', 'menu'));
+    }
+
+    public function frontendShow($generic_slug, $product_slug, $menu = null)
+    {
+        if (!$menu) {
+            $menu = Menu::where('slug', 'products')->first();
+        }
+
+        $product = Product::whereHas('generic', fn($q) => $q->where('slug', $generic_slug))
+            ->where(\DB::raw('LOWER(REPLACE(trade_name, " ", "-"))'), $product_slug)
+            ->firstOrFail();
+
+        return view('products.show', compact('product', 'menu'));
+    }
+
+    public function serveProductImage($generic_slug, $filename)
+    {
+        $path = storage_path("app/public/products/{$generic_slug}/{$filename}");
+        abort_if(!file_exists($path), 404);
+        return response()->file($path);
     }
 }

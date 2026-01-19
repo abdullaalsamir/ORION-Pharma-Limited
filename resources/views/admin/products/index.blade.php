@@ -81,16 +81,22 @@
             <div class="menu-tree-wrapper" style="flex: 1; overflow-y: auto;">
                 @foreach($generics as $g)
                     <div class="generic-list-item" onclick="loadProducts({{ $g->id }}, this)">
-                        <div>
+                        <div style="flex:1">
                             <div style="font-weight: 600;">{{ $g->name }}</div>
                             <span class="menu-badge {{ !$g->is_active ? 'inactive' : '' }}"
                                 style="font-size:10px; padding:2px 6px;">
                                 {{ $g->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </div>
-                        <button class="icon-btn" onclick="event.stopPropagation(); openEditGeneric({{ json_encode($g) }})">
-                            <i class="fas fa-pen"></i>
-                        </button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="icon-btn" onclick="event.stopPropagation(); openEditGeneric({{ json_encode($g) }})">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="icon-btn" style="color:red"
+                                onclick="event.stopPropagation(); deleteGeneric({{ $g->id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -239,7 +245,6 @@
 
         document.getElementById('genForm').onsubmit = function (e) {
             e.preventDefault();
-
             const formData = new FormData(this);
 
             const url = currentEditGenericId
@@ -257,15 +262,35 @@
                 body: formData,
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) return res.json().then(json => { throw json });
+                    return res.json();
+                })
                 .then(data => {
                     if (data.success) {
                         closeModal('genericModal');
                         window.location.reload();
                     }
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    alert(err.error || 'Operation failed. Check if name is unique.');
+                    console.error(err);
+                });
         };
+
+        function deleteGeneric(id) {
+            if (confirm('Delete this Generic? This will delete ALL associated products and images permanently.')) {
+                fetch(`/admin/products-actions/generic-delete/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) window.location.reload();
+                        else alert('Error: ' + data.error);
+                    });
+            }
+        }
 
         function openAddProduct() {
             document.getElementById('prodForm').reset();
@@ -313,8 +338,6 @@
                 method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             }).then(() => { closeModal('productModal'); loadProducts(currentGenId, document.querySelector('.generic-list-item.active')); });
         };
-
-
 
         function deleteProduct(id) {
             if (confirm('Delete product?')) fetch(`/admin/products-actions/product-delete/${id}`, {

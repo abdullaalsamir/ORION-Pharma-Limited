@@ -48,10 +48,9 @@ Route::prefix('admin')
 
         Route::prefix('products-actions')->name('products.')->group(function () {
             Route::get('/fetch/{generic}', [ProductController::class, 'fetchProducts'])->name('fetch');
-
             Route::post('/generic-store', [ProductController::class, 'storeGeneric'])->name('generic.store');
             Route::put('/generic-update/{generic}', [ProductController::class, 'updateGeneric'])->name('generic.update');
-
+            Route::delete('/generic-delete/{generic}', [ProductController::class, 'deleteGeneric'])->name('generic.delete');
             Route::post('/product-store/{generic}', [ProductController::class, 'storeProduct'])->name('store');
             Route::put('/product-update/{product}', [ProductController::class, 'updateProduct'])->name('update');
             Route::delete('/product-delete/{product}', [ProductController::class, 'deleteProduct'])->name('delete');
@@ -61,7 +60,7 @@ Route::prefix('admin')
             Route::post('/store', [ScholarshipController::class, 'store'])->name('store');
             Route::put('/{scholarship}', [ScholarshipController::class, 'update'])->name('update');
             Route::delete('/{scholarship}', [ScholarshipController::class, 'delete'])->name('delete');
-            Route::post('/update-order', [ScholarshipController::class, 'updateOrder'])->name('update-order'); // Add this
+            Route::post('/update-order', [ScholarshipController::class, 'updateOrder'])->name('update-order');
         });
 
         Route::prefix('csr-actions')->name('csr.')->group(function () {
@@ -78,8 +77,10 @@ Route::prefix('admin')
         Route::get('/{slug}', [MenuController::class, 'showMultifunctional'])->name('multifunctional');
     });
 
-Route::get('/', [PageController::class, 'home'])
-    ->name('home');
+Route::get('/', [PageController::class, 'home'])->name('home');
+
+Route::get('products/{generic}/{product}', [ProductController::class, 'frontendShow'])
+    ->where('product', '^[a-zA-Z0-9-]+$');
 
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
     ->where('filename', '^[0-9]+\.webp$');

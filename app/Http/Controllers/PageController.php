@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CsrController;
 use App\Http\Controllers\Admin\ScholarshipController;
+use App\Http\Controllers\Admin\ProductController;
 
 class PageController extends Controller
 {
@@ -34,6 +35,10 @@ class PageController extends Controller
                 return (new ScholarshipController)->frontendIndex($menu);
             }
 
+            if ($menu->slug === 'products') {
+                return (new ProductController)->frontendIndex($menu);
+            }
+
             abort_if($menu->children()->exists(), 404);
             return view('layouts.app', compact('menu'));
         }
@@ -43,6 +48,17 @@ class PageController extends Controller
         $parentPath = implode('/', $segments);
 
         $parentMenu = Menu::all()->first(fn($m) => $m->full_slug === $parentPath);
+
+        if (!$parentMenu) {
+            $baseMenu = Menu::where('slug', 'products')->first();
+            if ($baseMenu && count($segments) > 0 && $segments[0] === $baseMenu->slug) {
+                $genericSlug = $segments[1] ?? null;
+                if ($genericSlug) {
+                    return (new ProductController)->frontendShow($genericSlug, $itemSlug, $baseMenu);
+                }
+            }
+        }
+
         if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'csr-list') {
             return (new CsrController)->frontendShow($parentMenu, $itemSlug);
         }
@@ -52,6 +68,11 @@ class PageController extends Controller
 
     public function image($path, $filename)
     {
+        if (str_starts_with($path, 'products/')) {
+            $genericSlug = str_replace('products/', '', $path);
+            return (new ProductController)->serveProductImage($genericSlug, $filename);
+        }
+
         $menu = Menu::all()->first(fn($m) => $m->full_slug === $path);
         if (!$menu)
             abort(404);
@@ -60,7 +81,6 @@ class PageController extends Controller
             if ($menu->slug === 'csr-list') {
                 return (new CsrController)->serveCsrImage($filename);
             }
-
             if ($menu->slug === 'scholarship') {
                 return (new ScholarshipController)->serveScholarImage($filename);
             }
