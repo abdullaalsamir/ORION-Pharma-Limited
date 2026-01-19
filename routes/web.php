@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\CsrController;
 use App\Http\Controllers\Admin\ScholarshipController;
+use App\Http\Controllers\Admin\ProductController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -44,6 +45,17 @@ Route::prefix('admin')
         Route::put('/sliders/{slider}', [SliderController::class, 'update'])->name('sliders.update');
         Route::delete('/sliders/{slider}', [SliderController::class, 'destroy'])->name('sliders.delete');
         Route::post('/sliders/update-order', [SliderController::class, 'updateOrder'])->name('sliders.update-order');
+
+        Route::prefix('products-actions')->name('products.')->group(function () {
+            Route::get('/fetch/{generic}', [ProductController::class, 'fetchProducts'])->name('fetch');
+
+            Route::post('/generic-store', [ProductController::class, 'storeGeneric'])->name('generic.store');
+            Route::put('/generic-update/{generic}', [ProductController::class, 'updateGeneric'])->name('generic.update');
+
+            Route::post('/product-store/{generic}', [ProductController::class, 'storeProduct'])->name('store');
+            Route::put('/product-update/{product}', [ProductController::class, 'updateProduct'])->name('update');
+            Route::delete('/product-delete/{product}', [ProductController::class, 'deleteProduct'])->name('delete');
+        });
 
         Route::prefix('scholarship-actions')->name('scholarship.')->group(function () {
             Route::post('/store', [ScholarshipController::class, 'store'])->name('store');
