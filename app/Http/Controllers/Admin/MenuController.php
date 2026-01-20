@@ -172,6 +172,10 @@ class MenuController extends Controller
             return (new NewsController)->index();
         }
 
+        if ($menu->slug === 'board-of-directors') {
+            return (new BoardDirectorController)->index();
+        }
+
         if ($menu->slug === 'products') {
             return (new ProductController)->index();
         }

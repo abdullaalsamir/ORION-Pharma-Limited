@@ -166,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Add Modal -->
     <div id="addModal" class="modal-overlay">
         <div class="modal-content" style="width: 700px;">
             <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
@@ -204,7 +203,6 @@
         </div>
     </div>
 
-    <!-- Edit Modal -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content" style="width: 700px;">
             <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>

@@ -5,17 +5,15 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
-        Schema::create('news_items', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('title');
+        Schema::create('board_of_directors', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('designation');
             $table->string('slug');
             $table->text('description');
-            $table->date('news_date');
             $table->string('image_path');
             $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
@@ -23,11 +21,8 @@ return new class extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('board_of_directors');
     }
 };

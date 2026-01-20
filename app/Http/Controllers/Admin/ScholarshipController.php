@@ -38,7 +38,7 @@ class ScholarshipController extends Controller
         $request->validate([
             'name' => 'required|string',
             'medical_college' => 'required|string',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120'
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200'
         ]);
 
         try {

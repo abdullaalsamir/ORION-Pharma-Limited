@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CsrController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\BoardDirectorController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -76,6 +77,13 @@ Route::prefix('admin')
             Route::put('/{newsItem}', [NewsController::class, 'update'])->name('update');
             Route::delete('/{newsItem}', [NewsController::class, 'delete'])->name('delete');
             Route::post('/update-order', [NewsController::class, 'updateOrder'])->name('update-order');
+        });
+
+        Route::prefix('director-actions')->name('directors.')->group(function () {
+            Route::post('/store', [BoardDirectorController::class, 'store'])->name('store');
+            Route::put('/{boardDirector}', [BoardDirectorController::class, 'update'])->name('update');
+            Route::delete('/{boardDirector}', [BoardDirectorController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [BoardDirectorController::class, 'updateOrder'])->name('update-order');
         });
 
         Route::get('/settings', function () {

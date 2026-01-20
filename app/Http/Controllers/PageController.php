@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CsrController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\BoardDirectorController;
 
 class PageController extends Controller
 {
@@ -34,6 +35,10 @@ class PageController extends Controller
 
             if ($menu->is_multifunctional && $menu->slug === 'news-and-announcements') {
                 return (new NewsController)->frontendIndex($menu);
+            }
+
+            if ($menu->slug === 'board-of-directors') {
+                return (new BoardDirectorController)->frontendIndex($menu);
             }
 
             if ($menu->slug === 'scholarship') {
@@ -72,6 +77,10 @@ class PageController extends Controller
             return (new NewsController)->frontendShow($parentMenu, $itemSlug);
         }
 
+        if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'board-of-directors') {
+            return (new BoardDirectorController)->frontendShow($parentMenu, $itemSlug);
+        }
+
         abort(404);
     }
 
@@ -92,6 +101,9 @@ class PageController extends Controller
             }
             if ($menu->slug === 'news-and-announcements') {
                 return (new NewsController)->serveNewsImage($filename);
+            }
+            if ($menu->slug === 'board-of-directors') {
+                return (new BoardDirectorController)->serveImage($filename);
             }
             if ($menu->slug === 'scholarship') {
                 return (new ScholarshipController)->serveScholarImage($filename);
