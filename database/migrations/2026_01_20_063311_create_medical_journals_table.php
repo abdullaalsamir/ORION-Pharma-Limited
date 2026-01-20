@@ -5,24 +5,27 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('board_of_directors', function (Blueprint $table) {
+        Schema::create('medical_journals', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('designation');
-            $table->string('slug');
-            $table->text('description');
-            $table->string('image_path');
+            $table->string('title');
+            $table->string('filename');
+            $table->integer('year');
             $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('board_of_directors');
+        Schema::dropIfExists('medical_journals');
     }
 };

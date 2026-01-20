@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
+use App\Http\Controllers\Admin\MedicalJournalController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -86,6 +87,13 @@ Route::prefix('admin')
             Route::post('/update-order', [BoardDirectorController::class, 'updateOrder'])->name('update-order');
         });
 
+        Route::prefix('journal-actions')->name('journals.')->group(function () {
+            Route::post('/store', [MedicalJournalController::class, 'store'])->name('store');
+            Route::put('/{medicalJournal}', [MedicalJournalController::class, 'update'])->name('update');
+            Route::delete('/{medicalJournal}', [MedicalJournalController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [MedicalJournalController::class, 'updateOrder'])->name('update-order');
+        });
+
         Route::get('/settings', function () {
             return view('admin.settings.index');
         })->name('settings');
@@ -100,6 +108,11 @@ Route::get('products/{generic}/{product}', [ProductController::class, 'frontendS
 
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
     ->where('filename', '^[0-9]+\.webp$');
+
+Route::get('{path}/{year}/{filename}', [MedicalJournalController::class, 'servePdf'])
+    ->where('path', '.*')
+    ->where('year', '^[0-9]{4}$')
+    ->where('filename', '.*\.pdf$');
 
 Route::get('{path}/{filename}', [PageController::class, 'image'])
     ->where('path', '.*')

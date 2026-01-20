@@ -176,6 +176,10 @@ class MenuController extends Controller
             return (new BoardDirectorController)->index();
         }
 
+        if ($menu->slug === 'medical-journals') {
+            return (new MedicalJournalController)->index();
+        }
+
         if ($menu->slug === 'products') {
             return (new ProductController)->index();
         }

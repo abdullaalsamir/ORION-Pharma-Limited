@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
+use App\Http\Controllers\Admin\MedicalJournalController;
 
 class PageController extends Controller
 {
@@ -47,6 +48,10 @@ class PageController extends Controller
 
             if ($menu->slug === 'products') {
                 return (new ProductController)->frontendIndex($menu);
+            }
+
+            if ($menu->slug === 'medical-journals') {
+                return (new MedicalJournalController)->frontendIndex($menu);
             }
 
             abort_if($menu->children()->exists(), 404);
