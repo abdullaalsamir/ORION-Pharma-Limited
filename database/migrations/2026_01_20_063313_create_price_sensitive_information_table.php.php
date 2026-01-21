@@ -5,27 +5,22 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('medical_journals', function (Blueprint $table) {
+        Schema::create('price_sensitive_information', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('filename');
-            $table->integer('year');
+            $table->text('description')->nullable();
+            $table->date('publication_date');
             $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('medical_journals');
+        Schema::dropIfExists('price_sensitive_information');
     }
 };

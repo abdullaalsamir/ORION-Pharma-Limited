@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
 use App\Http\Controllers\Admin\MedicalJournalController;
+use App\Http\Controllers\Admin\PriceSensitiveInformationController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -94,6 +95,13 @@ Route::prefix('admin')
             Route::post('/update-order', [MedicalJournalController::class, 'updateOrder'])->name('update-order');
         });
 
+        Route::prefix('price-sensitive-information-actions')->name('price-sensitive-information.')->group(function () {
+            Route::post('/store', [PriceSensitiveInformationController::class, 'store'])->name('store');
+            Route::put('/{priceSensitiveInformation}', [PriceSensitiveInformationController::class, 'update'])->name('update');
+            Route::delete('/{priceSensitiveInformation}', [PriceSensitiveInformationController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [PriceSensitiveInformationController::class, 'updateOrder'])->name('update-order');
+        });
+
         Route::get('/settings', function () {
             return view('admin.settings.index');
         })->name('settings');
@@ -112,6 +120,10 @@ Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
 Route::get('{path}/{year}/{filename}', [MedicalJournalController::class, 'servePdf'])
     ->where('path', '.*')
     ->where('year', '^[0-9]{4}$')
+    ->where('filename', '.*\.pdf$');
+
+Route::get('{path}/{filename}', [PriceSensitiveInformationController::class, 'servePdf'])
+    ->where('path', '.*price-sensitive-information')
     ->where('filename', '.*\.pdf$');
 
 Route::get('{path}/{filename}', [PageController::class, 'image'])

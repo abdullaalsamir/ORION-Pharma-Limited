@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ScholarshipController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
 use App\Http\Controllers\Admin\MedicalJournalController;
+use App\Http\Controllers\Admin\PriceSensitiveInformationController;
 
 class PageController extends Controller
 {
@@ -33,25 +34,23 @@ class PageController extends Controller
             if ($menu->is_multifunctional && $menu->slug === 'csr-list') {
                 return (new CsrController)->frontendIndex($menu);
             }
-
             if ($menu->is_multifunctional && $menu->slug === 'news-and-announcements') {
                 return (new NewsController)->frontendIndex($menu);
             }
-
             if ($menu->slug === 'board-of-directors') {
                 return (new BoardDirectorController)->frontendIndex($menu);
             }
-
             if ($menu->slug === 'scholarship') {
                 return (new ScholarshipController)->frontendIndex($menu);
             }
-
             if ($menu->slug === 'products') {
                 return (new ProductController)->frontendIndex($menu);
             }
-
             if ($menu->slug === 'medical-journals') {
                 return (new MedicalJournalController)->frontendIndex($menu);
+            }
+            if ($menu->slug === 'price-sensitive-information') {
+                return (new PriceSensitiveInformationController)->frontendIndex($menu);
             }
 
             abort_if($menu->children()->exists(), 404);
@@ -64,6 +63,25 @@ class PageController extends Controller
 
         $parentMenu = Menu::all()->first(fn($m) => $m->full_slug === $parentPath);
 
+        if ($parentMenu && $parentMenu->is_multifunctional) {
+
+            if ($parentMenu->slug === 'price-sensitive-information' && str_ends_with($itemSlug, '.pdf')) {
+                return (new PriceSensitiveInformationController)->servePdf($parentPath, $itemSlug);
+            }
+
+            if ($parentMenu->slug === 'csr-list') {
+                return (new CsrController)->frontendShow($parentMenu, $itemSlug);
+            }
+
+            if ($parentMenu->slug === 'news-and-announcements') {
+                return (new NewsController)->frontendShow($parentMenu, $itemSlug);
+            }
+
+            if ($parentMenu->slug === 'board-of-directors') {
+                return (new BoardDirectorController)->frontendShow($parentMenu, $itemSlug);
+            }
+        }
+
         if (!$parentMenu) {
             $baseMenu = Menu::where('slug', 'products')->first();
             if ($baseMenu && count($segments) > 0 && $segments[0] === $baseMenu->slug) {
@@ -72,18 +90,6 @@ class PageController extends Controller
                     return (new ProductController)->frontendShow($genericSlug, $itemSlug, $baseMenu);
                 }
             }
-        }
-
-        if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'csr-list') {
-            return (new CsrController)->frontendShow($parentMenu, $itemSlug);
-        }
-
-        if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'news-and-announcements') {
-            return (new NewsController)->frontendShow($parentMenu, $itemSlug);
-        }
-
-        if ($parentMenu && $parentMenu->is_multifunctional && $parentMenu->slug === 'board-of-directors') {
-            return (new BoardDirectorController)->frontendShow($parentMenu, $itemSlug);
         }
 
         abort(404);

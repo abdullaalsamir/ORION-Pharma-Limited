@@ -180,6 +180,10 @@ class MenuController extends Controller
             return (new MedicalJournalController)->index();
         }
 
+        if ($menu->slug === 'price-sensitive-information') {
+            return (new PriceSensitiveInformationController)->index();
+        }
+
         if ($menu->slug === 'products') {
             return (new ProductController)->index();
         }
