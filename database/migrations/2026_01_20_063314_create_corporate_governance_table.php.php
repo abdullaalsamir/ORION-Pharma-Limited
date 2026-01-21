@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('price_sensitive_information', function (Blueprint $table) {
+        Schema::create('corporate_governance', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('filename');
@@ -21,6 +21,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('price_sensitive_information');
+        Schema::dropIfExists('corporate_governance');
     }
 };

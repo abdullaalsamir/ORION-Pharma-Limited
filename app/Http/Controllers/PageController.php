@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
 use App\Http\Controllers\Admin\MedicalJournalController;
 use App\Http\Controllers\Admin\PriceSensitiveInformationController;
+use App\Http\Controllers\Admin\CorporateGovernanceController;
 
 class PageController extends Controller
 {
@@ -52,6 +53,9 @@ class PageController extends Controller
             if ($menu->slug === 'price-sensitive-information') {
                 return (new PriceSensitiveInformationController)->frontendIndex($menu);
             }
+            if ($menu->slug === 'corporate-governance') {
+                return (new CorporateGovernanceController)->frontendIndex($menu);
+            }
 
             abort_if($menu->children()->exists(), 404);
             return view('layouts.app', compact('menu'));
@@ -67,6 +71,10 @@ class PageController extends Controller
 
             if ($parentMenu->slug === 'price-sensitive-information' && str_ends_with($itemSlug, '.pdf')) {
                 return (new PriceSensitiveInformationController)->servePdf($parentPath, $itemSlug);
+            }
+
+            if ($parentMenu->slug === 'corporate-governance' && str_ends_with($itemSlug, '.pdf')) {
+                return (new CorporateGovernanceController)->servePdf($parentPath, $itemSlug);
             }
 
             if ($parentMenu->slug === 'csr-list') {

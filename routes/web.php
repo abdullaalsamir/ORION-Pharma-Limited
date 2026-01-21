@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
 use App\Http\Controllers\Admin\MedicalJournalController;
 use App\Http\Controllers\Admin\PriceSensitiveInformationController;
+use App\Http\Controllers\Admin\CorporateGovernanceController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -102,6 +103,13 @@ Route::prefix('admin')
             Route::post('/update-order', [PriceSensitiveInformationController::class, 'updateOrder'])->name('update-order');
         });
 
+        Route::prefix('corporate-governance')->name('corporate-governance.')->group(function () {
+            Route::post('/store', [CorporateGovernanceController::class, 'store'])->name('store');
+            Route::put('/{corporateGovernance}', [CorporateGovernanceController::class, 'update'])->name('update');
+            Route::delete('/{corporateGovernance}', [CorporateGovernanceController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [CorporateGovernanceController::class, 'updateOrder'])->name('update-order');
+        });
+
         Route::get('/settings', function () {
             return view('admin.settings.index');
         })->name('settings');
@@ -124,6 +132,10 @@ Route::get('{path}/{year}/{filename}', [MedicalJournalController::class, 'serveP
 
 Route::get('{path}/{filename}', [PriceSensitiveInformationController::class, 'servePdf'])
     ->where('path', '.*price-sensitive-information')
+    ->where('filename', '.*\.pdf$');
+
+Route::get('{path}/{filename}', [CorporateGovernanceController::class, 'servePdf'])
+    ->where('path', '.*corporate-governance')
     ->where('filename', '.*\.pdf$');
 
 Route::get('{path}/{filename}', [PageController::class, 'image'])
