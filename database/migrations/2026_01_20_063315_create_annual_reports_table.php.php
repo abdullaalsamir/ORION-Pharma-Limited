@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('corporate_governance', function (Blueprint $table) {
+        Schema::create('annual_reports', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('filename');
@@ -21,6 +21,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('corporate_governance');
+        Schema::dropIfExists('annual_reports');
     }
 };

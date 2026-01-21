@@ -184,6 +184,10 @@ class MenuController extends Controller
             return (new PriceSensitiveInformationController)->index();
         }
 
+        if ($menu->slug === 'annual-reports') {
+            return (new AnnualReportsController)->index();
+        }
+
         if ($menu->slug === 'corporate-governance') {
             return (new CorporateGovernanceController)->index();
         }
