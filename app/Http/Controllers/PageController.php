@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
 use App\Http\Controllers\Admin\MedicalJournalController;
 use App\Http\Controllers\Admin\PriceSensitiveInformationController;
+use App\Http\Controllers\Admin\QuarterlyReportsController;
 use App\Http\Controllers\Admin\AnnualReportsController;
 use App\Http\Controllers\Admin\CorporateGovernanceController;
 
@@ -54,6 +55,9 @@ class PageController extends Controller
             if ($menu->slug === 'price-sensitive-information') {
                 return (new PriceSensitiveInformationController)->frontendIndex($menu);
             }
+            if ($menu->slug === 'quarterly-reports') {
+                return (new QuarterlyReportsController)->frontendIndex($menu);
+            }
             if ($menu->slug === 'annual-reports') {
                 return (new AnnualReportsController)->frontendIndex($menu);
             }
@@ -75,6 +79,10 @@ class PageController extends Controller
 
             if ($parentMenu->slug === 'price-sensitive-information' && str_ends_with($itemSlug, '.pdf')) {
                 return (new PriceSensitiveInformationController)->servePdf($parentPath, $itemSlug);
+            }
+
+            if ($parentMenu->slug === 'quarterly-reports' && str_ends_with($itemSlug, '.pdf')) {
+                return (new QuarterlyReportsController)->servePdf($parentPath, $itemSlug);
             }
 
             if ($parentMenu->slug === 'annual-reports' && str_ends_with($itemSlug, '.pdf')) {

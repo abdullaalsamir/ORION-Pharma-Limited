@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\BoardDirectorController;
 use App\Http\Controllers\Admin\MedicalJournalController;
 use App\Http\Controllers\Admin\PriceSensitiveInformationController;
+use App\Http\Controllers\Admin\QuarterlyReportsController;
 use App\Http\Controllers\Admin\AnnualReportsController;
 use App\Http\Controllers\Admin\CorporateGovernanceController;
 
@@ -104,6 +105,13 @@ Route::prefix('admin')
             Route::post('/update-order', [PriceSensitiveInformationController::class, 'updateOrder'])->name('update-order');
         });
 
+        Route::prefix('quarterly-reports-actions')->name('quarterly-reports.')->group(function () {
+            Route::post('/store', [QuarterlyReportsController::class, 'store'])->name('store');
+            Route::put('/{quarterlyReports}', [QuarterlyReportsController::class, 'update'])->name('update');
+            Route::delete('/{quarterlyReports}', [QuarterlyReportsController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [QuarterlyReportsController::class, 'updateOrder'])->name('update-order');
+        });
+
         Route::prefix('annual-reports-actions')->name('annual-reports.')->group(function () {
             Route::post('/store', [AnnualReportsController::class, 'store'])->name('store');
             Route::put('/{annualReports}', [AnnualReportsController::class, 'update'])->name('update');
@@ -140,6 +148,10 @@ Route::get('{path}/{year}/{filename}', [MedicalJournalController::class, 'serveP
 
 Route::get('{path}/{filename}', [PriceSensitiveInformationController::class, 'servePdf'])
     ->where('path', '.*price-sensitive-information')
+    ->where('filename', '.*\.pdf$');
+
+Route::get('{path}/{filename}', [QuarterlyReportsController::class, 'servePdf'])
+    ->where('path', '.*quarterly-reports')
     ->where('filename', '.*\.pdf$');
 
 Route::get('{path}/{filename}', [AnnualReportsController::class, 'servePdf'])
