@@ -255,6 +255,12 @@
                 </li>
             @endforeach
             <li>
+                <a href="{{ route('admin.footer') }}" class="{{ request()->is('admin/footer*') ? 'active' : '' }}">
+                    <i class="fas fa-socks"></i>
+                    <span>Footer</span>
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.settings') }}" class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>

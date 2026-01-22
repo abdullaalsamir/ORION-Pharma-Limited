@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\HalfYearlyReportsController;
 use App\Http\Controllers\Admin\QuarterlyReportsController;
 use App\Http\Controllers\Admin\AnnualReportsController;
 use App\Http\Controllers\Admin\CorporateGovernanceController;
+use App\Http\Controllers\Admin\ProductComplaintController;
 
 class PageController extends Controller
 {
@@ -67,6 +68,9 @@ class PageController extends Controller
             }
             if ($menu->slug === 'corporate-governance') {
                 return (new CorporateGovernanceController)->frontendIndex($menu);
+            }
+            if ($menu->slug === 'product-complaint') {
+                return (new ProductComplaintController)->frontendIndex($menu);
             }
 
             abort_if($menu->children()->exists(), 404);

@@ -18,6 +18,8 @@ use App\Http\Controllers\Admin\HalfYearlyReportsController;
 use App\Http\Controllers\Admin\QuarterlyReportsController;
 use App\Http\Controllers\Admin\AnnualReportsController;
 use App\Http\Controllers\Admin\CorporateGovernanceController;
+use App\Http\Controllers\Admin\ProductComplaintController;
+use App\Http\Controllers\Admin\FooterController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -134,6 +136,13 @@ Route::prefix('admin')
             Route::post('/update-order', [CorporateGovernanceController::class, 'updateOrder'])->name('update-order');
         });
 
+        Route::prefix('product-complaint-actions')->name('complaint.')->group(function () {
+            Route::delete('/{complaint}', [ProductComplaintController::class, 'delete'])->name('delete');
+        });
+
+        Route::get('/footer', [FooterController::class, 'index'])->name('footer');
+        Route::post('/footer/update', [FooterController::class, 'update'])->name('footer.update');
+
         Route::get('/settings', function () {
             return view('admin.settings.index');
         })->name('settings');
@@ -142,6 +151,7 @@ Route::prefix('admin')
     });
 
 Route::get('/', [PageController::class, 'home'])->name('home');
+
 
 Route::get('products/{generic}/{product}', [ProductController::class, 'frontendShow'])
     ->where('product', '^[a-zA-Z0-9-]+$');
@@ -177,6 +187,9 @@ Route::get('{path}/{filename}', [CorporateGovernanceController::class, 'servePdf
 Route::get('{path}/{filename}', [PageController::class, 'image'])
     ->where('path', '.*')
     ->where('filename', '^[a-zA-Z0-9-]+\.webp$');
+
+Route::post('/product-complaint/submit', [ProductComplaintController::class, 'store'])
+    ->name('complaint.submit');
 
 Route::get('{slug}', [PageController::class, 'page'])
     ->where('slug', '.*');

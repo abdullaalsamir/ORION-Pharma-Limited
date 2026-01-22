@@ -204,6 +204,10 @@ class MenuController extends Controller
             return (new ProductController)->index();
         }
 
+        if ($menu->slug === 'product-complaint') {
+            return (new ProductComplaintController)->index();
+        }
+
         if (view()->exists("admin.{$slug}.index")) {
             $controllerName = 'App\\Http\\Controllers\\Admin\\' . Str::studly($slug) . 'Controller';
             if (class_exists($controllerName)) {
