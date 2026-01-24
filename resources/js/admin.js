@@ -1,9 +1,11 @@
 import './bootstrap';
-import { initClockAndGreeting } from './admin/common';
+import * as Turbo from "@hotwired/turbo";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import { initLayoutUI, restoreSidebarScroll } from './admin/common';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const adminName = document.body.dataset.adminName;
-    if (adminName) {
-        initClockAndGreeting(adminName);
-    }
+Turbo.start();
+
+document.addEventListener('turbo:load', () => {
+    initLayoutUI();
+    restoreSidebarScroll();
 });
