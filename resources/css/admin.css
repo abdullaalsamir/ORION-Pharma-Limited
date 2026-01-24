@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+    --color-admin-blue: #0054a6;
+    --color-admin-hover: #003f7d;
+    --color-accent: #fbc531;
+}
+
+@layer base {
+    body {
+        @apply bg-slate-50 text-slate-900 antialiased;
+    }
+}
