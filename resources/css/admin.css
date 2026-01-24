@@ -8,30 +8,91 @@
 }
 
 @layer base {
-    body {
-        @apply font-sans text-base bg-slate-50 text-slate-900 antialiased;
+    body { 
+        @apply font-sans text-base bg-slate-50 text-slate-900 antialiased h-screen overflow-hidden; 
     }
-
-    h1 {
-        @apply text-xl font-bold text-slate-800 tracking-tight mb-6;
-    }
-
-    h2 {
-        @apply text-sm font-semibold text-slate-500 tracking-wider mb-4;
+    h1 { 
+        @apply text-xl font-bold text-slate-800 tracking-tight; 
     }
 }
 
-@layer utilities {
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
+@layer components {
+    .admin-card { 
+        @apply flex flex-col h-full bg-white rounded-2xl border border-slate-200 overflow-hidden; 
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        @apply bg-transparent;
+    .admin-card-header { 
+        @apply px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4 bg-white shrink-0; 
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-slate-400/40 rounded-full;
+    .admin-card-body { 
+        @apply p-6 flex-1 overflow-y-auto bg-white; 
     }
-    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-        @apply bg-slate-400/50;
+
+    .btn-primary { 
+        @apply bg-admin-blue hover:bg-admin-hover text-white px-4 py-2 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer border-none shadow-lg shadow-blue-900/10; 
     }
+    .btn-icon { 
+        @apply p-2 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-admin-blue transition-all cursor-pointer border-none; 
+    }
+    .btn-danger { 
+        @apply p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all cursor-pointer border-none; 
+    }
+
+    .badge { 
+        @apply px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border inline-block; 
+    }
+    .badge-success { @apply bg-emerald-50 text-emerald-600 border-emerald-100; }
+    .badge-danger { @apply bg-red-50 text-red-600 border-red-100; }
+    .badge-info { @apply bg-sky-50 text-sky-600 border-sky-100; }
+    .badge-purple { @apply bg-purple-50 text-purple-600 border-purple-100; }
+
+    .input-field { 
+        @apply px-4 py-2 rounded-xl border border-slate-200 focus:border-admin-blue outline-none transition-all placeholder:text-slate-400 text-sm bg-white; 
+    }
+
+    .modal-overlay { 
+        @apply fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300; 
+    }
+    .modal-overlay.active { 
+        @apply opacity-100 visible; 
+    }
+    .modal-content { 
+        @apply bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-8 transform translate-y-8 transition-all duration-300; 
+    }
+    .modal-overlay.active .modal-content { 
+        @apply translate-y-0; 
+    }
+
+    .toggle-switch {
+        @apply relative inline-flex items-center cursor-pointer;
+    }
+    .toggle-switch input {
+        @apply sr-only;
+    }
+    .toggle-bg {
+        @apply w-11 h-6 bg-slate-200 rounded-full transition-all relative 
+               after:content-[''] after:absolute after:top-0.5 after:left-0.5 
+               after:bg-white after:border-gray-300 after:border after:rounded-full 
+               after:h-5 after:w-5 after:transition-all;
+    }
+    .toggle-switch input:checked ~ .toggle-bg {
+        @apply bg-admin-blue;
+    }
+    .toggle-switch input:checked ~ .toggle-bg::after {
+        @apply translate-x-full border-white;
+    }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
 }

@@ -108,7 +108,7 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <main class="flex-1 overflow-hidden p-4">
             @yield('content')
         </main>
     </div>

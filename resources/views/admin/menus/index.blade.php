@@ -1,297 +1,115 @@
 @extends('admin.layouts.app')
-
-@section('title', 'Menus')
+@section('title', 'Menu Management')
 
 @section('content')
-    <div class="card">
-
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-            <div style="display:flex;align-items:center;gap:12px;">
-                <div>
-                    <h3 style="margin:0 0 4px 0;">Menu Management</h3>
-                    <small style="color:#666">Create and organize site menus, and it's childs.</small>
-                </div>
+    <div class="admin-card">
+        <div class="admin-card-header items-start!">
+            <div class="flex flex-col">
+                <h1>Menu Management</h1>
+                <p class="text-xs text-slate-400 font-medium">Organize hierarchical site navigation</p>
             </div>
 
-            <form method="POST" action="{{ route('admin.menus.store') }}" class="add-menu-form"
-                style="display:flex;align-items:center;gap:8px;">
+            <form method="POST" action="{{ route('admin.menus.store') }}"
+                class="flex items-center gap-3 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
                 @csrf
-                <input type="text" name="name" placeholder="Menu name" required
-                    style="padding:9px 12px;border:1px solid #e6e9ee;border-radius:6px;min-width:180px;">
-                <select name="parent_id" style="padding:9px 12px;border:1px solid #e6e9ee;border-radius:6px;">
+                <input type="text" name="name" placeholder="Menu Name..." required class="input-field h-10! w-48">
+
+                <select name="parent_id" class="input-field h-10! w-40">
                     <option value="">⁝⁝⁝ Main Menu ⁝⁝⁝</option>
                     @foreach($menus as $menu)
                         <option value="{{ $menu->id }}">{{ $menu->name }}</option>
-                        @foreach($menu->children as $child)
-                            <option value="{{ $child->id }}" style="color: gray;">— {{ $child->name }}</option>
-                        @endforeach
                     @endforeach
                 </select>
-                <div class="segmented-control">
-                    <input type="radio" name="is_multifunctional" value="0" id="type-functional" checked>
-                    <label for="type-functional">Functional</label>
 
-                    <input type="radio" name="is_multifunctional" value="1" id="type-multi">
-                    <label for="type-multi">Multifunctional</label>
+                <div class="flex bg-white p-1 rounded-xl border border-slate-200 h-10 items-center">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="is_multifunctional" value="0" checked class="peer sr-only">
+                        <span
+                            class="px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 peer-checked:bg-admin-blue peer-checked:text-white transition-all uppercase">Functional</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="is_multifunctional" value="1" class="peer sr-only">
+                        <span
+                            class="px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 peer-checked:bg-admin-blue peer-checked:text-white transition-all uppercase">Multi</span>
+                    </label>
                 </div>
-                <button title="Add"
-                    style="background:#0a3d62;border:none;color:#fff;padding:9px 11px;border-radius:6px;cursor:pointer;">
-                    <i class="fas fa-plus"></i>
+
+                <button type="submit" class="btn-primary h-10!">
+                    <i class="fas fa-plus"></i> Add Menu
                 </button>
             </form>
         </div>
 
-        <div class="card-body" style="margin-top:18px; flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-            <div class="menu-tree-wrapper">
-                <ul class="menu-tree">
-                    <li class="fixed-menu-item">
-                        <div class="menu-card">
-                            <div class="menu-left">
-                                <div style="margin-left:67px">
-                                    <div class="menu-title">{{ $homeMenu->name }}</div>
-                                    <div class="small-note">System Default Menu</div>
-                                </div>
-                            </div>
+        <div class="admin-card-body custom-scrollbar bg-slate-50/20">
+            <ul id="menu-sortable" class="nested-sortable-list space-y-4">
+                <li class="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between opacity-60">
+                    <div class="flex items-center gap-4 pl-10">
+                        <span class="font-bold text-slate-700">{{ $homeMenu->name }}</span>
+                        <span class="badge badge-info">System Default</span>
+                    </div>
+                </li>
 
-                            <div style="margin-right:84px; display: flex; align-items: center; gap: 10px;">
-                                <span class="functional-badge type-functional">Functional</span>
-                                <span class="menu-badge">Active</span>
-                            </div>
-                        </div>
-                    </li>
-
-                    @foreach($menus as $menu)
-                        @include('admin.menus.partials.menu-item', ['menu' => $menu])
-                    @endforeach
-                </ul>
-            </div>
+                @foreach($menus as $menu)
+                    @include('admin.menus.partials.menu-item', ['menu' => $menu])
+                @endforeach
+            </ul>
         </div>
     </div>
 
-    <div id="editModal" class="modal-overlay">
+    <div id="editModal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button type="button" class="modal-close" onclick="closeModal()">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="flex justify-between items-center mb-8 pb-2 border-b border-slate-100">
+                <h1 class="mb-0!">Edit Menu Item</h1>
+                <button onclick="closeModal()" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-            <h3 style="margin:0 0 12px 0;color:#0a3d62">Edit Menu</h3>
+            <form method="POST" id="editForm" class="space-y-6">
+                @csrf @method('PUT')
 
-            <form method="POST" id="editForm" style="display:flex;flex-direction:column;gap:10px;">
-                @csrf
-                @method('PUT')
-
-                <label style="font-size:13px;color:#555">Name</label>
-                <input type="text" name="name" id="editName" required
-                    style="padding:10px;border:1px solid #e6e9ee;border-radius:6px;">
-
-                <label style="font-size:13px;color:#555">Parent</label>
-                <select name="parent_id" id="editParent" style="padding:10px;border:1px solid #e6e9ee;border-radius:6px;">
-                    <option value="">⁝⁝⁝ Main Menu ⁝⁝⁝</option>
-                    @foreach($menus as $m)
-                        <option value="{{ $m->id }}" data-active="{{ $m->is_active ? '1' : '0' }}">{{ $m->name }}</option>
-                        @foreach($m->children as $c)
-                            <option value="{{ $c->id }}" data-active="{{ $c->is_active ? '1' : '0' }}" style="color: gray;">
-                                — {{ $c->name }}
-                            </option>
-                        @endforeach
-                    @endforeach
-                </select>
-
-                <label style="font-size:13px;color:#555">Menu Type</label>
-                <div class="segmented-control" style="width: 100%; margin-bottom: 10px;">
-                    <input type="radio" name="is_multifunctional" value="0" id="edit-type-functional">
-                    <label for="edit-type-functional">Functional</label>
-
-                    <input type="radio" name="is_multifunctional" value="1" id="edit-type-multi">
-                    <label for="edit-type-multi">Multifunctional</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Menu Name</label>
+                        <input type="text" name="name" id="editName" required class="input-field">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Parent Category</label>
+                        <select name="parent_id" id="editParent" class="input-field">
+                            <option value="">⁝⁝ Main Menu ⁝⁝⁝</option>
+                            @foreach($menus as $m)
+                                <option value="{{ $m->id }}">{{ $m->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
-                <label style="display:flex;align-items:center;gap:10px;margin-top:10px;">
-                    <div class="toggle-switch">
-                        <input type="checkbox" name="is_active" id="editActive">
-                        <span class="slider"></span>
-                    </div>
-                    <span id="toggleLabel" style="font-weight:600;"></span>
-                </label>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="toggleLabel" class="...">Active</span>
+                    </label>
 
-                <div style="display:flex;gap:8px;justify-content:flex-end;">
-                    <button type="submit"
-                        style="background:#0a3d62;color:#fff;border:none;padding:9px 14px;border-radius:8px;cursor:pointer;transition:0.3s;"
-                        onmouseover="this.style.background='#1e6091'" onmouseout="this.style.background='#0a3d62'"
-                        onmousedown="this.style.background='#074173'" onmouseup="this.style.background='#1e6091'">
-                        Update
-                    </button>
+                    <div class="flex bg-white p-1 rounded-xl border border-slate-200">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="is_multifunctional" value="0" id="edit-type-functional"
+                                class="peer sr-only">
+                            <span
+                                class="px-5 py-2 rounded-lg text-[10px] font-bold text-slate-400 peer-checked:bg-admin-blue peer-checked:text-white transition-all uppercase">Functional</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="is_multifunctional" value="1" id="edit-type-multi"
+                                class="peer sr-only">
+                            <span
+                                class="px-5 py-2 rounded-lg text-[10px] font-bold text-slate-400 peer-checked:bg-admin-blue peer-checked:text-white transition-all uppercase">Multi</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="btn-primary px-12! h-12!">Update Menu
+                        Item</button>
                 </div>
             </form>
         </div>
     </div>
-
-    @include('admin.partials.css')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('editModal');
-            const form = document.getElementById('editForm');
-            const editParent = document.getElementById('editParent');
-            const toggleInput = document.getElementById('editActive');
-            const toggleLabel = document.getElementById('toggleLabel');
-
-            function updateToggleState() {
-                if (!editParent || !toggleInput) return;
-
-                const selectedOption = editParent.options[editParent.selectedIndex];
-                const isParentInactive = selectedOption.value !== "" && selectedOption.dataset.active === "0";
-
-                if (isParentInactive) {
-                    toggleInput.checked = false;
-                    toggleInput.disabled = true;
-                    toggleInput.parentElement.style.opacity = '0.5';
-                    toggleInput.parentElement.style.pointerEvents = 'none';
-                    toggleLabel.textContent = 'Inactive (Locked by Parent)';
-                    toggleLabel.style.color = '#c0392b';
-                } else {
-                    toggleInput.disabled = false;
-                    toggleInput.parentElement.style.opacity = '1';
-                    toggleInput.parentElement.style.pointerEvents = 'auto';
-                    toggleLabel.textContent = toggleInput.checked ? 'Active' : 'Inactive';
-                    toggleLabel.style.color = toggleInput.checked ? '#1e7a43' : '#c0392b';
-                }
-            }
-
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const currentId = this.dataset.id;
-                    form.action = `/admin/menus/${currentId}`;
-
-                    document.getElementById('editName').value = this.dataset.name;
-                    editParent.value = this.dataset.parent || '';
-                    toggleInput.checked = this.dataset.active == '1';
-
-                    Array.from(editParent.options).forEach(option => {
-                        if (option.value === currentId) {
-                            option.style.color = 'darkred';
-                            option.disabled = true;
-                        } else {
-                            const isSubmenu = option.text.includes('—');
-                            option.style.color = isSubmenu ? 'gray' : '';
-                            option.disabled = false;
-                        }
-                    });
-
-                    if (this.dataset.multi == '1') {
-                        document.getElementById('edit-type-multi').checked = true;
-                    } else {
-                        document.getElementById('edit-type-functional').checked = true;
-                    }
-
-                    updateToggleState();
-
-                    modal.style.display = 'flex';
-                    setTimeout(() => modal.classList.add('active'), 10);
-                });
-            });
-
-            editParent.addEventListener('change', updateToggleState);
-            toggleInput.addEventListener('change', updateToggleState);
-
-            window.closeModal = function () {
-                modal.classList.remove('active');
-                setTimeout(() => modal.style.display = 'none', 300);
-            };
-
-            document.querySelectorAll('.collapse-toggle').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const target = document.querySelector(this.dataset.target);
-                    if (!target) return;
-
-                    if (target.classList.contains('expanded')) {
-                        target.classList.remove('expanded');
-                        this.innerHTML = '<i class="fas fa-chevron-right"></i>';
-
-                        target.querySelectorAll('.nested').forEach(c => c.classList.remove('expanded'));
-                        target.querySelectorAll('.collapse-toggle').forEach(b => b.innerHTML = '<i class="fas fa-chevron-right"></i>');
-                    } else {
-                        target.classList.add('expanded');
-                        this.innerHTML = '<i class="fas fa-chevron-down"></i>';
-                    }
-                });
-            });
-
-            let draggedItem = null;
-            const allCards = document.querySelectorAll('.menu-card');
-
-            document.querySelectorAll('.drag-handle').forEach(handle => {
-                const card = handle.closest('.menu-card');
-                const item = card.closest('li');
-
-                handle.addEventListener('dragstart', (e) => {
-                    draggedItem = item;
-                    card.classList.add('dragging');
-                    e.dataTransfer.setData('text/plain', item.dataset.id);
-                });
-
-                handle.addEventListener('dragend', () => {
-                    card.classList.remove('dragging');
-                    allCards.forEach(c => c.classList.remove('drag-over-above', 'drag-over-below'));
-                    saveMenuOrder();
-                });
-            });
-
-            allCards.forEach(card => {
-                card.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    const item = card.closest('li');
-                    if (!draggedItem || draggedItem === item) return;
-
-                    const rect = card.getBoundingClientRect();
-                    const isAbove = e.clientY < rect.top + rect.height / 2;
-
-                    allCards.forEach(c => c.classList.remove('drag-over-above', 'drag-over-below'));
-                    card.classList.add(isAbove ? 'drag-over-above' : 'drag-over-below');
-                });
-
-                card.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    const item = card.closest('li');
-                    if (!draggedItem || draggedItem === item) return;
-
-                    const rect = card.getBoundingClientRect();
-                    const isAbove = e.clientY < rect.top + rect.height / 2;
-                    const parent = item.parentNode;
-
-                    if (isAbove) {
-                        parent.insertBefore(draggedItem, item);
-                    } else {
-                        parent.insertBefore(draggedItem, item.nextSibling);
-                    }
-                    draggedItem.dataset.parent = item.dataset.parent;
-                });
-            });
-
-            function saveMenuOrder() {
-                const menus = [];
-                function process(ul, parentId) {
-                    Array.from(ul.children).forEach((li, index) => {
-                        menus.push({
-                            id: li.dataset.id,
-                            parent_id: parentId,
-                            sort_order: index
-                        });
-                        const sub = li.querySelector(':scope > .nested > ul');
-                        if (sub) process(sub, li.dataset.id);
-                    });
-                }
-                process(document.querySelector('.menu-tree'), null);
-
-                fetch('{{ route("admin.menus.update-order") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ menus })
-                });
-            }
-        });
-    </script>
 @endsection
