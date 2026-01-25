@@ -168,7 +168,7 @@ Route::get('{path}/{filename}', [PriceSensitiveInformationController::class, 'se
     ->where('path', '.*price-sensitive-information')
     ->where('filename', '.*\.pdf$');
 
-Route::get('{path}/{filename}', [halfYearlyReportsController::class, 'servePdf'])
+Route::get('{path}/{filename}', [HalfYearlyReportsController::class, 'servePdf'])
     ->where('path', '.*half-yearly-reports')
     ->where('filename', '.*\.pdf$');
 

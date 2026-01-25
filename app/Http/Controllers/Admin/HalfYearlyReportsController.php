@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\halfYearlyReports;
+use App\Models\HalfYearlyReports;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class halfYearlyReportsController extends Controller
+class HalfYearlyReportsController extends Controller
 {
     public function index()
     {
         $menu = Menu::where('slug', 'half-yearly-reports')->firstOrFail();
-        $items = halfYearlyReports::orderBy('publication_date', 'desc')
+        $items = HalfYearlyReports::orderBy('publication_date', 'desc')
             ->orderBy('order', 'desc')
             ->get();
 
@@ -33,21 +33,21 @@ class halfYearlyReportsController extends Controller
         $slug = $this->generateUniqueFilename($request->title);
         $filename = $slug . '.pdf';
 
-        $request->file('pdf')->storeAs("half-yearly-reports", $filename, 'public');
+        $request->file('pdf')->storeAs('half-yearly-reports', $filename, 'public');
 
-        halfYearlyReports::create([
+        HalfYearlyReports::create([
             'title' => $request->title,
             'filename' => $filename,
             'description' => $request->description,
             'publication_date' => $request->publication_date,
             'is_active' => 1,
-            'order' => halfYearlyReports::max('order') + 1
+            'order' => HalfYearlyReports::max('order') + 1
         ]);
 
         return back()->with('success', 'Information added successfully');
     }
 
-    public function update(Request $request, halfYearlyReports $halfYearlyReports)
+    public function update(Request $request, HalfYearlyReports $halfYearlyReport)
     {
         $request->validate([
             'pdf' => 'nullable|mimes:pdf|max:51200',
@@ -56,21 +56,25 @@ class halfYearlyReportsController extends Controller
             'description' => 'nullable|string|max:550'
         ]);
 
-        $oldFilename = $halfYearlyReports->filename;
-        $slug = ($halfYearlyReports->title === $request->title)
+        $oldFilename = $halfYearlyReport->filename;
+
+        $slug = ($halfYearlyReport->title === $request->title)
             ? str_replace('.pdf', '', $oldFilename)
-            : $this->generateUniqueFilename($request->title, $halfYearlyReports->id);
+            : $this->generateUniqueFilename($request->title, $halfYearlyReport->id);
 
         $newFilename = $slug . '.pdf';
 
         if ($request->hasFile('pdf')) {
             Storage::disk('public')->delete("half-yearly-reports/{$oldFilename}");
-            $request->file('pdf')->storeAs("half-yearly-reports", $newFilename, 'public');
-        } elseif ($oldFilename != $newFilename) {
-            Storage::disk('public')->move("half-yearly-reports/{$oldFilename}", "half-yearly-reports/{$newFilename}");
+            $request->file('pdf')->storeAs('half-yearly-reports', $newFilename, 'public');
+        } elseif ($oldFilename !== $newFilename) {
+            Storage::disk('public')->move(
+                "half-yearly-reports/{$oldFilename}",
+                "half-yearly-reports/{$newFilename}"
+            );
         }
 
-        $halfYearlyReports->update([
+        $halfYearlyReport->update([
             'title' => $request->title,
             'filename' => $newFilename,
             'description' => $request->description,
@@ -84,15 +88,21 @@ class halfYearlyReportsController extends Controller
     public function updateOrder(Request $request)
     {
         foreach ($request->orders as $item) {
-            halfYearlyReports::where('id', $item['id'])->update(['order' => $item['order']]);
+            HalfYearlyReports::where('id', $item['id'])
+                ->update(['order' => $item['order']]);
         }
+
         return response()->json(['success' => true]);
     }
 
-    public function delete(halfYearlyReports $halfYearlyReports)
+    public function delete(HalfYearlyReports $halfYearlyReport)
     {
-        Storage::disk('public')->delete("half-yearly-reports/{$halfYearlyReports->filename}");
-        $halfYearlyReports->delete();
+        Storage::disk('public')->delete(
+            "half-yearly-reports/{$halfYearlyReport->filename}"
+        );
+
+        $halfYearlyReport->delete();
+
         return back()->with('success', 'Deleted successfully');
     }
 
@@ -101,14 +111,15 @@ class halfYearlyReportsController extends Controller
         $base = Str::slug(str_replace('&', 'and', $title));
         $slug = $base;
         $counter = 2;
+
         while (
-            halfYearlyReports::where('filename', $slug . '.pdf')
+            HalfYearlyReports::where('filename', $slug . '.pdf')
                 ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
                 ->exists()
         ) {
-            $slug = $base . '-' . $counter;
-            $counter++;
+            $slug = $base . '-' . $counter++;
         }
+
         return $slug;
     }
 
@@ -128,7 +139,7 @@ class halfYearlyReportsController extends Controller
 
     public function frontendIndex($menu)
     {
-        $items = halfYearlyReports::where('is_active', 1)
+        $items = HalfYearlyReports::where('is_active', 1)
             ->orderBy('publication_date', 'desc')
             ->orderBy('order', 'desc')
             ->get();
