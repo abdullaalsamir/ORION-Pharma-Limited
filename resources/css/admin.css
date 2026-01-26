@@ -34,10 +34,8 @@
     @apply px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4 bg-white shrink-0;
   }
   .admin-card-body {
-    @apply p-6 flex-1 overflow-y-scroll bg-white;
-    scrollbar-gutter: stable;
+  @apply p-6 flex-1 overflow-y-auto bg-white;
   }
-
   .btn-primary {
     @apply bg-admin-blue hover:bg-admin-hover text-white px-4 py-2 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer border-none;
   }
@@ -110,6 +108,29 @@
   .toggle-switch input:checked ~ .toggle-bg::after {
     @apply translate-x-8 border-white;
   }
+
+  .btn-toolbar {
+    @apply h-7 w-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 hover:border-admin-blue hover:text-admin-blue hover:bg-slate-50 transition-all cursor-pointer active:scale-90;
+  }
+
+   .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 9999px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }
 
 .tree-list {
@@ -117,7 +138,7 @@
 }
 
 .tree-list.expanded {
-  @apply opacity-100 max-h-[2000px] mt-3;
+  @apply opacity-100 max-h-500 mt-3;
   overflow: visible;
 }
 
@@ -154,18 +175,4 @@
 #root-menu-list > .tree-item::before,
 #root-menu-list > .tree-item::after {
   display: none !important;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
 }
