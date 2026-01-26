@@ -137,7 +137,7 @@
                                 {{ $item->medical_college }}
                             </td>
                             <td align="center">
-                                <img src="{{ asset('storage/' . $item->image_path) }}" class="list-photo">
+                                <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}" class="list-photo">
                             </td>
                             <td>
                                 <div class="action-cell">

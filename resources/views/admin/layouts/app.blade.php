@@ -38,7 +38,7 @@
 <body class="h-full flex bg-slate-50 overflow-hidden font-sans text-base antialiased"
     data-admin-name="{{ auth('admin')->user()->name }}">
 
-    <aside class="w-68 bg-admin-blue text-white flex flex-col shrink-0 z-20">
+    <aside class="w-70 bg-admin-blue text-white flex flex-col shrink-0 z-20">
         <div class="h-16 flex items-center justify-center border-b border-white/10 px-6">
             <h2 class="text-lg font-bold text-slate-200 tracking-tight mb-0">Admin Panel</h2>
         </div>

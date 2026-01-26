@@ -135,16 +135,26 @@ export function initPagesPage() {
 
         const applyFormatting = (type) => {
             const selectedText = editor.getSelectedText();
-            const range = editor.getSelectionRange();
+            
+            const toggleTag = (text, tagName) => {
+                const startTag = `<${tagName}>`;
+                const endTag = `</${tagName}>`;
+                
+                if (text.startsWith(startTag) && text.endsWith(endTag)) {
+                    return text.substring(startTag.length, text.length - endTag.length);
+                } else {
+                    return `${startTag}${text}${endTag}`;
+                }
+            };
 
             switch (type) {
-                case 'b': editor.insert(`<b>${selectedText}</b>`); break;
-                case 'i': editor.insert(`<i>${selectedText}</i>`); break;
-                case 'p': editor.insert(`<p>${selectedText}</p>`); break;
-                case 'h1': editor.insert(`<h1>${selectedText}</h1>`); break;
-                case 'h2': editor.insert(`<h2>${selectedText}</h2>`); break;
+                case 'b': editor.insert(toggleTag(selectedText, 'b')); break;
+                case 'i': editor.insert(toggleTag(selectedText, 'i')); break;
+                case 'p': editor.insert(toggleTag(selectedText, 'p')); break;
+                case 'h1': editor.insert(toggleTag(selectedText, 'h1')); break;
+                case 'h2': editor.insert(toggleTag(selectedText, 'h2')); break;
                 case 'br': 
-                    editor.insert(`<br>\n`);
+                    editor.insert(`<br>\n`); 
                     break;
                 case 'ul':
                 case 'ol':
