@@ -90,9 +90,9 @@
             <div id="greetingText" class="text-base font-medium"></div>
 
             <div class="hidden sm:flex items-center gap-2 bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100">
-                <i class="far fa-clock text-admin-blue text-xs"></i>
+                <i class="far fa-clock text-admin-blue text-sm"></i>
                 <span id="clock"
-                    class="text-xs font-mono font-bold text-slate-600 w-28 text-center tracking-widest uppercase">00:00:00
+                    class="text-sm font-mono font-bold text-slate-600 text-center tracking-widest uppercase">00:00:00
                     AM</span>
             </div>
 
