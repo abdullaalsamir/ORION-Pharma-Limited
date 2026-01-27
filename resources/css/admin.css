@@ -40,7 +40,7 @@
     @apply bg-admin-blue hover:bg-admin-hover text-white px-4 py-2 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer border-none;
   }
   .btn-success {
-    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer border-none shadow-lg shadow-emerald-900/10;
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer border-none;
   }
 
   .btn-icon {

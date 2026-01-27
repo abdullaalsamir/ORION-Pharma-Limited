@@ -86,7 +86,7 @@
             </div>
 
             <div class="flex justify-end pt-6">
-                <button id="savePage" class="btn-primary h-10!">Update Menu</button>
+                <button id="savePage" class="btn-primary h-10">Update Menu</button>
             </div>
         </div>
     </div>

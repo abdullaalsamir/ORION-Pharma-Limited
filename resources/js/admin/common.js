@@ -227,6 +227,118 @@ export function initPagesPage() {
     }
 }
 
+export function initBannersPage() {
+    const uploadForm = document.getElementById('uploadForm');
+    const editForm = document.getElementById('editForm');
+    
+    if (!document.querySelector('.leaf-menu-item')) return;
+
+    window.loadBanners = (menuId, el) => {
+        document.querySelectorAll('.leaf-menu-item').forEach(i => i.classList.remove('active', 'border-admin-blue', 'bg-slate-100'));
+        el.classList.add('active', 'border-admin-blue', 'bg-slate-100');
+        
+        window.currentMenuId = menuId;
+
+        fetch(`/admin/banners/fetch/${menuId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('imageArea').innerHTML = data.html;
+            });
+    };
+
+    window.openUploadModal = () => {
+        if (!window.currentMenuId) { alert("Please select a page first"); return; }
+        uploadForm.reset();
+        document.getElementById('uploadPreviewContainer').innerHTML = `
+            <i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>
+            <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Click to select 48:9 image</span>
+        `;
+        const modal = document.getElementById('uploadModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditModal = (id, name, fullSlug, isActive) => {
+        window.currentBannerId = id;
+        editForm.reset();
+        document.getElementById('editPreviewContainer').innerHTML = `<img src="/${fullSlug}/${name}?t=${Date.now()}" class="w-full h-full object-cover">`;
+        
+        const toggle = document.getElementById('editActiveToggle');
+        const lbl = document.getElementById('editStatusLabel');
+        toggle.checked = (isActive == 1);
+        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.closeModal = (id) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+    };
+
+    window.handlePreview = (input, containerId) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    window.deleteImage = (id) => {
+        if (confirm('Delete this banner permanently?')) {
+            fetch(`/admin/banners/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => {
+                const activeItem = document.querySelector('.leaf-menu-item.active');
+                if (activeItem) loadBanners(window.currentMenuId, activeItem);
+            });
+        }
+    };
+
+    if (uploadForm) {
+        uploadForm.onsubmit = function(e) {
+            e.preventDefault();
+            fetch(`/admin/banners/upload/${window.currentMenuId}`, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => { 
+                closeModal('uploadModal'); 
+                loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); 
+            });
+        };
+    }
+
+    if (editForm) {
+        editForm.onsubmit = function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            formData.append('is_active', document.getElementById('editActiveToggle').checked ? 1 : 0);
+            
+            fetch(`/admin/banners/${window.currentBannerId}`, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => { 
+                closeModal('editModal'); 
+                loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); 
+            });
+        };
+        
+        document.getElementById('editActiveToggle').onchange = function() {
+            document.getElementById('editStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
+        };
+    }
+}
+
 function saveMenuOrder() {
     const menus = [];
     const process = (ul, parentId) => {
