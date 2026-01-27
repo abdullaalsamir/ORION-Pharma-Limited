@@ -1,7 +1,7 @@
 import './bootstrap';
 import * as Turbo from "@hotwired/turbo";
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { initLayoutUI, restoreSidebarScroll, initTreeLogic, initMenuPage, initPagesPage, initBannersPage, initSlidersPage } from './admin/common';
+import { initLayoutUI, restoreSidebarScroll, initTreeLogic, initMenuPage, initPagesPage, initBannersPage, initSlidersPage, initProductsPage } from './admin/common';
 
 Turbo.start();
 
@@ -13,4 +13,5 @@ document.addEventListener('turbo:load', () => {
     initPagesPage();
     initBannersPage();
     initSlidersPage();
+    initProductsPage();
 });

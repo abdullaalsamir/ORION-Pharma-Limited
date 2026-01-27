@@ -478,3 +478,256 @@ export function initSlidersPage() {
         });
     }
 }
+
+export function initProductsPage() {
+    const genForm = document.getElementById('genForm');
+    const prodForm = document.getElementById('prodForm');
+    if (!genForm && !prodForm) return;
+
+    window.closeModal = (id) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+    };
+
+    const showInlineError = (inputId, errorId, message) => {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+        if (input) {
+            input.classList.add('border-red-500', 'bg-red-50');
+            input.classList.remove('border-slate-200', 'bg-white');
+        }
+        if (error) {
+            error.innerText = message;
+            error.classList.remove('hidden');
+        }
+    };
+
+    const clearInlineError = (inputId, errorId) => {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+        if (input) {
+            input.classList.remove('border-red-500', 'bg-red-50');
+            input.classList.add('border-slate-200', 'bg-white');
+        }
+        if (error) error.classList.add('hidden');
+    };
+
+    window.handlePreview = (input, containerId) => {
+        if (input.files && input.files[0]) {
+            const previewBox = document.getElementById('prodPreview');
+            const errorMsg = document.getElementById('prodImageError');
+            if (previewBox) {
+                previewBox.classList.remove('border-red-500', 'bg-red-50');
+                previewBox.classList.add('border-slate-200', 'bg-slate-50');
+            }
+            if (errorMsg) errorMsg.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    const updateSidebarSelection = (el) => {
+        document.querySelectorAll('.generic-list-item').forEach(item => {
+            item.classList.remove('border-admin-blue');
+            item.classList.add('bg-white', 'border-slate-200');
+            
+            const nameSpan = item.querySelector('.generic-name');
+            if (nameSpan) nameSpan.classList.remove('text-admin-blue');
+        });
+
+        el.classList.add('border-admin-blue');
+        el.classList.remove('bg-white', 'border-slate-200');
+
+        const activeNameSpan = el.querySelector('.generic-name');
+        if (activeNameSpan) activeNameSpan.classList.add('text-admin-blue');
+    };
+
+    const genNameInput = document.getElementById('genName');
+    if (genNameInput) genNameInput.oninput = () => clearInlineError('genName', 'genNameError');
+
+    window.loadProducts = (id, el) => {
+        updateSidebarSelection(el);
+        window.currentGenId = id;
+        fetch(`/admin/products-actions/fetch/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('productArea').innerHTML = data.html;
+            });
+    };
+
+    window.openGenericModal = () => {
+        window.currentEditGenericId = null;
+        genForm.reset();
+        clearInlineError('genName', 'genNameError');
+        document.getElementById('genTitle').innerText = "Add Generic";
+        document.getElementById('genActiveWrapper').classList.add('hidden');
+        document.getElementById('genSubmitBtn').innerText = "Save Generic";
+        const modal = document.getElementById('genericModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditGeneric = (g) => {
+        window.currentEditGenericId = g.id;
+        document.getElementById('genTitle').innerText = "Edit Generic";
+        document.getElementById('genName').value = g.name;
+        
+        const toggle = document.getElementById('genActive');
+        const lbl = document.getElementById('genStatusLabel');
+        toggle.checked = (g.is_active == 1);
+        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+
+        document.getElementById('genActiveWrapper').classList.remove('hidden');
+        document.getElementById('genSubmitBtn').innerText = "Save Changes";
+        const modal = document.getElementById('genericModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    const genActive = document.getElementById('genActive');
+    if(genActive) {
+        genActive.onchange = () => {
+            document.getElementById('genStatusLabel').innerText = genActive.checked ? 'Active' : 'Inactive';
+        };
+    }
+
+    if (genForm) {
+        genForm.onsubmit = function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const url = window.currentEditGenericId ? `/admin/products-actions/generic-update/${window.currentEditGenericId}` : `/admin/products-actions/generic-store`;
+            if (window.currentEditGenericId) formData.append('_method', 'PUT');
+            formData.set('is_active', document.getElementById('genActive').checked ? 1 : 0);
+
+            fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
+                .then(async res => {
+                    const data = await res.json();
+                    if (res.ok) window.location.reload();
+                    else {
+                        showInlineError('genName', 'genNameError', data.error || "Name already exists.");
+                    }
+                });
+        };
+    }
+
+    window.deleteGeneric = (id) => {
+        if (confirm('Delete this Generic and ALL its products?')) {
+            fetch(`/admin/products-actions/generic-delete/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
+                .then(res => res.json()).then(data => { if (data.success) window.location.reload(); });
+        }
+    };
+
+    const prodNameInput = document.getElementById('p_trade_name');
+    if (prodNameInput) prodNameInput.oninput = () => clearInlineError('p_trade_name', 'prodNameError');
+
+    window.openAddProduct = () => {
+        prodForm.reset();
+        prodForm.dataset.id = "";
+        clearInlineError('p_trade_name', 'prodNameError');
+        
+        const previewBox = document.getElementById('prodPreview');
+        const errorMsg = document.getElementById('prodImageError');
+        if (previewBox) {
+            previewBox.classList.remove('border-red-500', 'bg-red-50');
+            previewBox.classList.add('border-slate-200', 'bg-slate-50');
+        }
+        if (errorMsg) errorMsg.classList.add('hidden');
+        
+        document.getElementById('prodTitle').innerText = "Add Product";
+        document.getElementById('prodReplaceOverlay').classList.add('hidden');
+        document.getElementById('prodPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select Image</span>`;
+        document.getElementById('prodActiveWrapper').classList.add('opacity-0', 'pointer-events-none');
+        
+        const modal = document.getElementById('productModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditProduct = (p) => {
+        prodForm.reset();
+        prodForm.dataset.id = p.id;
+        clearInlineError('p_trade_name', 'prodNameError');
+
+        document.getElementById('prodTitle').innerText = "Edit Product";
+        document.getElementById('prodReplaceOverlay').classList.remove('hidden');
+        
+        const fields = ['trade_name', 'preparation', 'therapeutic_class', 'indications', 'dosage_admin', 'use_children', 'use_pregnancy_lactation', 'contraindications', 'precautions', 'side_effects', 'drug_interactions', 'high_risk', 'overdosage', 'storage', 'presentation', 'how_supplied', 'commercial_pack', 'packaging', 'official_specification'];
+        fields.forEach(f => {
+            const el = document.getElementById('p_' + f);
+            if (el) el.value = p[f] || '';
+        });
+
+        const toggle = document.getElementById('p_active');
+        const lbl = document.getElementById('prodStatusLabel');
+        toggle.checked = (p.is_active == 1);
+        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+
+        document.getElementById('prodPreview').innerHTML = `<img src="/storage/${p.image_path}" class="w-full h-full object-cover">`;
+        document.getElementById('prodActiveWrapper').classList.remove('opacity-0', 'pointer-events-none');
+        
+        const modal = document.getElementById('productModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    const pActive = document.getElementById('p_active');
+    if(pActive) {
+        pActive.onchange = () => {
+            document.getElementById('prodStatusLabel').innerText = pActive.checked ? 'Active' : 'Inactive';
+        };
+    }
+
+    if (prodForm) {
+        prodForm.onsubmit = function(e) {
+            e.preventDefault();
+            
+            const id = this.dataset.id;
+            const fileInput = document.getElementById('prodInput');
+            const previewBox = document.getElementById('prodPreview');
+            const errorMsg = document.getElementById('prodImageError');
+
+            if (!id && fileInput.files.length === 0) {
+                previewBox.classList.add('border-red-500', 'bg-red-50');
+                previewBox.classList.remove('border-slate-200', 'bg-slate-50');
+                if (errorMsg) errorMsg.classList.remove('hidden');
+                prodForm.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            const url = id ? `/admin/products-actions/product-update/${id}` : `/admin/products-actions/product-store/${window.currentGenId}`;
+            const formData = new FormData(this);
+            if (id) {
+                formData.append('_method', 'PUT');
+                formData.append('is_active', document.getElementById('p_active').checked ? 1 : 0);
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (res.ok) {
+                    closeModal('productModal'); 
+                    loadProducts(window.currentGenId, document.querySelector('.generic-list-item.active'));
+                } else {
+                    showInlineError('p_trade_name', 'prodNameError', data.error || "Trade name must be unique.");
+                    prodForm.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        };
+    }
+
+    window.deleteProduct = (id) => {
+        if (confirm('Delete product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
+            .then(() => loadProducts(window.currentGenId, document.querySelector('.generic-list-item.active')));
+    };
+}
