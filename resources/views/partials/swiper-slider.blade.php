@@ -16,12 +16,14 @@
                                 <p class="text-lg opacity-90">
                                     {{ $slider->description }}
                                 </p>
-                                <div class="pt-4">
-                                    <a href="{{ $slider->link_url }}"
-                                        class="bg-orion-blue hover:bg-white hover:text-orion-blue text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 inline-block">
-                                        {{ $slider->button_text }}
-                                    </a>
-                                </div>
+                                @if($slider->link_url)
+                                    <div class="pt-4">
+                                        <a href="{{ url($slider->link_url) }}"
+                                            class="bg-orion-blue hover:bg-white hover:text-orion-blue text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 inline-block">
+                                            {{ $slider->button_text }}
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

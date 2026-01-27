@@ -121,6 +121,26 @@ export function initMenuPage() {
     if(editActive) editActive.onchange = () => lbl.innerText = editActive.checked ? 'Active' : 'Inactive';
 }
 
+function saveMenuOrder() {
+    const menus = [];
+    const process = (ul, parentId) => {
+        Array.from(ul.children).forEach((li, index) => {
+            if (li.dataset.id) {
+                menus.push({ id: li.dataset.id, parent_id: parentId, sort_order: index });
+                const subUl = li.querySelector('.menu-sortable-list');
+                if (subUl) process(subUl, li.dataset.id);
+            }
+        });
+    };
+    const root = document.getElementById('root-menu-list');
+    if (root) process(root, null);
+    fetch('/admin/menus/update-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+        body: JSON.stringify({ menus })
+    });
+}
+
 export function initPagesPage() {
     const modal = document.getElementById('pageModal');
     const editorEl = document.getElementById('ace-editor');
@@ -339,22 +359,122 @@ export function initBannersPage() {
     }
 }
 
-function saveMenuOrder() {
-    const menus = [];
-    const process = (ul, parentId) => {
-        Array.from(ul.children).forEach((li, index) => {
-            if (li.dataset.id) {
-                menus.push({ id: li.dataset.id, parent_id: parentId, sort_order: index });
-                const subUl = li.querySelector('.menu-sortable-list');
-                if (subUl) process(subUl, li.dataset.id);
+export function initSlidersPage() {
+    const list = document.getElementById('slider-list');
+    const addForm = document.querySelector('#addModal form');
+    const editForm = document.getElementById('editForm');
+    if (!list && !addForm && !editForm) return;
+
+    window.closeModal = (id) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+    };
+
+    window.handlePreview = (input, containerId) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    window.updateCount = (el, counterId, limit) => {
+        const counter = document.getElementById(counterId);
+        if (counter) {
+            const len = el.value.length;
+            counter.innerText = `${len}/${limit}`;
+            if (len >= limit) {
+                counter.className = 'absolute right-3 bottom-2.5 text-[9px] text-red-500 font-bold';
+            } else {
+                counter.className = 'absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold';
+            }
+        }
+    };
+
+    window.openAddModal = () => {
+        addForm.reset();
+        document.getElementById('addPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Click to select 23:9 image</span>`;
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditModal = (slider) => {
+        window.currentSliderId = slider.id;
+        document.getElementById('editH1').value = slider.header_1;
+        document.getElementById('editH2').value = slider.header_2;
+        document.getElementById('editDesc').value = slider.description;
+        document.getElementById('editBT').value = slider.button_text || 'Explore More';
+        document.getElementById('editLink').value = slider.link_url || '';
+        document.getElementById('editActive').checked = slider.is_active == 1;
+        document.getElementById('sliderStatusLabel').innerText = slider.is_active == 1 ? 'Active' : 'Inactive';
+        document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}" class="w-full h-full object-cover">`;
+
+        ['editH1', 'editH2', 'editDesc', 'editBT'].forEach(id => {
+            const el = document.getElementById(id);
+            const counterId = id.replace('edit', 'editC').replace('H1', '1').replace('H2', '2').replace('Desc', 'D').replace('BT', 'BT');
+            updateCount(el, counterId, el.getAttribute('maxlength'));
+        });
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    const submitForm = (form, url, isUpdate = false) => {
+        const formData = new FormData(form);
+        if (isUpdate) {
+            formData.append('_method', 'PUT');
+            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+        })
+        .then(async res => {
+            const data = await res.json();
+            if (res.ok) Turbo.visit(window.location.href);
+            else alert("Error: " + (data.error || "Validation failed"));
+        })
+        .catch(() => alert("Server error occurred"));
+    };
+
+    if (addForm) {
+        addForm.onsubmit = (e) => {
+            e.preventDefault();
+            submitForm(addForm, '/admin/sliders', false);
+        };
+    }
+
+    if (editForm) {
+        editForm.onsubmit = (e) => {
+            e.preventDefault();
+            submitForm(editForm, `/admin/sliders/${window.currentSliderId}`, true);
+        };
+        document.getElementById('editActive').onchange = function() {
+            document.getElementById('sliderStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
+        };
+    }
+
+    if (list) {
+        new Sortable(list, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
+            onEnd: () => {
+                let orders = [];
+                document.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
+                fetch('/admin/sliders/update-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ orders })
+                });
             }
         });
-    };
-    const root = document.getElementById('root-menu-list');
-    if (root) process(root, null);
-    fetch('/admin/menus/update-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-        body: JSON.stringify({ menus })
-    });
+    }
 }

@@ -1,124 +1,66 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Swiper Slider')
 
 @section('content')
-    <style>
-        .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #eef1f6;
-            margin-bottom: 10px;
-        }
-
-        .slider-preview {
-            width: 200px;
-            aspect-ratio: 23/9;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        .ratio-23-9 {
-            width: 100%;
-            aspect-ratio: 23/9;
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .ratio-23-9 img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .drag-handle {
-            cursor: move;
-            color: #ccc;
-            padding: 10px;
-        }
-    </style>
-
-    <div class="card">
-        <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="margin:0">Swiper Slider Management</h3>
-                <small style="color:#666">Manage home page slider images and content (23:9 Ratio)</small>
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div class="flex flex-col">
+                <h1>Swiper Slider Management</h1>
+                <p class="text-xs text-slate-400">Manage home page slider images and content
+                </p>
             </div>
-            <button onclick="openAddModal()"
-                style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+            <button onclick="openAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Slider
             </button>
         </div>
 
-        <div class="card-body">
-            <div id="slider-list">
+        <div class="admin-card-body bg-slate-50/20 custom-scrollbar">
+            <div id="slider-list" class="space-y-4">
                 @foreach($sliders as $slider)
-                    <div class="slider-row" data-id="{{ $slider->id }}"
-                        style="display: flex; align-items: center; gap: 15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eef1f6; margin-bottom: 10px;">
-
-                        <div class="drag-handle" style="cursor: move; color: #ccc; padding: 10px 5px;"><i
-                                class="fas fa-bars"></i></div>
-
-                        <img src="{{ asset('storage/' . $slider->image_path) }}"
-                            style="width: 200px; aspect-ratio: 23/9; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; flex-shrink: 0;">
+                    <div class="sortable-item group bg-white border border-slate-200 rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all"
+                        data-id="{{ $slider->id }}">
+                        <div
+                            class="drag-handle w-8 flex justify-center cursor-grab active:cursor-grabbing p-1.5 text-slate-300 hover:text-admin-blue transition-colors">
+                            <i class="fas fa-arrows-up-down-left-right"></i>
+                        </div>
 
                         <div
-                            style="flex: 1; align-self: flex-start; display: flex; flex-direction: column; gap: 2px; padding-top: 2px; min-width: 0;">
-                            <div style="font-weight:700; font-size: 16px; color: #1e293b; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                title="{{ $slider->header_1 }}">
-                                {{ $slider->header_1 }}
-                            </div>
-                            <div style="color:#0054a6; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                title="{{ $slider->header_2 }}">
-                                {{ $slider->header_2 }}
-                            </div>
-                            <div style="font-size:13px; color:#64748b; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                title="{{ $slider->description }}">
-                                {{ $slider->description }}
-                            </div>
+                            class="w-48 aspect-23/9 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 ml-2">
+                            <img src="{{ asset('storage/' . $slider->image_path) }}"
+                                class="w-full h-full object-cover {{ !$slider->is_active ? 'opacity-40 grayscale' : '' }}">
                         </div>
 
-                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                        <div class="flex-1 min-w-0 flex flex-col gap-1 ml-4">
+                            <span
+                                class="font-bold text-slate-700 text-sm truncate uppercase tracking-tight">{{ $slider->header_1 }}</span>
+                            <span class="text-admin-blue font-bold text-xs truncate">{{ $slider->header_2 }}</span>
+                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">{{ $slider->description }}</p>
+                        </div>
+
+                        <div class="flex items-center gap-4 shrink-0 px-4">
                             @php
                                 $cleanUrl = ltrim($slider->link_url, '/');
-                                $linkedMenu = $allMenus->first(function ($m) use ($cleanUrl) {
-                                    return $m->full_slug === $cleanUrl;
-                                });
+                                $linkedMenu = $allMenus->firstWhere('full_slug', $cleanUrl);
                             @endphp
-
                             @if($linkedMenu)
-                                <span class="link-badge" title="URL: {{ $slider->link_url }}"
-                                    style="display: flex; align-items: center; font-size: 12px; padding: 4px 12px; border-radius: 999px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; white-space: nowrap;">
-                                    <i class="fas fa-link" style="font-size: 10px; margin-right: 7px; color: #0054a6;"></i>
-                                    {{ $linkedMenu->name }}
+                                <span class="badge badge-info uppercase! tracking-normal!">
+                                    <i class="fas fa-link mr-1 opacity-50"></i> {{ $linkedMenu->name }}
                                 </span>
                             @endif
-
-                            @if($slider->is_active)
-                                <span class="menu-badge">Active</span>
-                            @else
-                                <span class="menu-badge inactive">Inactive</span>
-                            @endif
+                            <span class="badge {{ $slider->is_active ? 'badge-success' : 'badge-danger' }}">
+                                {{ $slider->is_active ? 'Active' : 'Inactive' }}
+                            </span>
                         </div>
 
-                        <div class="menu-actions" style="flex-shrink: 0; display: flex; align-items: center; gap: 5px;">
-                            <button class="icon-btn" onclick="openEditModal({{ json_encode($slider) }})">
-                                <i class="fas fa-pen"></i>
+                        <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
+                            <button class="btn-icon w-8 p-1.5!" onclick="openEditModal({{ json_encode($slider) }})">
+                                <i class="fas fa-pencil text-xs"></i>
                             </button>
-                            <form action="{{ route('admin.sliders.delete', $slider) }}" method="POST" style="display:inline"
+                            <form action="{{ route('admin.sliders.delete', $slider) }}" method="POST"
                                 onsubmit="return confirm('Delete slider?')">
                                 @csrf @method('DELETE')
-                                <button class="icon-btn" style="color:red"><i class="fas fa-trash"></i></button>
+                                <button type="submit" class="btn-danger w-8 p-1.5!"><i
+                                        class="fas fa-trash-can text-xs"></i></button>
                             </form>
                         </div>
                     </div>
@@ -127,272 +69,146 @@
         </div>
     </div>
 
-    <div id="addModal" class="modal-overlay">
-        <div class="modal-content" style="width: 700px;">
-            <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Add New Slider</h3>
-            <form action="{{ route('admin.sliders.store') }}" method="POST" enctype="multipart/form-data">
+    <div id="addModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-2xl! h-[85vh]! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Add New Slider</h1>
+                <button type="button" onclick="closeModal('addModal')" class="btn-icon">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.sliders.store') }}" method="POST" enctype="multipart/form-data"
+                class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-5">
                 @csrf
-                <div class="ratio-23-9" id="addPreview"><span style="color:#94a3b8">23:9 Ratio Preview</span></div>
-                <input type="file" name="image" required onchange="preview(this, 'addPreview')"
-                    style="margin: 10px 0; width: 100%;">
+                <input type="file" name="image" id="addInput" accept="image/*" class="hidden"
+                    onchange="handlePreview(this, 'addPreview')">
+                <div class="aspect-23/9 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue hover:bg-slate-100 transition-all group relative shrink-0"
+                    id="addPreview" onclick="document.getElementById('addInput').click()">
+                    <i
+                        class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i>
+                    <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Click to select 23:9
+                        image</span>
+                </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:10px;">
-                    <div style="position: relative;">
-                        <input type="text" name="header_1" placeholder="Header Line 1" maxlength="22" required
-                            oninput="updateCount(this, 'addC1', 22)"
-                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
-                        <span id="addC1"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Header Line 1</label>
+                        <input type="text" name="header_1" maxlength="22" required class="input-field w-full"
+                            oninput="updateCount(this, 'addC1', 22)">
+                        <span id="addC1" class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/22</span>
                     </div>
-
-                    <div style="position: relative;">
-                        <input type="text" name="header_2" placeholder="Header Line 2 (Highlight)" maxlength="22" required
-                            oninput="updateCount(this, 'addC2', 22)"
-                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
-                        <span id="addC2"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                    <div class="relative">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Header Line 2 (Blue)</label>
+                        <input type="text" name="header_2" maxlength="22" required class="input-field w-full"
+                            oninput="updateCount(this, 'addC2', 22)">
+                        <span id="addC2" class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/22</span>
                     </div>
                 </div>
 
-                <div style="position: relative; margin-bottom:10px;">
-                    <textarea name="description" placeholder="Description" maxlength="150" required
-                        oninput="updateCount(this, 'addCD', 150)"
-                        style="width:100%; height:50px; line-height:1.2; padding:8px 10px 18px 10px; border:1px solid #ddd; border-radius:6px; resize: none; overflow:hidden;"></textarea>
-                    <span id="addCD"
-                        style="position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: #999; pointer-events: none;">0/150</span>
+                <div class="relative">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description Text</label>
+                    <textarea name="description" maxlength="150" required class="input-field w-full h-24 py-3 resize-none"
+                        oninput="updateCount(this, 'addCD', 150)"></textarea>
+                    <span id="addCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/150</span>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px; margin-bottom:15px;">
-                    <div style="position: relative;">
-                        <input type="text" name="button_text" value="Explore More" placeholder="Button Name" maxlength="15"
-                            required oninput="updateCount(this, 'addCBT', 15)"
-                            style="width:100%; padding:9px 45px 9px 10px; border:1px solid #e6e9ee; border-radius:6px;">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-4 relative">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Button Text</label>
+                        <input type="text" name="button_text" value="Explore More" maxlength="15" class="input-field w-full"
+                            oninput="updateCount(this, 'addCBT', 15)">
                         <span id="addCBT"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">12/15</span>
+                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">12/15</span>
                     </div>
-
-                    <select name="link_url" id="addLink" required
-                        style="padding:9px 12px; border:1px solid #e6e9ee; border-radius:6px; width:100%;">
-                        <option value="">⁝⁝⁝ Select Link ⁝⁝⁝</option>
-                        @foreach($menus as $m)
-                            @php $mIsCat = $m->children->count() > 0; @endphp
-                            <option value="/{{ $m->full_slug }}" {{ $mIsCat ? 'disabled' : '' }}
-                                style="{{ $mIsCat ? 'color: darkred; font-weight: bold;' : '' }}">{{ $m->name }}</option>
-                            @foreach($m->children as $c)
-                                @php $cIsCat = $c->children->count() > 0; @endphp
-                                <option value="/{{ $c->full_slug }}" {{ $cIsCat ? 'disabled' : '' }}
-                                    style="{{ $cIsCat ? 'color: darkred;' : 'color: gray;' }}">— {{ $c->name }}</option>
-                                @foreach($c->children as $sc)
-                                    <option value="/{{ $sc->full_slug }}" style="color: gray;">&nbsp;&nbsp;&nbsp;— {{ $sc->name }}
-                                    </option>
-                                @endforeach
-                            @endforeach
-                        @endforeach
-                    </select>
+                    <div class="col-span-8">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Redirect Link (Optional)</label>
+                        <select name="link_url" class="input-field w-full">
+                            @include('admin.sliders.partials.menu-options', ['menus' => $menus])
+                        </select>
+                    </div>
                 </div>
 
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Upload
-                    Slider</button>
+                <div class="flex justify-end pt-4 sticky bottom-0 bg-white">
+                    <button type="submit" class="btn-success h-10">Upload Slider</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content" style="width: 700px;">
-            <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Edit Slider</h3>
-            <form id="editForm">
-                <div class="ratio-23-9" id="editPreview"></div>
-                <input type="file" name="image" onchange="preview(this, 'editPreview')"
-                    style="margin: 10px 0; width: 100%;">
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-2xl! h-[85vh]! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Edit Slider</h1>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:10px;">
-                    <div style="position: relative;">
-                        <input type="text" name="header_1" placeholder="Header Line 1" id="editH1" maxlength="22" required
-                            oninput="updateCount(this, 'editC1', 22)"
-                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
+            <form id="editForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-5">
+                @csrf
+                <input type="file" name="image" id="editInput" accept="image/*" class="hidden"
+                    onchange="handlePreview(this, 'editPreview')">
+
+                <div class="relative group cursor-pointer shrink-0" onclick="document.getElementById('editInput').click()">
+                    <div class="aspect-23/9 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden"
+                        id="editPreview"></div>
+                    <div
+                        class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-2xl">
+                        <span class="text-white font-bold text-xs uppercase tracking-widest">Click to replace image</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Header Line 1</label>
+                        <input type="text" name="header_1" id="editH1" maxlength="22" required class="input-field w-full"
+                            oninput="updateCount(this, 'editC1', 22)">
                         <span id="editC1"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/22</span>
                     </div>
-
-                    <div style="position: relative;">
-                        <input type="text" name="header_2" placeholder="Header Line 2 (Highlight)" id="editH2"
-                            maxlength="22" required oninput="updateCount(this, 'editC2', 22)"
-                            style="width:100%; padding:10px 45px 10px 10px; border:1px solid #ddd; border-radius:6px;">
+                    <div class="relative">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Header Line 2 (Blue)</label>
+                        <input type="text" name="header_2" id="editH2" maxlength="22" required class="input-field w-full"
+                            oninput="updateCount(this, 'editC2', 22)">
                         <span id="editC2"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/22</span>
+                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/22</span>
                     </div>
                 </div>
 
-                <div style="position: relative; margin-bottom:10px;">
-                    <textarea name="description" id="editDesc" placeholder="Description" maxlength="150" required
-                        oninput="updateCount(this, 'editCD', 150)"
-                        style="width:100%; height:50px; line-height:1.2; padding:8px 10px 18px 10px; border:1px solid #ddd; border-radius:6px; resize: none; overflow:hidden;"></textarea>
-                    <span id="editCD"
-                        style="position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: #999; pointer-events: none;">0/150</span>
+                <div class="relative">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description Text</label>
+                    <textarea name="description" id="editDesc" maxlength="150" required
+                        class="input-field w-full h-24 py-3 resize-none"
+                        oninput="updateCount(this, 'editCD', 150)"></textarea>
+                    <span id="editCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/150</span>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px; margin-bottom:15px;">
-                    <div style="position: relative;">
-                        <input type="text" name="button_text" id="editBT" placeholder="Button Name" maxlength="15" required
-                            oninput="updateCount(this, 'editCBT', 15)"
-                            style="width:100%; padding:9px 45px 9px 10px; border:1px solid #e6e9ee; border-radius:6px;">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-4 relative">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Button Text</label>
+                        <input type="text" name="button_text" id="editBT" maxlength="15" class="input-field w-full"
+                            oninput="updateCount(this, 'editCBT', 15)">
                         <span id="editCBT"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; pointer-events: none;">0/15</span>
+                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/15</span>
                     </div>
-
-                    <select name="link_url" id="editLink" required
-                        style="padding:9px 12px; border:1px solid #e6e9ee; border-radius:6px; width:100%; margin-bottom:15px; font-size: 14px;">
-
-                        <option value="">⁝⁝⁝ Select Link ⁝⁝⁝</option>
-
-                        @foreach($menus as $m)
-                            @php $mIsCat = $m->children->count() > 0; @endphp
-                            <option value="/{{ $m->full_slug }}" {{ $mIsCat ? 'disabled' : '' }}
-                                style="{{ $mIsCat ? 'color: darkred; font-weight: bold;' : '' }}">
-                                {{ $m->name }}
-                            </option>
-
-                            @foreach($m->children as $c)
-                                @php $cIsCat = $c->children->count() > 0; @endphp
-                                <option value="/{{ $c->full_slug }}" {{ $cIsCat ? 'disabled' : '' }}
-                                    style="{{ $cIsCat ? 'color: darkred;' : 'color: gray;' }}">
-                                    — {{ $c->name }}
-                                </option>
-
-                                @foreach($c->children as $sc)
-                                    <option value="/{{ $sc->full_slug }}" style="color: gray;">
-                                        &nbsp;&nbsp;&nbsp;— {{ $sc->name }}
-                                    </option>
-                                @endforeach
-                            @endforeach
-                        @endforeach
-                    </select>
+                    <div class="col-span-8">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Redirect Link (Optional)</label>
+                        <select name="link_url" id="editLink" class="input-field w-full">
+                            @include('admin.sliders.partials.menu-options', ['menus' => $menus])
+                        </select>
+                    </div>
                 </div>
 
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px; cursor:pointer;">
-                    <input type="checkbox" name="is_active" id="editActive">
-                    <span style="font-weight:600; font-size:14px;">Active Status</span>
-                </label>
+                <div
+                    class="flex items-center justify-between mt-2 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="sliderStatusLabel" class="ml-3 font-bold text-slate-600">Active</span>
+                    </label>
 
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Update
-                    Slider</button>
+                    <button type="submit" class="btn-primary h-10">Update Slider</button>
+                </div>
             </form>
         </div>
     </div>
-
-    @include('admin.partials.css')
-
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-        <script>
-            function preview(input, id) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = e => document.getElementById(id).innerHTML = `<img src="${e.target.result}">`;
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-
-            function openAddModal() {
-                document.getElementById('addModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('addModal').classList.add('active'), 10);
-            }
-
-            let currentEditId = null;
-            function openEditModal(slider) {
-                currentEditId = slider.id;
-
-                const h1 = document.getElementById('editH1');
-                const h2 = document.getElementById('editH2');
-                const desc = document.getElementById('editDesc');
-                const bt = document.getElementById('editBT');
-                const link = document.getElementById('editLink');
-                const active = document.getElementById('editActive');
-
-                h1.value = slider.header_1;
-                h2.value = slider.header_2;
-                desc.value = slider.description;
-                if (bt) bt.value = slider.button_text;
-
-                if (link) {
-                    link.value = slider.link_url;
-                }
-
-                if (active) {
-                    active.checked = (slider.is_active == 1);
-                }
-
-                updateCount(h1, 'editC1', 22);
-                updateCount(h2, 'editC2', 22);
-                updateCount(desc, 'editCD', 150);
-                if (bt) updateCount(bt, 'editCBT', 15);
-
-                document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}">`;
-
-                const modal = document.getElementById('editModal');
-                modal.style.display = 'flex';
-                setTimeout(() => modal.classList.add('active'), 10);
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                setTimeout(() => document.getElementById(id).style.display = 'none', 300);
-            }
-
-            function updateCount(el, counterId, limit) {
-                const len = el.value.length;
-                const counter = document.getElementById(counterId);
-                if (counter) {
-                    counter.innerText = `${len}/${limit}`;
-                    counter.style.color = (len >= limit) ? '#e11d48' : '#999';
-                }
-            }
-
-            document.getElementById('editForm').onsubmit = function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-
-                fetch(`/admin/sliders/${currentEditId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(() => window.location.reload());
-            }
-
-            new Sortable(document.getElementById('slider-list'), {
-                handle: '.drag-handle',
-                animation: 150,
-                onEnd: function () {
-                    let orders = [];
-                    document.querySelectorAll('.slider-row').forEach((el, index) => {
-                        orders.push({
-                            id: el.dataset.id,
-                            order: index + 1
-                        });
-                    });
-
-                    fetch('{{ route("admin.sliders.update-order") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ orders })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                console.log('Order updated successfully');
-                            }
-                        });
-                }
-            });
-        </script>
-    @endpush
 @endsection

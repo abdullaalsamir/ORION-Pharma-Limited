@@ -33,35 +33,32 @@ class SliderController extends Controller
             'header_1' => 'required|string|max:22',
             'header_2' => 'required|string|max:22',
             'description' => 'required|string|max:150',
-            'button_text' => 'required|string|max:15',
-            'link_url' => 'required|string',
+            'button_text' => 'nullable|string|max:15',
+            'link_url' => 'nullable|string',
         ]);
 
         try {
-            if (!Storage::disk('public')->exists('sliders')) {
-                Storage::disk('public')->makeDirectory('sliders');
-            }
-
             $file = $request->file('image');
             $fileName = time() . '.webp';
             $path = "sliders/{$fileName}";
-            $fullPath = storage_path("app/public/{$path}");
+            $this->processSliderImage($file->getRealPath(), storage_path("app/public/{$path}"));
 
-            $this->processSliderImage($file->getRealPath(), $fullPath);
+            $link = $request->filled('link_url') ? $request->link_url : null;
+            $button = $link ? ($request->input('button_text') ?? 'Explore More') : null;
 
             Slider::create([
                 'image_path' => $path,
                 'header_1' => $request->header_1,
                 'header_2' => $request->header_2,
                 'description' => $request->description,
-                'button_text' => $request->button_text,
-                'link_url' => $request->link_url,
+                'button_text' => $button,
+                'link_url' => $link,
                 'order' => (Slider::max('order') ?? 0) + 1
             ]);
 
-            return back()->with('success', 'Slider added successfully');
+            return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return back()->with('error', 'Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -72,24 +69,26 @@ class SliderController extends Controller
             'header_1' => 'required|string|max:22',
             'header_2' => 'required|string|max:22',
             'description' => 'required|string|max:150',
-            'button_text' => 'required|string|max:15',
-            'link_url' => 'required|string',
+            'button_text' => 'nullable|string|max:15',
+            'link_url' => 'nullable|string',
             'is_active' => 'required'
         ]);
 
         try {
             if ($request->hasFile('image')) {
                 Storage::disk('public')->delete($slider->image_path);
-                $fullPath = storage_path("app/public/{$slider->image_path}");
-                $this->processSliderImage($request->file('image')->getRealPath(), $fullPath);
+                $this->processSliderImage($request->file('image')->getRealPath(), storage_path("app/public/{$slider->image_path}"));
             }
+
+            $link = $request->filled('link_url') ? $request->link_url : null;
+            $button = $link ? ($request->input('button_text') ?? 'Explore More') : null;
 
             $slider->update([
                 'header_1' => $request->header_1,
                 'header_2' => $request->header_2,
                 'description' => $request->description,
-                'button_text' => $request->button_text,
-                'link_url' => $request->link_url,
+                'button_text' => $button,
+                'link_url' => $link,
                 'is_active' => $request->is_active
             ]);
 
