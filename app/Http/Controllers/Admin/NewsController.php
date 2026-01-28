@@ -19,7 +19,7 @@ class NewsController extends Controller
             ->orderBy('order', 'asc')
             ->get()
             ->groupBy(function ($item) {
-                return $item->news_date->format('Y-m-d');
+                return \Carbon\Carbon::parse($item->news_date)->format('Y-m-d');
             });
 
         return view('admin.news-and-announcements.index', compact('menu', 'groupedNews'));
@@ -51,12 +51,12 @@ class NewsController extends Controller
                 'news_date' => $request->news_date,
                 'image_path' => $path,
                 'is_active' => 1,
-                'order' => NewsItem::where('news_date', $request->news_date)->max('order') + 1
+                'order' => (NewsItem::where('news_date', $request->news_date)->max('order') ?? 0) + 1
             ]);
 
-            return back()->with('success', 'News added successfully');
+            return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -171,11 +171,17 @@ class NewsController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function destroy(NewsItem $newsItem)
+    public function delete(NewsItem $newsItem)
     {
-        Storage::disk('public')->delete($newsItem->image_path);
-        $newsItem->delete();
-        return back()->with('success', 'News deleted successfully');
+        try {
+            if (Storage::disk('public')->exists($newsItem->image_path)) {
+                Storage::disk('public')->delete($newsItem->image_path);
+            }
+            $newsItem->delete();
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function serveNewsImage($filename)

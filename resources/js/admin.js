@@ -12,6 +12,7 @@ import {
     initProductsPage,
     initScholarshipPage,
     initCSRPage,
+    initNewsPage
 } from './admin/common';
 
 Turbo.start();
@@ -27,4 +28,5 @@ document.addEventListener('turbo:load', () => {
     initProductsPage();
     initScholarshipPage();
     initCSRPage();
+    initNewsPage();
 });

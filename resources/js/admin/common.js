@@ -850,7 +850,6 @@ export function initCSRPage() {
     const addForm = document.querySelector('#addModal form');
     if (!editForm && !addForm) return;
 
-    // 1. Sibling-Only Sortable (Initializes for each date group separately)
     document.querySelectorAll('.csr-sortable-list').forEach(list => {
         new Sortable(list, {
             animation: 150,
@@ -859,25 +858,35 @@ export function initCSRPage() {
             ghostClass: 'bg-slate-50',
             onEnd: () => {
                 let orders = [];
-                // Only collect items from this specific date group
                 list.querySelectorAll('.sortable-item').forEach((row, index) => {
                     orders.push({ id: row.dataset.id, order: index + 1 });
                 });
+
                 fetch('/admin/csr-actions/update-order', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
                     body: JSON.stringify({ orders })
                 });
             }
         });
     });
 
-    // 2. Modals logic (same as before but updated IDs)
     window.openAddModal = () => {
         const modal = document.getElementById('addModal');
+
         addForm.reset();
         addForm.scrollTop = 0;
-        document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera text-3xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4 opacity-60">Select Image</span>`;
+
+        document.getElementById('addPreview').innerHTML = `
+            <i class="fas fa-camera text-3xl text-slate-300 mb-2"></i>
+            <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4 opacity-60">
+                Select Image
+            </span>
+        `;
+
         document.getElementById('addImgError').classList.add('hidden');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -885,22 +894,25 @@ export function initCSRPage() {
 
     window.openEditModal = (item, fullSlug) => {
         window.currentCsrId = item.id;
+
         const form = document.getElementById('editForm');
         form.scrollTop = 0;
 
         document.getElementById('editTitle').value = item.title;
         document.getElementById('editDesc').value = item.description;
         document.getElementById('editDate').value = item.csr_date.split('T')[0];
-        
+
         const toggle = document.getElementById('editActive');
         const lbl = document.getElementById('csrStatusLabel');
+
         toggle.checked = item.is_active == 1;
         lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-        
-        const filename = item.image_path.split('/').pop();
-        document.getElementById('editPreview').innerHTML = `<img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">`;
 
-        // Update counts
+        const filename = item.image_path.split('/').pop();
+        document.getElementById('editPreview').innerHTML = `
+            <img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">
+        `;
+
         updateCount(document.getElementById('editTitle'), 'editC1', 100);
         updateCount(document.getElementById('editDesc'), 'editCD', 500);
 
@@ -909,17 +921,21 @@ export function initCSRPage() {
         setTimeout(() => modal.classList.add('active'), 10);
     };
 
-    // 3. Form Submissions (Correction: URLs match Route Prefix 'csr-actions')
     const handleCsrSubmit = (e, url, isUpdate = false) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+
         if (isUpdate) {
-            formData.append('_method', 'PUT'); // Required for Laravel Spoofing
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+            formData.append('_method', 'PUT');
+            formData.append(
+                'is_active',
+                document.getElementById('editActive').checked ? 1 : 0
+            );
         } else {
             if (document.getElementById('addInput').files.length === 0) {
                 document.getElementById('addImgError').classList.remove('hidden');
-                document.getElementById('addPreview').classList.add('border-red-500', 'bg-red-50');
+                document.getElementById('addPreview')
+                    .classList.add('border-red-500', 'bg-red-50');
                 return;
             }
         }
@@ -927,24 +943,33 @@ export function initCSRPage() {
         fetch(url, {
             method: 'POST',
             body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
             if (data.success) Turbo.visit(window.location.href);
             else alert(data.error || "Validation failed.");
-        }).catch(err => {
+        })
+        .catch(err => {
             console.error(err);
             alert("A server error occurred.");
         });
     };
 
-    if (addForm) addForm.onsubmit = (e) => handleCsrSubmit(e, '/admin/csr-actions/store', false);
-    
+    if (addForm) {
+        addForm.onsubmit = (e) =>
+            handleCsrSubmit(e, '/admin/csr-actions/store', false);
+    }
+
     if (editForm) {
-        // Corrected URL: uses prefix 'csr-actions'
-        editForm.onsubmit = (e) => handleCsrSubmit(e, `/admin/csr-actions/${window.currentCsrId}`, true);
-        
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('csrStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
+        editForm.onsubmit = (e) =>
+            handleCsrSubmit(e, `/admin/csr-actions/${window.currentCsrId}`, true);
+
+        document.getElementById('editActive').onchange = function () {
+            document.getElementById('csrStatusLabel').innerText =
+                this.checked ? 'Active' : 'Inactive';
         };
     }
 
@@ -952,7 +977,153 @@ export function initCSRPage() {
         if (confirm('Delete this CSR item permanently?')) {
             fetch(`/admin/csr-actions/${id}`, {
                 method: 'DELETE',
-                headers: { 
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Turbo.visit(window.location.href, { action: "replace" });
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("A system error occurred.");
+            });
+        }
+    };
+}
+
+export function initNewsPage() {
+    const editForm = document.getElementById('editForm');
+    const addForm = document.querySelector('#addModal form');
+    if (!editForm && !addForm) return;
+
+    document.querySelectorAll('.news-sortable-list').forEach(list => {
+        new Sortable(list, {
+            animation: 150,
+            handle: '.drag-handle',
+            draggable: '.sortable-item',
+            ghostClass: 'bg-slate-50',
+            onEnd: () => {
+                let orders = [];
+                list.querySelectorAll('.sortable-item').forEach((row, index) => {
+                    orders.push({ id: row.dataset.id, order: index + 1 });
+                });
+                fetch('/admin/news-actions/update-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ orders })
+                });
+            }
+        });
+    });
+
+    window.openAddModal = () => {
+        const modal = document.getElementById('addModal');
+        addForm.reset();
+        addForm.scrollTop = 0;
+        document.getElementById('addPreview').innerHTML = `
+            <i class="fas fa-camera text-3xl text-slate-300 mb-2"></i>
+            <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4 opacity-60">
+                Select Image
+            </span>`;
+        document.getElementById('addImgError').classList.add('hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditModal = (item, fullSlug) => {
+        window.currentNewsId = item.id;
+        const form = document.getElementById('editForm');
+        form.scrollTop = 0;
+
+        document.getElementById('editTitle').value = item.title;
+        document.getElementById('editDesc').value = item.description;
+        document.getElementById('editDate').value = item.news_date.split('T')[0];
+
+        const toggle = document.getElementById('editActive');
+        const lbl = document.getElementById('newsStatusLabel');
+        toggle.checked = item.is_active == 1;
+        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+
+        const filename = item.image_path.split('/').pop();
+        document.getElementById('editPreview').innerHTML = `
+            <img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">
+        `;
+
+        updateCount(document.getElementById('editTitle'), 'editC1', 100);
+        updateCount(document.getElementById('editDesc'), 'editCD', 500);
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    const handleNewsSubmit = (e, url, isUpdate = false) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        if (isUpdate) {
+            formData.append('_method', 'PUT');
+            formData.append(
+                'is_active',
+                document.getElementById('editActive').checked ? 1 : 0
+            );
+        } else {
+            if (document.getElementById('addInput').files.length === 0) {
+                document.getElementById('addImgError').classList.remove('hidden');
+                document.getElementById('addPreview')
+                    .classList.add('border-red-500', 'bg-red-50');
+                return;
+            }
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) Turbo.visit(window.location.href);
+            else alert(data.error || "Validation failed.");
+        })
+        .catch(err => {
+            console.error(err);
+            alert("A server error occurred.");
+        });
+    };
+
+    if (addForm) {
+        addForm.onsubmit = (e) =>
+            handleNewsSubmit(e, '/admin/news-actions/store', false);
+    }
+
+    if (editForm) {
+        editForm.onsubmit = (e) =>
+            handleNewsSubmit(e, `/admin/news-actions/${window.currentNewsId}`, true);
+
+        document.getElementById('editActive').onchange = function () {
+            document.getElementById('newsStatusLabel').innerText =
+                this.checked ? 'Active' : 'Inactive';
+        };
+    }
+
+    window.deleteNews = (id) => {
+        if (confirm('Delete this News item permanently?')) {
+            fetch(`/admin/news-actions/${id}`, {
+                method: 'DELETE',
+                headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Accept': 'application/json'
                 }

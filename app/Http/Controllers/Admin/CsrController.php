@@ -19,7 +19,7 @@ class CsrController extends Controller
             ->orderBy('order', 'asc')
             ->get()
             ->groupBy(function ($item) {
-                return $item->csr_date->format('Y-m-d');
+                return \Carbon\Carbon::parse($item->csr_date)->format('Y-m-d');
             });
 
         return view('admin.csr-list.index', compact('menu', 'groupedCsr'));
