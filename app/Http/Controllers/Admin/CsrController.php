@@ -51,12 +51,12 @@ class CsrController extends Controller
                 'csr_date' => $request->csr_date,
                 'image_path' => $path,
                 'is_active' => 1,
-                'order' => CsrItem::where('csr_date', $request->csr_date)->max('order') + 1
+                'order' => (CsrItem::where('csr_date', $request->csr_date)->max('order') ?? 0) + 1
             ]);
 
-            return back()->with('success', 'CSR added successfully');
+            return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -171,11 +171,19 @@ class CsrController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function destroy(CsrItem $csrItem)
+    public function delete(CsrItem $csrItem)
     {
-        Storage::disk('public')->delete($csrItem->image_path);
-        $csrItem->delete();
-        return back()->with('success', 'CSR deleted successfully');
+        try {
+            if (Storage::disk('public')->exists($csrItem->image_path)) {
+                Storage::disk('public')->delete($csrItem->image_path);
+            }
+
+            $csrItem->delete();
+
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function serveCsrImage($filename)

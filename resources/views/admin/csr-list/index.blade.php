@@ -1,329 +1,194 @@
 @extends('admin.layouts.app')
-
-@section('title', 'CSR List Management')
+@section('title', 'CSR Management')
 
 @section('content')
-    <style>
-        .date-group {
-            margin-bottom: 30px;
-            border-left: 4px solid #0a3d62;
-            padding-left: 15px;
-        }
-
-        .date-header {
-            font-weight: 700;
-            color: #0a3d62;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-        }
-
-        .csr-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #eef1f6;
-            margin-bottom: 10px;
-        }
-
-        .csr-preview-img {
-            width: 200px;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            flex-shrink: 0;
-        }
-
-        .ratio-16-9 {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .ratio-16-9 img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .drag-handle {
-            cursor: move;
-            color: #ccc;
-            padding: 10px;
-        }
-
-        .csr-details {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .csr-title {
-            font-weight: 700;
-            font-size: 16px;
-            color: #1e293b;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .csr-desc {
-            font-size: 13px;
-            color: #64748b;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .csr-meta {
-            font-size: 12px;
-            color: #0054a6;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-    </style>
-
-    <div class="card">
-        <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="margin:0">CSR Management</h3>
-                <small style="color:#666">Manage CSR items (16:9 Ratio)</small>
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div class="flex flex-col">
+                <h1>CSR Management</h1>
+                <p class="text-xs text-slate-400">Manage CSR items and activities (16:9 Ratio)</p>
             </div>
-            <button onclick="openAddModal()"
-                style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+            <button onclick="openAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add CSR Item
             </button>
         </div>
 
-        <div class="card-body">
-            @forelse($groupedCsr as $date => $items)
-                <div class="date-group">
-                    <div class="date-header">
-                        <i class="far fa-calendar-alt"></i> {{ date('F d, Y', strtotime($date)) }}
-                    </div>
-
-                    <div class="sortable-list" data-date="{{ $date }}">
+        <div class="admin-card-body bg-slate-50/20 custom-scrollbar">
+            <div class="space-y-3">
+                @forelse($groupedCsr as $date => $items)
+                    <div class="csr-sortable-list space-y-3" data-date="{{ $date }}">
                         @foreach($items as $item)
-                            <div class="csr-row" data-id="{{ $item->id }}">
-                                <div class="drag-handle" style="{{ $items->count() > 1 ? '' : 'visibility:hidden' }}">
-                                    <i class="fas fa-bars"></i>
+                            <div class="sortable-item group {{ $loop->parent->index % 2 == 0 ? 'bg-red-50/50 border-red-100' : 'bg-green-50/50 border-green-100' }} border rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all"
+                                data-id="{{ $item->id }}">
+
+                                <div
+                                    class="drag-handle w-8 flex justify-center {{ count($items) > 1 ? 'cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue' : 'opacity-0 pointer-events-none' }}">
+                                    <i class="fas fa-arrows-up-down-left-right"></i>
                                 </div>
 
-                                <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}" class="csr-preview-img">
+                                <div
+                                    class="w-40 aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 ml-2">
+                                    <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}"
+                                        class="w-full h-full object-cover transition-all duration-500">
+                                </div>
 
-                                <div class="csr-details">
-                                    <div class="csr-title" title="{{ $item->title }}">{{ $item->title }}</div>
-                                    <div class="csr-desc" title="{{ $item->description }}">{{ $item->description }}</div>
-                                    <div class="csr-meta">
-                                        <i class="far fa-clock"></i> {{ $item->csr_date->format('M d, Y') }}
+                                <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4 self-start">
+                                    <span class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">
+                                        {{ $item->title }}
+                                    </span>
+
+                                    <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                                        {{ $item->description }}
+                                    </p>
+
+                                    <div
+                                        class="flex items-center gap-1.5 text-[10px] font-bold text-admin-blue uppercase tracking-wider mt-2">
+                                        <i class="far fa-calendar-alt text-[9px]"></i>
+                                        {{ date('d F, Y', strtotime($date)) }}
                                     </div>
                                 </div>
 
-                                <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
-                                    @if($item->is_active)
-                                        <span class="menu-badge">Active</span>
-                                    @else
-                                        <span class="menu-badge inactive">Inactive</span>
-                                    @endif
+                                <div class="shrink-0 px-4">
+                                    <span class="badge {{ $item->is_active ? 'badge-success' : 'badge-danger' }}">
+                                        {{ $item->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
 
-                                    <div class="menu-actions">
-                                        <button class="icon-btn" onclick="openEditModal({{ json_encode($item) }})">
-                                            <i class="fas fa-pen"></i>
-                                        </button>
-                                        <form action="{{ route('admin.csr.delete', $item) }}" method="POST" style="display:inline"
-                                            onsubmit="return confirm('Delete this CSR?')">
-                                            @csrf @method('DELETE')
-                                            <button class="icon-btn" style="color:red"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </div>
+                                <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
+                                    <button class="btn-icon w-8 p-1.5!"
+                                        onclick="openEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
+                                        <i class="fas fa-pencil text-xs"></i>
+                                    </button>
+                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteCsr({{ $item->id }})">
+                                        <i class="fas fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
                     </div>
-                </div>
-            @empty
-                <div style="text-align:center; padding:50px; color:#ccc;">
-                    <i class="fas fa-folder-open" style="font-size:40px; margin-bottom:10px"></i>
-                    <p>No CSR items found.</p>
-                </div>
-            @endforelse
+                @empty
+                    <div
+                        class="flex flex-col items-center justify-center py-20 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-slate-300">
+                        <i class="fas fa-folder-open text-4xl mb-4"></i>
+                        <h2 class="text-slate-400!">No CSR Items Found</h2>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </div>
 
-    <div id="addModal" class="modal-overlay">
-        <div class="modal-content" style="width: 700px;">
-            <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Add New CSR</h3>
-            <form action="{{ route('admin.csr.store') }}" method="POST" enctype="multipart/form-data">
+    <div id="addModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Add CSR Item</h1>
+                <button type="button" onclick="closeModal('addModal')" class="btn-icon"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form action="{{ route('admin.csr.store') }}" method="POST" enctype="multipart/form-data"
+                class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <div class="ratio-16-9" id="addPreview"><span style="color:#94a3b8">16:9 Ratio Preview</span></div>
-                <input type="file" name="image" required onchange="preview(this, 'addPreview')"
-                    style="margin: 10px 0; width: 100%;">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Event Image (16:9)</label>
+                    <input type="file" name="image" id="addInput" accept="image/*" class="hidden"
+                        onchange="handlePreview(this, 'addPreview')">
+                    <div class="aspect-video bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
+                        id="addPreview" onclick="document.getElementById('addInput').click()">
+                        <i
+                            class="fas fa-camera text-3xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i>
+                        <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select
+                            Image</span>
+                    </div>
+                    <span id="addImgError" class="text-[10px] text-red-500 font-bold uppercase mt-1 hidden ml-1">Please
+                        select an image</span>
+                </div>
 
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-bottom:10px;">
-                    <div style="position: relative;">
-                        <input type="text" name="title" placeholder="CSR Title" maxlength="100" required
-                            oninput="updateCount(this, 'addC1', 100)"
-                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-8 relative flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">CSR Title</label>
+                        <input type="text" name="title" maxlength="100" required class="input-field w-full"
+                            oninput="updateCount(this, 'addC1', 100)">
                         <span id="addC1"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999;">0/100</span>
+                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/100</span>
                     </div>
-                    <input type="date" name="csr_date" required
-                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                    <div class="col-span-4 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Event Date</label>
+                        <input type="date" name="csr_date" required class="input-field w-full">
+                    </div>
                 </div>
 
-                <div style="position: relative; margin-bottom:15px;">
-                    <textarea name="description" placeholder="Short Description..." maxlength="500" required
-                        oninput="updateCount(this, 'addCD', 500)"
-                        style="width:100%; height:80px; padding:10px; border:1px solid #ddd; border-radius:6px; resize: none;"></textarea>
-                    <span id="addCD"
-                        style="position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: #999;">0/500</span>
+                <div class="relative flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
+                    <textarea name="description" maxlength="500" required
+                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"
+                        oninput="updateCount(this, 'addCD', 500)"></textarea>
+                    <span id="addCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
                 </div>
 
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Upload
-                    CSR</button>
+                <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
+                    <button type="submit" class="btn-success h-10">Save CSR Item</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content" style="width: 700px;">
-            <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Edit CSR Item</h3>
-            <form id="editForm">
-                <div class="ratio-16-9" id="editPreview"></div>
-                <input type="file" name="image" onchange="preview(this, 'editPreview')"
-                    style="margin: 10px 0; width: 100%;">
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Edit CSR Item</h1>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-bottom:10px;">
-                    <div style="position: relative;">
-                        <input type="text" id="editTitle" name="title" maxlength="100" required
-                            oninput="updateCount(this, 'editC1', 100)"
-                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <form id="editForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
+                @csrf
+                <input type="file" name="image" id="editInput" accept="image/*" class="hidden"
+                    onchange="handlePreview(this, 'editPreview')">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase mb-1 block ml-1">Change Image</label>
+                    <div class="relative group cursor-pointer aspect-video"
+                        onclick="document.getElementById('editInput').click()">
+                        <div class="w-full h-full bg-slate-100 rounded-3xl border border-slate-200 overflow-hidden"
+                            id="editPreview"></div>
+                        <div
+                            class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-3xl">
+                            <span class="text-white font-bold text-[10px] uppercase tracking-widest">Click to Replace
+                                Image</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-8 relative flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">CSR Title</label>
+                        <input type="text" name="title" id="editTitle" maxlength="100" required class="input-field w-full"
+                            oninput="updateCount(this, 'editC1', 100)">
                         <span id="editC1"
-                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999;">0/100</span>
+                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/100</span>
                     </div>
-                    <input type="date" id="editDate" name="csr_date" required
-                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                    <div class="col-span-4 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Event Date</label>
+                        <input type="date" name="csr_date" id="editDate" required class="input-field w-full">
+                    </div>
                 </div>
 
-                <div style="position: relative; margin-bottom:10px;">
-                    <textarea id="editDesc" name="description" maxlength="500" required
-                        oninput="updateCount(this, 'editCD', 500)"
-                        style="width:100%; height:80px; padding:10px; border:1px solid #ddd; border-radius:6px; resize: none;"></textarea>
-                    <span id="editCD"
-                        style="position: absolute; right: 10px; bottom: 10px; font-size: 11px; color: #999;">0/500</span>
+                <div class="relative flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
+                    <textarea name="description" id="editDesc" maxlength="500" required
+                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"
+                        oninput="updateCount(this, 'editCD', 500)"></textarea>
+                    <span id="editCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
                 </div>
 
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px; cursor:pointer;">
-                    <input type="checkbox" name="is_active" id="editActive">
-                    <span style="font-weight:600; font-size:14px;">Active Status</span>
-                </label>
-
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Update
-                    CSR</button>
+                <div
+                    class="flex items-center justify-between mt-4 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="csrStatusLabel" class="ml-3 font-bold text-slate-600 text-sm">Active</span>
+                    </label>
+                    <button type="submit" class="btn-primary h-10">Update CSR Item</button>
+                </div>
             </form>
         </div>
     </div>
-
-    @include('admin.partials.css')
-
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        <script>
-            function preview(input, id) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = e => document.getElementById(id).innerHTML = `<img src="${e.target.result}">`;
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-
-            function updateCount(el, counterId, limit) {
-                const len = el.value.length;
-                document.getElementById(counterId).innerText = `${len}/${limit}`;
-            }
-
-            function openAddModal() {
-                document.getElementById('addModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('addModal').classList.add('active'), 10);
-            }
-
-            let currentEditId = null;
-            function openEditModal(item) {
-                currentEditId = item.id;
-                document.getElementById('editTitle').value = item.title;
-                document.getElementById('editDesc').value = item.description;
-                document.getElementById('editDate').value = item.csr_date.split('T')[0];
-                document.getElementById('editActive').checked = (item.is_active == 1);
-
-                const filename = item.image_path.split('/').pop();
-                const fullSlug = "{{ $menu->full_slug }}";
-                document.getElementById('editPreview').innerHTML = `<img src="/${fullSlug}/${filename}">`;
-
-                updateCount(document.getElementById('editTitle'), 'editC1', 100);
-                updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-                document.getElementById('editModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('editModal').classList.add('active'), 10);
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                setTimeout(() => document.getElementById(id).style.display = 'none', 300);
-            }
-
-            document.getElementById('editForm').onsubmit = function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-
-                fetch(`/admin/csr-list/${currentEditId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(res => res.json()).then(data => {
-                    if (data.success) window.location.reload();
-                    else alert(data.error);
-                });
-            }
-
-            document.querySelectorAll('.sortable-list').forEach(el => {
-                new Sortable(el, {
-                    handle: '.drag-handle',
-                    animation: 150,
-                    onEnd: function () {
-                        let orders = [];
-                        el.querySelectorAll('.csr-row').forEach((row, index) => {
-                            orders.push({ id: row.dataset.id, order: index + 1 });
-                        });
-                        fetch('{{ route("admin.csr.update-order") }}', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                            body: JSON.stringify({ orders })
-                        });
-                    }
-                });
-            });
-        </script>
-    @endpush
 @endsection
