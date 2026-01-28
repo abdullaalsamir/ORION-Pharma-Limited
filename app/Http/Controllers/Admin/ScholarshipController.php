@@ -19,17 +19,35 @@ class ScholarshipController extends Controller
         return view('admin.scholarship.index', compact('menu', 'items'));
     }
 
+    private function getAvailableFileName($name, $currentPath = null)
+    {
+        $baseSlug = Str::slug($name);
+        $extension = '.webp';
+        $directory = 'scholarship';
+
+        $i = 1;
+        while (true) {
+            $targetName = ($i === 1) ? $baseSlug : $baseSlug . '-' . $i;
+            $targetPath = "{$directory}/{$targetName}{$extension}";
+
+            if ($currentPath && $targetPath === $currentPath) {
+                return $targetName . $extension;
+            }
+
+            if (!Storage::disk('public')->exists($targetPath)) {
+                return $targetName . $extension;
+            }
+            $i++;
+        }
+    }
     private function formatPrefix($value, $prefix)
     {
         if (empty($value))
             return null;
-
         $cleanValue = str_replace($prefix . ': ', '', $value);
         $cleanValue = trim($cleanValue);
-
         if (empty($cleanValue))
             return null;
-
         return $prefix . ': ' . $cleanValue;
     }
 
@@ -43,7 +61,8 @@ class ScholarshipController extends Controller
 
         try {
             $file = $request->file('image');
-            $fileName = Str::slug($request->name) . '-' . time() . '.webp';
+
+            $fileName = $this->getAvailableFileName($request->name);
             $path = "scholarship/{$fileName}";
 
             if (!Storage::disk('public')->exists('scholarship')) {
@@ -54,42 +73,51 @@ class ScholarshipController extends Controller
 
             Scholarship::create([
                 'name' => $request->name,
-                'session' => $this->formatPrefix($request->input('session'), 'Session'), // Changed this
-                'roll_no' => $request->roll_no,
+                'session' => $this->formatPrefix($request->input('session'), 'Session'),
+                'roll_no' => $this->formatPrefix($request->input('roll_no'), 'Roll No'),
                 'medical_college' => $request->medical_college,
                 'image_path' => $path,
-                'order' => Scholarship::max('order') + 1,
+                'order' => (Scholarship::max('order') ?? 0) + 1,
                 'is_active' => 1
             ]);
 
-            return back()->with('success', 'Scholar added successfully');
+            return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
     public function update(Request $request, Scholarship $scholarship)
     {
-        $data = [
-            'name' => $request->name,
-            'session' => $this->formatPrefix($request->input('session'), 'Session'), // Changed this
-            'roll_no' => $request->roll_no,
-            'medical_college' => $request->medical_college,
-            'is_active' => $request->is_active
-        ];
+        try {
+            $oldPath = $scholarship->image_path;
 
-        if ($request->hasFile('image')) {
-            if (Storage::disk('public')->exists($scholarship->image_path)) {
-                Storage::disk('public')->delete($scholarship->image_path);
+            $newFileName = $this->getAvailableFileName($request->name, $oldPath);
+            $newPath = "scholarship/{$newFileName}";
+
+            $data = [
+                'name' => $request->name,
+                'session' => $this->formatPrefix($request->input('session'), 'Session'),
+                'roll_no' => $this->formatPrefix($request->input('roll_no'), 'Roll No'),
+                'medical_college' => $request->medical_college,
+                'is_active' => $request->is_active,
+                'image_path' => $newPath
+            ];
+
+            if ($request->hasFile('image')) {
+                Storage::disk('public')->delete($oldPath);
+                $this->processScholarImage($request->file('image')->getRealPath(), storage_path("app/public/{$newPath}"));
+            } elseif ($oldPath !== $newPath) {
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->move($oldPath, $newPath);
+                }
             }
-            $fileName = Str::slug($request->name) . '-' . time() . '.webp';
-            $path = "scholarship/{$fileName}";
-            $this->processScholarImage($request->file('image')->getRealPath(), storage_path("app/public/{$path}"));
-            $data['image_path'] = $path;
-        }
 
-        $scholarship->update($data);
-        return response()->json(['success' => true]);
+            $scholarship->update($data);
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function updateOrder(Request $request)
@@ -188,22 +216,14 @@ class ScholarshipController extends Controller
 
     public function frontendIndex($menu)
     {
-        $items = Scholarship::where('is_active', 1)
-            ->orderBy('order', 'asc')
-            ->get();
-
+        $items = Scholarship::where('is_active', 1)->orderBy('order', 'asc')->get();
         return view('scholarship.index', compact('items', 'menu'));
     }
 
     public function serveScholarImage($filename)
     {
         $storagePath = storage_path('app/public/scholarship/' . $filename);
-
         abort_if(!file_exists($storagePath), 404);
-
-        return response()->file($storagePath, [
-            'Content-Type' => 'image/webp',
-            'Cache-Control' => 'public, max-age=86400',
-        ]);
+        return response()->file($storagePath);
     }
 }

@@ -2,313 +2,223 @@
 @section('title', 'Scholarship Management')
 
 @section('content')
-    <style>
-        .scholar-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            table-layout: fixed;
-        }
-
-        .scholar-table th,
-        .scholar-table td {
-            padding: 12px;
-            border: 1px solid #edf2f7;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        .table-responsive {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            border: 1px solid #edf2f7;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .prefix-input-wrapper {
-            display: flex;
-            align-items: center;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 0 10px;
-            margin-bottom: 8px;
-        }
-
-        .prefix-text {
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            user-select: none;
-        }
-
-        .prefix-input {
-            border: none !important;
-            background: transparent !important;
-            padding: 8px 5px !important;
-            width: 100%;
-            outline: none;
-            font-size: 14px;
-        }
-
-        .list-photo {
-            width: 50px;
-            height: 61px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        .modal-photo-preview {
-            width: 120px;
-            height: 146px;
-            border: 2px dashed #cbd5e0;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-photo-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .action-cell {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .drag-handle {
-            cursor: move;
-            color: #cbd5e0;
-            font-size: 18px;
-        }
-    </style>
-
-    <div class="card" style="height: calc(100vh - 100px);">
-        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h3 style="margin:0">Scholarship Management</h3>
-                <small>Manage and organize scholarship recipients</small>
+    <div class="admin-card">
+        <div class="admin-card-header shrink-0">
+            <div class="flex flex-col">
+                <h1>Scholarship Management</h1>
+                <p class="text-xs text-slate-400">Manage and organize scholarship recipients</p>
             </div>
-            <button onclick="openAddModal()" class="btn-add-person"
-                style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">
+            <button onclick="openAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Person
             </button>
         </div>
 
-        <div class="table-responsive menu-tree-wrapper">
-            <table class="scholar-table">
+        <div class="flex-1 flex flex-col min-h-0 bg-white overflow-hidden">
+            <table class="w-full table-fixed border-collapse shrink-0">
                 <thead>
-                    <tr style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
-                        <th width="45"></th>
-                        <th width="280">Name, Session & Roll</th>
-                        <th>Name of Medical College</th>
-                        <th width="80">Photo</th>
-                        <th width="200">Action</th>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="w-12 p-4 border-r border-slate-100"></th>
+                        <th
+                            class="w-72 p-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100">
+                            Name, Session & Roll</th>
+                        <th
+                            class="p-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100">
+                            Medical College</th>
+                        <th
+                            class="w-24 p-4 text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100">
+                            Photo</th>
+                        <th class="w-48 p-4 text-right text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            Action</th>
+                        <th class="w-2.5"></th>
                     </tr>
                 </thead>
-                <tbody id="sortable-list">
-                    @foreach($items as $item)
-                        <tr data-id="{{ $item->id }}" class="scholar-row">
-                            <td align="center"><i class="fas fa-grip-vertical drag-handle"></i></td>
-                            <td>
-                                <div style="font-weight:700; color:#1e293b; line-height: 1.2; margin-bottom: 4px;">
-                                    {{ $item->name }}
-                                </div>
-
-                                @if($item->session)
-                                    <div style="font-size:12px; color:#64748b;">{{ $item->session }}</div>
-                                @endif
-
-                                @if($item->roll_no)
-                                    <div style="font-size:12px; color:#64748b;">{{ $item->roll_no }}</div>
-                                @endif
-                            </td>
-                            <td>
-                                {{ $item->medical_college }}
-                            </td>
-                            <td align="center">
-                                <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}" class="list-photo">
-                            </td>
-                            <td>
-                                <div class="action-cell">
-                                    @if($item->is_active)
-                                        <span class="menu-badge">Active</span>
-                                    @else
-                                        <span class="menu-badge inactive">Inactive</span>
-                                    @endif
-
-                                    <button onclick="openEditModal({{ json_encode($item) }})" class="icon-btn"
-                                        style="color:#0a3d62"><i class="fas fa-pen-to-square"></i></button>
-
-                                    <form action="{{ route('admin.scholarship.delete', $item) }}" method="POST"
-                                        onsubmit="return confirm('Delete?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="icon-btn" style="color:red"><i
-                                                class="fas fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
             </table>
+
+            <div class="flex-1 overflow-y-scroll custom-scrollbar" style="scrollbar-gutter: stable;">
+                <table class="w-full table-fixed border-collapse">
+                    <tbody id="scholar-sortable-list">
+                        @foreach($items as $item)
+                            <tr data-id="{{ $item->id }}"
+                                class="sortable-item group border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                <td class="w-12 p-4 text-center border-r border-slate-100">
+                                    <div
+                                        class="drag-handle cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue transition-colors">
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </div>
+                                </td>
+                                <td class="w-72 p-4 border-r border-slate-100">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="font-bold text-slate-700 text-sm leading-tight mb-1">{{ $item->name }}</span>
+                                        <div class="flex flex-col gap-0.5">
+                                            @if($item->session)<span
+                                            class="text-[10px] text-slate-400 font-medium">{{ $item->session }}</span>@endif
+                                            @if($item->roll_no)<span
+                                            class="text-[10px] text-slate-400 font-medium">{{ $item->roll_no }}</span>@endif
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4 border-r border-slate-100 text-xs text-slate-500 font-medium leading-relaxed">
+                                    {{ $item->medical_college }}
+                                </td>
+                                <td class="w-24 p-2 border-r border-slate-100 aspect-9/11">
+                                    <div class="flex items-center justify-center w-full h-full">
+                                        <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}"
+                                            class="w-full h-full object-cover rounded-lg bg-slate-100" alt="">
+                                    </div>
+                                </td>
+                                <td class="w-48 p-4">
+                                    <div class="flex items-center justify-end gap-3">
+                                        <span
+                                            class="badge {{ $item->is_active ? 'badge-success' : 'badge-danger' }} text-[8px]!">
+                                            {{ $item->is_active ? 'Active' : 'Inactive' }}
+                                        </span>
+                                        <div class="flex items-center border-l pl-3 border-slate-100 space-x-1">
+                                            <button class="btn-icon w-8 p-1.5!"
+                                                onclick="openEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
+                                                <i class="fas fa-pencil text-xs"></i>
+                                            </button>
+                                            <form action="{{ route('admin.scholarship.delete', $item) }}" method="POST"
+                                                onsubmit="return confirm('Delete record?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn-danger w-8 p-1.5!"><i
+                                                        class="fas fa-trash-can text-xs"></i></button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div id="addModal" class="modal-overlay">
-        <div class="modal-content" style="width: 500px;">
-            <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3 style="margin-bottom: 20px;">Add New Person</h3>
-            <form action="{{ route('admin.scholarship.store') }}" method="POST" enctype="multipart/form-data">
+    <div id="addModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-2xl! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Add New Person</h1>
+                <button type="button" onclick="closeModal('addModal')" class="btn-icon"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form action="{{ route('admin.scholarship.store') }}" method="POST" enctype="multipart/form-data"
+                class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <div class="modal-photo-preview" id="addPhotoPreview"><i class="fas fa-camera fa-2x"
-                        style="color:#cbd5e0"></i></div>
-                <input type="file" name="image" required onchange="previewImg(this, 'addPhotoPreview')"
-                    style="margin-bottom:15px; width:100%;">
-
-                <input type="text" name="name" placeholder="Full Name" required
-                    style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:10px;">
-
-                <div class="prefix-input-wrapper">
-                    <span class="prefix-text">Session:</span>
-                    <input type="text" name="session" class="prefix-input" placeholder="2023-24">
-                </div>
-
-                <div class="prefix-input-wrapper">
-                    <span class="prefix-text">Roll No:</span>
-                    <input type="text" name="roll_no" class="prefix-input" placeholder="12345">
-                </div>
-
-                <input type="text" name="medical_college" placeholder="Medical College Name" required
-                    style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:20px;">
-
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Save
-                    Person</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content" style="width: 500px;">
-            <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3 style="margin-bottom: 20px;">Edit Details</h3>
-            <form id="editForm">
-                <div class="modal-photo-preview" id="editPhotoPreview"></div>
-                <input type="file" name="image" onchange="previewImg(this, 'editPhotoPreview')"
-                    style="margin-bottom:15px; width:100%;">
-
-                <input type="text" name="name" id="editName" required
-                    style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:10px;">
-
-                <div class="prefix-input-wrapper">
-                    <span class="prefix-text">Session:</span>
-                    <input type="text" name="session" id="editSession" class="prefix-input">
-                </div>
-
-                <div class="prefix-input-wrapper">
-                    <span class="prefix-text">Roll No:</span>
-                    <input type="text" name="roll_no" id="editRoll" class="prefix-input">
-                </div>
-
-                <input type="text" name="medical_college" id="editCollege" required
-                    style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:15px;">
-
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer;">
-                    <div class="toggle-switch">
-                        <input type="checkbox" name="is_active" id="editActive">
-                        <span class="slider"></span>
+                <div class="grid grid-cols-12 gap-10">
+                    <div class="col-span-4 flex flex-col items-center">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase mb-2 self-start ml-1">Photo
+                            (9:11)</label>
+                        <input type="file" name="image" id="addInput" accept="image/*" class="hidden"
+                            onchange="handlePreview(this, 'addPreview')">
+                        <div class="w-full aspect-9/11 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue hover:bg-slate-100 transition-all group"
+                            id="addPreview" onclick="document.getElementById('addInput').click()">
+                            <i
+                                class="fas fa-camera text-3xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i>
+                            <span
+                                class="text-slate-400 font-bold text-[9px] uppercase tracking-widest text-center px-4 opacity-60">Upload
+                                Portrait</span>
+                        </div>
+                        <span id="addImgError" class="text-[10px] text-red-500 font-bold uppercase mt-2 hidden">Photo is
+                            required</span>
                     </div>
-                    <span style="font-weight:600;">Active Status</span>
-                </label>
 
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Update
-                    Details</button>
+                    <div class="col-span-8 space-y-5">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Full Name</label>
+                            <input type="text" name="name" required class="input-field w-full"
+                                placeholder="Enter recipient's name">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Session</label>
+                                <input type="text" name="session" class="input-field w-full" placeholder="e.g. 2023-24">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Roll No</label>
+                                <input type="text" name="roll_no" class="input-field w-full" placeholder="e.g. 12345">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Medical College Name</label>
+                            <input type="text" name="medical_college" required class="input-field w-full"
+                                placeholder="Enter college name">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-6 sticky bottom-0 bg-white">
+                    <button type="submit" class="btn-success h-10">Save Recipient</button>
+                </div>
             </form>
         </div>
     </div>
 
-    @include('admin.partials.css')
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-2xl! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Edit Recipient</h1>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-        <script>
-            new Sortable(document.getElementById('sortable-list'), {
-                handle: '.drag-handle',
-                animation: 150,
-                onEnd: function () {
-                    let orders = [];
-                    document.querySelectorAll('.scholar-row').forEach((row, index) => {
-                        orders.push({ id: row.dataset.id, order: index + 1 });
-                    });
-                    fetch('{{ route("admin.scholarship.update-order") }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ orders })
-                    });
-                }
-            });
+            <form id="editForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
+                @csrf
+                <input type="file" name="image" id="editInput" accept="image/*" class="hidden"
+                    onchange="handlePreview(this, 'editPreview')">
 
-            function previewImg(input, targetId) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = e => document.getElementById(targetId).innerHTML = `<img src="${e.target.result}">`;
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
+                <div class="grid grid-cols-12 gap-10">
+                    <div class="col-span-4 flex flex-col items-center">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase mb-2 self-start ml-1">Recipient
+                            Photo</label>
+                        <div class="relative group cursor-pointer w-full aspect-9/11"
+                            onclick="document.getElementById('editInput').click()">
+                            <div class="w-full h-full bg-slate-100 rounded-3xl border border-slate-200 overflow-hidden"
+                                id="editPreview"></div>
+                            <div
+                                class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-3xl">
+                                <span
+                                    class="text-white font-bold text-[9px] uppercase tracking-widest text-center px-2">Replace
+                                    Photo</span>
+                            </div>
+                        </div>
+                    </div>
 
-            function openAddModal() {
-                document.getElementById('addModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('addModal').classList.add('active'), 10);
-            }
+                    <div class="col-span-8 space-y-5">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Full Name</label>
+                            <input type="text" name="name" id="editName" required class="input-field w-full">
+                        </div>
 
-            let currentEditId = null;
-            function openEditModal(item) {
-                currentEditId = item.id;
-                document.getElementById('editName').value = item.name;
-                document.getElementById('editCollege').value = item.medical_college;
-                document.getElementById('editActive').checked = (item.is_active == 1);
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Session</label>
+                                <input type="text" name="session" id="editSession" class="input-field w-full">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Roll No</label>
+                                <input type="text" name="roll_no" id="editRoll" class="input-field w-full">
+                            </div>
+                        </div>
 
-                let sessionRaw = item.session ? item.session.replace('Session: ', '') : '';
-                let rollRaw = item.roll_no ? item.roll_no.replace('Roll No: ', '') : '';
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Medical College Name</label>
+                            <input type="text" name="medical_college" id="editCollege" required class="input-field w-full">
+                        </div>
+                    </div>
+                </div>
 
-                document.getElementById('editSession').value = sessionRaw;
-                document.getElementById('editRoll').value = rollRaw;
-
-                document.getElementById('editPhotoPreview').innerHTML = `<img src="/storage/${item.image_path}">`;
-
-                document.getElementById('editModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('editModal').classList.add('active'), 10);
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                setTimeout(() => document.getElementById(id).style.display = 'none', 300);
-            }
-
-            document.getElementById('editForm').onsubmit = function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-
-                fetch(`/admin/scholarship-actions/${currentEditId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(() => window.location.reload());
-            }
-        </script>
-    @endpush
+                <div class="flex items-center justify-between mt-6 sticky bottom-0 bg-white pb-2 pt-4">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="scholarStatusLabel" class="ml-3 font-bold text-slate-600 text-sm">Active</span>
+                    </label>
+                    <button type="submit" class="btn-primary h-10">Update Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
