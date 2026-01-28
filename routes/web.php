@@ -154,10 +154,14 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 
 
 Route::get('products/{generic}/{product}', [ProductController::class, 'frontendShow'])
+    ->where('generic', '^[a-zA-Z0-9-]+$')
     ->where('product', '^[a-zA-Z0-9-]+$');
 
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
     ->where('filename', '^[0-9]+\.webp$');
+
+Route::get('products/{path}', [ProductController::class, 'serveProductImage'])
+    ->where('path', '.*\.webp$');
 
 Route::get('{path}/{year}/{filename}', [MedicalJournalController::class, 'servePdf'])
     ->where('path', '.*')

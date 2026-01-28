@@ -1,16 +1,20 @@
 <div class="admin-card-header p-5!">
     <div class="w-3/4">
-        <h1 class="whitespace-normal leading-tight pr-4">{{ $generic->name }}</h1>
+        <h1 class="whitespace-normal leading-tight pr-4">
+            {{ $generic ? $generic->name : 'Archived Products' }}
+        </h1>
     </div>
-    <button onclick="openAddProduct()" class="btn-success h-10 shrink-0">
-        <i class="fas fa-plus"></i> Add Product
-    </button>
+    @if($generic)
+        <button onclick="openAddProduct()" class="btn-success h-10 shrink-0">
+            <i class="fas fa-plus"></i> Add Product
+        </button>
+    @endif
 </div>
 
 <div class="admin-card-body flex flex-col custom-scrollbar bg-slate-50/20">
     <div id="product-list-container" class="space-y-3 flex-1">
         @forelse($products as $p)
-            @php $isLocked = !$generic->is_active; @endphp
+            @php $isLocked = $generic ? !$generic->is_active : false; @endphp
             <div
                 class="group bg-white border border-slate-200 rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all {{ ($isLocked || !$p->is_active) ? 'opacity-70' : '' }}">
 

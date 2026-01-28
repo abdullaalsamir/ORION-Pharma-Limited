@@ -63,6 +63,18 @@
                         </div>
                     </div>
                 @endforeach
+                @if($archivedCount > 0)
+                    <div class="generic-list-item archived-item p-3 bg-red-50/50 border border-red-100 rounded-2xl hover:border-red-400 cursor-pointer transition-all group mt-4"
+                        onclick="loadProducts(0, this)">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="generic-name font-bold text-red-500 text-sm whitespace-normal leading-tight flex-1">
+                                Archived Products
+                            </span>
+                            <span
+                                class="badge bg-red-100! text-red-500! border-red-200! text-[8px]!">{{ $archivedCount }}</span>
+                        </div>
+                    </div>
+                @endif
             </div>
         </aside>
 
@@ -150,6 +162,15 @@
                         <input type="text" name="trade_name" id="p_trade_name" required class="input-field w-full">
                         <span id="prodNameError"
                             class="text-[10px] text-red-500 font-bold uppercase ml-1 mt-1 hidden"></span>
+                    </div>
+                    <div class="flex flex-col gap-1" id="p_generic_id_wrapper">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Assign Generic (Optional)</label>
+                        <select name="generic_id" id="p_generic_id" class="input-field w-full">
+                            <option value="">⁝⁝⁝ No Generic / Archived ⁝⁝⁝</option>
+                            @foreach($generics as $g)
+                                <option value="{{ $g->id }}">{{ $g->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Preparation</label>

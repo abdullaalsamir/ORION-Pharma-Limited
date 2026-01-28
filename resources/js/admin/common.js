@@ -535,18 +535,27 @@ export function initProductsPage() {
 
     const updateSidebarSelection = (el) => {
         document.querySelectorAll('.generic-list-item').forEach(item => {
-            item.classList.remove('border-admin-blue');
-            item.classList.add('bg-white', 'border-slate-200');
+            item.classList.remove('active', 'border-admin-blue', 'bg-blue-50/50', 'border-red-500', 'bg-red-50', 'shadow-inner');
             
+            if (item.classList.contains('archived-item')) {
+                item.classList.add('bg-red-50/50', 'border-red-100');
+            } else {
+                item.classList.add('bg-white', 'border-slate-200');
+            }
+
             const nameSpan = item.querySelector('.generic-name');
-            if (nameSpan) nameSpan.classList.remove('text-admin-blue');
+            if (nameSpan) nameSpan.classList.remove('text-admin-blue', 'text-red-700');
         });
 
-        el.classList.add('border-admin-blue');
-        el.classList.remove('bg-white', 'border-slate-200');
-
-        const activeNameSpan = el.querySelector('.generic-name');
-        if (activeNameSpan) activeNameSpan.classList.add('text-admin-blue');
+        if (el.classList.contains('archived-item')) {
+            el.classList.add('active', 'border-red-500', 'bg-red-50', 'shadow-inner');
+            el.classList.remove('bg-red-50/50', 'border-red-100');
+            el.querySelector('.generic-name').classList.add('text-red-700');
+        } else {
+            el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50', 'shadow-inner');
+            el.classList.remove('bg-white', 'border-slate-200');
+            el.querySelector('.generic-name').classList.add('text-admin-blue');
+        }
     };
 
     const genNameInput = document.getElementById('genName');
@@ -618,7 +627,7 @@ export function initProductsPage() {
     }
 
     window.deleteGeneric = (id) => {
-        if (confirm('Delete this Generic and ALL its products?')) {
+        if (confirm('Delete this Generic? All products will move to "Archived Products".')) {
             fetch(`/admin/products-actions/generic-delete/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
                 .then(res => res.json()).then(data => { if (data.success) window.location.reload(); });
         }
@@ -631,6 +640,8 @@ export function initProductsPage() {
         prodForm.reset();
         prodForm.dataset.id = "";
         clearInlineError('p_trade_name', 'prodNameError');
+
+        document.getElementById('p_generic_id_wrapper').classList.add('hidden');
         
         const previewBox = document.getElementById('prodPreview');
         const errorMsg = document.getElementById('prodImageError');
@@ -642,7 +653,7 @@ export function initProductsPage() {
         
         document.getElementById('prodTitle').innerText = "Add Product";
         document.getElementById('prodReplaceOverlay').classList.add('hidden');
-        document.getElementById('prodPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select Image</span>`;
+        document.getElementById('prodPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select 16:9 Image</span>`;
         document.getElementById('prodActiveWrapper').classList.add('opacity-0', 'pointer-events-none');
         
         const modal = document.getElementById('productModal');
@@ -655,6 +666,13 @@ export function initProductsPage() {
         prodForm.dataset.id = p.id;
         clearInlineError('p_trade_name', 'prodNameError');
 
+        const genWrapper = document.getElementById('p_generic_id_wrapper');
+        if (!p.generic_id) {
+            genWrapper.classList.remove('hidden');
+        } else {
+            genWrapper.classList.add('hidden');
+        }
+
         document.getElementById('prodTitle').innerText = "Edit Product";
         document.getElementById('prodReplaceOverlay').classList.remove('hidden');
         
@@ -664,11 +682,13 @@ export function initProductsPage() {
             if (el) el.value = p[f] || '';
         });
 
+        const genSelect = document.getElementById('p_generic_id');
+        if(genSelect) genSelect.value = p.generic_id || '';
+
         const toggle = document.getElementById('p_active');
         const lbl = document.getElementById('prodStatusLabel');
         toggle.checked = (p.is_active == 1);
         lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
         document.getElementById('prodPreview').innerHTML = `<img src="/storage/${p.image_path}" class="w-full h-full object-cover">`;
         document.getElementById('prodActiveWrapper').classList.remove('opacity-0', 'pointer-events-none');
         
@@ -717,9 +737,9 @@ export function initProductsPage() {
                 const data = await res.json();
                 if (res.ok) {
                     closeModal('productModal'); 
-                    loadProducts(window.currentGenId, document.querySelector('.generic-list-item.active'));
+                    window.location.reload();
                 } else {
-                    showInlineError('p_trade_name', 'prodNameError', data.error || "Trade name must be unique.");
+                    showInlineError('p_trade_name', 'prodNameError', data.error || "Trade name already exists in this generic.");
                     prodForm.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
@@ -728,6 +748,6 @@ export function initProductsPage() {
 
     window.deleteProduct = (id) => {
         if (confirm('Delete product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
-            .then(() => loadProducts(window.currentGenId, document.querySelector('.generic-list-item.active')));
+            .then(() => window.location.reload());
     };
 }
