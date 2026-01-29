@@ -1342,57 +1342,24 @@ export function initJournalsPage() {
     };
 }
 
-export function initAnnualReportsPage() {
+export function initReportModule() {
+    const pageMap = {
+        'annual-reports': '/admin/annual-reports-actions',
+        'quarterly-reports': '/admin/quarterly-reports-actions',
+        'half-yearly-reports': '/admin/half-yearly-reports-actions',
+        'price-sensitive-information': '/admin/price-sensitive-information-actions',
+        'corporate-governance': '/admin/corporate-governance-actions'
+    };
+
+    const segment = window.location.pathname.split('/')[2];
+    const baseUrl = pageMap[segment];
+
     const addForm = document.querySelector('#addModal form');
     const editForm = document.getElementById('editForm');
-    if (!addForm && !editForm) return;
-
-    document.querySelectorAll('.report-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-slate-50',
-
-            onMove: (evt) => {
-                const draggedDate = evt.dragged.dataset.date;
-                const relatedDate = evt.related?.dataset.date;
-
-                return draggedDate === relatedDate;
-            },
-
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-
-                fetch('/admin/annual-reports-actions/update-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.handlePdfSelect = (input, isEdit = false) => {
-        if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
-            } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
-                document.getElementById('titleInput').value = fileName.replace(/\.[^/.]+$/, "");
-            }
-        }
-    };
 
     window.openAddModal = () => {
         const modal = document.getElementById('addModal');
+        if(!modal) return;
         addForm.reset();
         addForm.scrollTop = 0;
         document.getElementById('pdfStatusText').innerText = "Click to select PDF";
@@ -1401,13 +1368,24 @@ export function initAnnualReportsPage() {
         setTimeout(() => modal.classList.add('active'), 10);
     };
 
+    window.deleteItem = (id) => {
+        if (!baseUrl) return;
+        if (confirm('Delete this record permanently?')) {
+            fetch(`${baseUrl}/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => Turbo.visit(window.location.href));
+        }
+    };
+
     window.openEditModal = (item) => {
-        window.currentReportId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
+        if(!editForm) return;
+        window.currentReportItemId = item.id;
+        editForm.reset();
+        editForm.scrollTop = 0;
 
         document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.publication_date.split('T')[0];
+        document.getElementById('editDate').value = item.publication_date ? item.publication_date.split('T')[0] : '';
         document.getElementById('editDesc').value = item.description || '';
         document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
         
@@ -1423,134 +1401,34 @@ export function initAnnualReportsPage() {
         setTimeout(() => modal.classList.add('active'), 10);
     };
 
-    const handleReportSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    if (addForm) addForm.onsubmit = (e) => handleReportSubmit(e, '/admin/annual-reports-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleReportSubmit(e, `/admin/annual-reports-actions/${window.currentReportId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteReport = (id) => {
-        if (confirm('Delete this report permanently?')) {
-            fetch(`/admin/annual-reports-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
-}
-
-export function initQuarterlyReportsPage() {
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!addForm && !editForm) return;
+    if (!baseUrl || !addForm || !editForm) return;
 
     document.querySelectorAll('.report-sortable-list').forEach(list => {
         new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-slate-50',
-
-            onMove: (evt) => {
-                const draggedDate = evt.dragged.dataset.date;
-                const relatedDate = evt.related?.dataset.date;
-
-                return draggedDate === relatedDate;
-            },
-
+            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
             onEnd: () => {
                 let orders = [];
                 list.querySelectorAll('.sortable-item').forEach((row, index) => {
                     orders.push({ id: row.dataset.id, order: index + 1 });
                 });
-
-                fetch('/admin/quarterly-reports-actions/update-order', {
+                fetch(`${baseUrl}/update-order`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                     body: JSON.stringify({ orders })
                 });
             }
         });
     });
 
-    window.handlePdfSelect = (input, isEdit = false) => {
-        if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
-            } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
-                document.getElementById('titleInput').value = fileName.replace(/\.[^/.]+$/, "");
-            }
-        }
-    };
-
-    window.openAddModal = () => {
-        const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('pdfStatusText').innerText = "Click to select PDF";
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.openEditModal = (item) => {
-        window.currentReportId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.publication_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description || '';
-        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('reportStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    const handleReportSubmit = (e, url, isUpdate = false) => {
+    const handleFormSubmit = (e, url, isUpdate = false) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         if (isUpdate) {
             formData.append('_method', 'PUT');
             formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
         }
-
         fetch(url, {
-            method: 'POST',
-            body: formData,
+            method: 'POST', body: formData,
             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
         }).then(res => res.json()).then(data => {
             if (data.success) Turbo.visit(window.location.href);
@@ -1558,371 +1436,10 @@ export function initQuarterlyReportsPage() {
         });
     };
 
-    if (addForm) addForm.onsubmit = (e) => handleReportSubmit(e, '/admin/quarterly-reports-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleReportSubmit(e, `/admin/quarterly-reports-actions/${window.currentReportId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteReport = (id) => {
-        if (confirm('Delete this report permanently?')) {
-            fetch(`/admin/quarterly-reports-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
-}
-
-export function initHalfYearlyReportsPage() {
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!addForm && !editForm) return;
-
-    document.querySelectorAll('.report-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-slate-50',
-
-            onMove: (evt) => {
-                const draggedDate = evt.dragged.dataset.date;
-                const relatedDate = evt.related?.dataset.date;
-
-                return draggedDate === relatedDate;
-            },
-
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-
-                fetch('/admin/half-yearly-reports-actions/update-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.handlePdfSelect = (input, isEdit = false) => {
-        if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
-            } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
-                document.getElementById('titleInput').value = fileName.replace(/\.[^/.]+$/, "");
-            }
-        }
-    };
-
-    window.openAddModal = () => {
-        const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('pdfStatusText').innerText = "Click to select PDF";
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.openEditModal = (item) => {
-        window.currentReportId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.publication_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description || '';
-        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('reportStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    const handleReportSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    if (addForm) addForm.onsubmit = (e) => handleReportSubmit(e, '/admin/half-yearly-reports-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleReportSubmit(e, `/admin/half-yearly-reports-actions/${window.currentReportId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteReport = (id) => {
-        if (confirm('Delete this report permanently?')) {
-            fetch(`/admin/half-yearly-reports-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
-}
-
-export function initPriceSensitiveInformationPage() {
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!addForm && !editForm) return;
-
-    document.querySelectorAll('.report-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-slate-50',
-
-            onMove: (evt) => {
-                const draggedDate = evt.dragged.dataset.date;
-                const relatedDate = evt.related?.dataset.date;
-
-                return draggedDate === relatedDate;
-            },
-
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-
-                fetch('/admin/price-sensitive-information-actions/update-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.handlePdfSelect = (input, isEdit = false) => {
-        if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
-            } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
-                document.getElementById('titleInput').value = fileName.replace(/\.[^/.]+$/, "");
-            }
-        }
-    };
-
-    window.openAddModal = () => {
-        const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('pdfStatusText').innerText = "Click to select PDF";
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.openEditModal = (item) => {
-        window.currentReportId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.publication_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description || '';
-        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('reportStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    const handleReportSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    if (addForm) addForm.onsubmit = (e) => handleReportSubmit(e, '/admin/price-sensitive-information-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleReportSubmit(e, `/admin/price-sensitive-information-actions/${window.currentReportId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteReport = (id) => {
-        if (confirm('Delete this report permanently?')) {
-            fetch(`/admin/price-sensitive-information-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
-}
-
-export function initCorporateGovernancePage() {
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!addForm && !editForm) return;
-
-    document.querySelectorAll('.report-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-slate-50',
-
-            onMove: (evt) => {
-                const draggedDate = evt.dragged.dataset.date;
-                const relatedDate = evt.related?.dataset.date;
-
-                return draggedDate === relatedDate;
-            },
-
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-
-                fetch('/admin/corporate-governance-actions/update-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.handlePdfSelect = (input, isEdit = false) => {
-        if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
-            } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
-                document.getElementById('titleInput').value = fileName.replace(/\.[^/.]+$/, "");
-            }
-        }
-    };
-
-    window.openAddModal = () => {
-        const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('pdfStatusText').innerText = "Click to select PDF";
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.openEditModal = (item) => {
-        window.currentReportId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.publication_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description || '';
-        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('reportStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    const handleReportSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    if (addForm) addForm.onsubmit = (e) => handleReportSubmit(e, '/admin/corporate-governance-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleReportSubmit(e, `/admin/corporate-governance-actions/${window.currentReportId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteReport = (id) => {
-        if (confirm('Delete this report permanently?')) {
-            fetch(`/admin/corporate-governance-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
+    addForm.onsubmit = (e) => handleFormSubmit(e, `${baseUrl}/store`, false);
+    editForm.onsubmit = (e) => handleFormSubmit(e, `${baseUrl}/${window.currentReportItemId}`, true);
+    
+    document.getElementById('editActive').onchange = function() {
+        document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
     };
 }

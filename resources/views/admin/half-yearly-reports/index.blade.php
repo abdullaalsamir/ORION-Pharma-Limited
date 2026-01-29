@@ -68,7 +68,7 @@
                                     <button class="btn-icon w-8 p-1.5!" onclick="openEditModal({{ json_encode($item) }})">
                                         <i class="fas fa-pencil text-xs"></i>
                                     </button>
-                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteReport({{ $item->id }})">
+                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteItem({{ $item->id }})">
                                         <i class="fas fa-trash-can text-xs"></i>
                                     </button>
                                 </div>

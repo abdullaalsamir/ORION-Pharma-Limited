@@ -101,18 +101,11 @@ Route::prefix('admin')
             Route::post('/update-order', [MedicalJournalController::class, 'updateOrder'])->name('update-order');
         });
 
-        Route::prefix('price-sensitive-information-actions')->name('price-sensitive-information.')->group(function () {
-            Route::post('/store', [PriceSensitiveInformationController::class, 'store'])->name('store');
-            Route::put('/{priceSensitiveInformation}', [PriceSensitiveInformationController::class, 'update'])->name('update');
-            Route::delete('/{priceSensitiveInformation}', [PriceSensitiveInformationController::class, 'delete'])->name('delete');
-            Route::post('/update-order', [PriceSensitiveInformationController::class, 'updateOrder'])->name('update-order');
-        });
-
-        Route::prefix('half-yearly-reports-actions')->name('half-yearly-reports.')->group(function () {
-            Route::post('/store', [HalfYearlyReportsController::class, 'store'])->name('store');
-            Route::put('/{halfYearlyReports}', [HalfYearlyReportsController::class, 'update'])->name('update');
-            Route::delete('/{halfYearlyReports}', [HalfYearlyReportsController::class, 'delete'])->name('delete');
-            Route::post('/update-order', [HalfYearlyReportsController::class, 'updateOrder'])->name('update-order');
+        Route::prefix('annual-reports-actions')->name('annual-reports.')->group(function () {
+            Route::post('/store', [AnnualReportsController::class, 'store'])->name('store');
+            Route::put('/{annualReports}', [AnnualReportsController::class, 'update'])->name('update');
+            Route::delete('/{annualReports}', [AnnualReportsController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [AnnualReportsController::class, 'updateOrder'])->name('update-order');
         });
 
         Route::prefix('quarterly-reports-actions')->name('quarterly-reports.')->group(function () {
@@ -122,14 +115,21 @@ Route::prefix('admin')
             Route::post('/update-order', [QuarterlyReportsController::class, 'updateOrder'])->name('update-order');
         });
 
-        Route::prefix('annual-reports-actions')->name('annual-reports.')->group(function () {
-            Route::post('/store', [AnnualReportsController::class, 'store'])->name('store');
-            Route::put('/{annualReports}', [AnnualReportsController::class, 'update'])->name('update');
-            Route::delete('/{annualReports}', [AnnualReportsController::class, 'delete'])->name('delete');
-            Route::post('/update-order', [AnnualReportsController::class, 'updateOrder'])->name('update-order');
+        Route::prefix('half-yearly-reports-actions')->name('half-yearly-reports.')->group(function () {
+            Route::post('/store', [HalfYearlyReportsController::class, 'store'])->name('store');
+            Route::put('/{halfYearlyReports}', [HalfYearlyReportsController::class, 'update'])->name('update');
+            Route::delete('/{halfYearlyReports}', [HalfYearlyReportsController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [HalfYearlyReportsController::class, 'updateOrder'])->name('update-order');
         });
 
-        Route::prefix('corporate-governance')->name('corporate-governance.')->group(function () {
+        Route::prefix('price-sensitive-information-actions')->name('price-sensitive-information.')->group(function () {
+            Route::post('/store', [PriceSensitiveInformationController::class, 'store'])->name('store');
+            Route::put('/{priceSensitiveInformation}', [PriceSensitiveInformationController::class, 'update'])->name('update');
+            Route::delete('/{priceSensitiveInformation}', [PriceSensitiveInformationController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [PriceSensitiveInformationController::class, 'updateOrder'])->name('update-order');
+        });
+
+        Route::prefix('corporate-governance-actions')->name('corporate-governance.')->group(function () {
             Route::post('/store', [CorporateGovernanceController::class, 'store'])->name('store');
             Route::put('/{corporateGovernance}', [CorporateGovernanceController::class, 'update'])->name('update');
             Route::delete('/{corporateGovernance}', [CorporateGovernanceController::class, 'delete'])->name('delete');
