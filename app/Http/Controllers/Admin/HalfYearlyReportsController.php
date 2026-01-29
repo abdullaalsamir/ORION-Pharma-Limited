@@ -14,11 +14,15 @@ class HalfYearlyReportsController extends Controller
     public function index()
     {
         $menu = Menu::where('slug', 'half-yearly-reports')->firstOrFail();
-        $items = HalfYearlyReports::orderBy('publication_date', 'desc')
-            ->orderBy('order', 'desc')
-            ->get();
 
-        return view('admin.half-yearly-reports.index', compact('menu', 'items'));
+        $groupedItems = HalfYearlyReports::orderBy('publication_date', 'desc')
+            ->orderBy('order', 'asc')
+            ->get()
+            ->groupBy(function ($item) {
+                return \Carbon\Carbon::parse($item->publication_date)->format('Y');
+            });
+
+        return view('admin.half-yearly-reports.index', compact('menu', 'groupedItems'));
     }
 
     public function store(Request $request)
@@ -27,83 +31,81 @@ class HalfYearlyReportsController extends Controller
             'pdf' => 'required|mimes:pdf|max:51200',
             'title' => 'required|string',
             'publication_date' => 'required|date',
-            'description' => 'nullable|string|max:550'
+            'description' => 'nullable|string|max:500'
         ]);
 
-        $slug = $this->generateUniqueFilename($request->title);
-        $filename = $slug . '.pdf';
+        try {
+            $slug = $this->generateUniqueFilename($request->title);
+            $filename = $slug . '.pdf';
+            $request->file('pdf')->storeAs("half-yearly-reports", $filename, 'public');
 
-        $request->file('pdf')->storeAs('half-yearly-reports', $filename, 'public');
+            HalfYearlyReports::create([
+                'title' => $request->title,
+                'filename' => $filename,
+                'description' => $request->description,
+                'publication_date' => $request->publication_date,
+                'is_active' => 1,
+                'order' => (HalfYearlyReports::max('order') ?? 0) + 1
+            ]);
 
-        HalfYearlyReports::create([
-            'title' => $request->title,
-            'filename' => $filename,
-            'description' => $request->description,
-            'publication_date' => $request->publication_date,
-            'is_active' => 1,
-            'order' => HalfYearlyReports::max('order') + 1
-        ]);
-
-        return back()->with('success', 'Information added successfully');
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
-    public function update(Request $request, HalfYearlyReports $halfYearlyReport)
+    public function update(Request $request, HalfYearlyReports $halfYearlyReports)
     {
         $request->validate([
             'pdf' => 'nullable|mimes:pdf|max:51200',
             'title' => 'required|string',
             'publication_date' => 'required|date',
-            'description' => 'nullable|string|max:550'
+            'description' => 'nullable|string|max:500'
         ]);
 
-        $oldFilename = $halfYearlyReport->filename;
+        try {
+            $oldFilename = $halfYearlyReports->filename;
+            $newSlug = $this->generateUniqueFilename($request->title, $halfYearlyReports->id);
+            $newFilename = $newSlug . '.pdf';
 
-        $slug = ($halfYearlyReport->title === $request->title)
-            ? str_replace('.pdf', '', $oldFilename)
-            : $this->generateUniqueFilename($request->title, $halfYearlyReport->id);
+            if ($request->hasFile('pdf')) {
+                Storage::disk('public')->delete("half-yearly-reports/{$oldFilename}");
+                $request->file('pdf')->storeAs("half-yearly-reports", $newFilename, 'public');
+            } elseif ($oldFilename !== $newFilename) {
+                Storage::disk('public')->move("half-yearly-reports/{$oldFilename}", "half-yearly-reports/{$newFilename}");
+            }
 
-        $newFilename = $slug . '.pdf';
+            $halfYearlyReports->update([
+                'title' => $request->title,
+                'filename' => $newFilename,
+                'description' => $request->description,
+                'publication_date' => $request->publication_date,
+                'is_active' => $request->input('is_active') == 1 ? 1 : 0
+            ]);
 
-        if ($request->hasFile('pdf')) {
-            Storage::disk('public')->delete("half-yearly-reports/{$oldFilename}");
-            $request->file('pdf')->storeAs('half-yearly-reports', $newFilename, 'public');
-        } elseif ($oldFilename !== $newFilename) {
-            Storage::disk('public')->move(
-                "half-yearly-reports/{$oldFilename}",
-                "half-yearly-reports/{$newFilename}"
-            );
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        $halfYearlyReport->update([
-            'title' => $request->title,
-            'filename' => $newFilename,
-            'description' => $request->description,
-            'publication_date' => $request->publication_date,
-            'is_active' => $request->input('is_active') == 1 ? 1 : 0
-        ]);
-
-        return response()->json(['success' => true]);
     }
 
     public function updateOrder(Request $request)
     {
         foreach ($request->orders as $item) {
-            HalfYearlyReports::where('id', $item['id'])
-                ->update(['order' => $item['order']]);
+            HalfYearlyReports::where('id', $item['id'])->update(['order' => $item['order']]);
         }
-
         return response()->json(['success' => true]);
     }
 
-    public function delete(HalfYearlyReports $halfYearlyReport)
+    public function delete(HalfYearlyReports $halfYearlyReports)
     {
-        Storage::disk('public')->delete(
-            "half-yearly-reports/{$halfYearlyReport->filename}"
-        );
-
-        $halfYearlyReport->delete();
-
-        return back()->with('success', 'Deleted successfully');
+        try {
+            Storage::disk('public')->delete("half-yearly-reports/{$halfYearlyReports->filename}");
+            $halfYearlyReports->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     private function generateUniqueFilename($title, $ignoreId = null)
@@ -111,15 +113,14 @@ class HalfYearlyReportsController extends Controller
         $base = Str::slug(str_replace('&', 'and', $title));
         $slug = $base;
         $counter = 2;
-
         while (
             HalfYearlyReports::where('filename', $slug . '.pdf')
                 ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
                 ->exists()
         ) {
-            $slug = $base . '-' . $counter++;
+            $slug = $base . '-' . $counter;
+            $counter++;
         }
-
         return $slug;
     }
 
