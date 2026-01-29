@@ -1,138 +1,162 @@
-<div id="contactModal" class="modal-overlay" style="display:none">
-    <div class="modal-content" style="width: 600px;">
-        <button onclick="closeFooterModal('contactModal')" class="modal-close"><i class="fas fa-times"></i></button>
-        <h3 style="color:#0a3d62; margin-bottom:25px; font-weight:800;">EDIT CONTACT INFO</h3>
-        <form action="{{ route('admin.footer.update') }}" method="POST">
+<div id="contactModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+            <h1 class="mb-0!">Edit Contact Info</h1>
+            <button type="button" onclick="closeModal('contactModal')" class="btn-icon"><i
+                    class="fas fa-times text-xl"></i></button>
+        </div>
+        <form action="{{ route('admin.footer.update') }}" method="POST"
+            class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
             @csrf
-            <div style="margin-bottom:20px; position:relative;">
-                <label class="modal-section-label">Company Name</label>
+            <div class="flex flex-col gap-1 relative">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Company Name</label>
                 <input type="text" name="company" value="{{ $footer->company }}" required maxlength="50"
-                    oninput="updateCounter(this, 'cnt_company', 50)"
-                    style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-weight:bold;">
-                <span class="char-limit-hint" id="cnt_company">0/50</span>
+                    class="input-field w-full" oninput="updateCount(this, 'c_company', 50)">
+                <span id="c_company" class="absolute right-3 top-8 text-[9px] text-slate-300 font-bold">0/50</span>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                @foreach(['address_1' => 'Address 1', 'address_2' => 'Address 2', 'address_3' => 'Address 3', 'phone_1' => 'Phone 1', 'phone_2' => 'Phone 2', 'fax' => 'Fax Number', 'email' => 'Email Address'] as $key => $label)
-                    <div style="margin-bottom:15px; position:relative;">
-                        <label class="modal-section-label">{{ $label }}</label>
-                        <input type="text" name="{{ $key }}" value="{{ $footer->$key }}" required maxlength="50"
-                            oninput="updateCounter(this, 'cnt_{{ $key }}', 50)"
-                            style="width:100%; padding:11px; border:1px solid #e2e8f0; border-radius:10px; font-size:13px;">
-                        <span class="char-limit-hint" id="cnt_{{ $key }}">0/50</span>
-                    </div>
-                @endforeach
+            <div class="flex flex-col gap-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Address</label>
+                <div class="relative"><input type="text" name="address_1" value="{{ $footer->address_1 }}"
+                        placeholder="Address Line 1" required maxlength="50" class="input-field w-full mb-2"
+                        oninput="updateCount(this, 'c_addr1', 50)"><span id="c_addr1"
+                        class="absolute right-3 top-2.5 text-[9px] text-slate-300 font-bold">0/50</span></div>
+                <div class="relative"><input type="text" name="address_2" value="{{ $footer->address_2 }}"
+                        placeholder="Address Line 2" required maxlength="50" class="input-field w-full mb-2"
+                        oninput="updateCount(this, 'c_addr2', 50)"><span id="c_addr2"
+                        class="absolute right-3 top-2.5 text-[9px] text-slate-300 font-bold">0/50</span></div>
+                <div class="relative"><input type="text" name="address_3" value="{{ $footer->address_3 }}"
+                        placeholder="Address Line 3" required maxlength="50" class="input-field w-full"
+                        oninput="updateCount(this, 'c_addr3', 50)"><span id="c_addr3"
+                        class="absolute right-3 top-2.5 text-[9px] text-slate-300 font-bold">0/50</span></div>
             </div>
-            <button type="submit"
-                style="width:100%; background:#0a3d62; color:#fff; border:none; padding:15px; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:10px;">UPDATE
-                FOOTER CONTACT</button>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Phone</label>
+                <div class="relative"><input type="text" name="phone_1" value="{{ $footer->phone_1 }}"
+                        placeholder="Phone Number 1" required maxlength="50" class="input-field w-full mb-2"
+                        oninput="updateCount(this, 'c_ph1', 50)"><span id="c_ph1"
+                        class="absolute right-3 top-2.5 text-[9px] text-slate-300 font-bold">0/50</span></div>
+                <div class="relative"><input type="text" name="phone_2" value="{{ $footer->phone_2 }}"
+                        placeholder="Phone Number 2" required maxlength="50" class="input-field w-full"
+                        oninput="updateCount(this, 'c_ph2', 50)"><span id="c_ph2"
+                        class="absolute right-3 top-2.5 text-[9px] text-slate-300 font-bold">0/50</span></div>
+            </div>
+
+            <div class="flex flex-col gap-1 relative">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Fax</label>
+                <input type="text" name="fax" value="{{ $footer->fax }}" maxlength="50" class="input-field w-full"
+                    oninput="updateCount(this, 'c_fax', 50)">
+                <span id="c_fax" class="absolute right-3 top-8 text-[9px] text-slate-300 font-bold">0/50</span>
+            </div>
+
+            <div class="flex flex-col gap-1 relative">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Email</label>
+                <input type="email" name="email" value="{{ $footer->email }}" required maxlength="50"
+                    class="input-field w-full" oninput="updateCount(this, 'c_mail', 50)">
+                <span id="c_mail" class="absolute right-3 top-8 text-[9px] text-slate-300 font-bold">0/50</span>
+            </div>
+
+            <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
+                <button type="submit" class="btn-primary h-10">Update</button>
+            </div>
         </form>
     </div>
 </div>
 
-<div id="mapModal" class="modal-overlay" style="display:none">
-    <div class="modal-content" style="width: 600px;">
-        <button onclick="closeFooterModal('mapModal')" class="modal-close"><i class="fas fa-times"></i></button>
-        <h3 style="color:#0a3d62; margin-bottom:20px;">LOCATION MAP CONFIG</h3>
-        <form action="{{ route('admin.footer.update') }}" method="POST">
+<div id="mapModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-2xl! h-[85vh]! flex flex-col">
+        <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+            <h1 class="mb-0!">Map Configuration</h1>
+            <button onclick="closeModal('mapModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <form action="{{ route('admin.footer.update') }}" method="POST" class="flex-1 flex flex-col space-y-6">
             @csrf
-            <label class="modal-section-label">Google Maps iframe 'src' URL</label>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" name="map_url" id="map_input" value="{{ $footer->map_url }}"
-                    placeholder="https://www.google.com/maps/embed?..." required
-                    style="flex:1; padding:12px; border:1px solid #e2e8f0; border-radius:10px;">
-                <button type="button" onclick="fetchMap()"
-                    style="background:#0a3d62; color:#fff; border:none; padding:0 25px; border-radius:10px; cursor:pointer; font-weight:bold;">FETCH</button>
+            <div class="flex flex-col gap-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Google Maps Embed URL</label>
+                <div class="flex gap-2">
+                    <input type="text" name="map_url" id="map_input" value="{{ $footer->map_url }}"
+                        placeholder="https://www.google.com/maps/embed?..." required class="input-field flex-1">
+                    <button type="button" onclick="fetchMap()" class="btn-primary h-11 px-6 bg-slate-800">Fetch
+                        Map</button>
+                </div>
             </div>
-            <iframe id="map_preview" src="{{ $footer->map_url }}" width="100%" height="220"
-                style="border:1px solid #e2e8f0; border-radius:15px; margin-bottom:20px; background:#f8fafc;"></iframe>
-            <button type="submit" id="mapSaveBtn" disabled
-                style="width:100%; background:#1e7a43; color:#fff; border:none; padding:15px; border-radius:12px; font-weight:bold; opacity:0.5; cursor:not-allowed;">CONFIRM
-                MAP UPDATE</button>
+            <div class="flex-1 rounded-3xl overflow-hidden border border-slate-200 bg-slate-50">
+                <iframe id="map_preview" src="{{ $footer->map_url }}" class="w-full h-full" style="border:0;"></iframe>
+            </div>
+            <div class="flex justify-end pt-4 border-t border-slate-50">
+                <button type="submit" id="mapSaveBtn" disabled
+                    class="btn-success h-10 opacity-50 cursor-not-allowed">Update</button>
+            </div>
         </form>
     </div>
 </div>
 
-<div id="qlModal" class="modal-overlay" style="display:none">
-    <div class="modal-content" style="width: 550px;">
-        <button onclick="closeFooterModal('qlModal')" class="modal-close">
-            <i class="fas fa-times"></i>
-        </button>
-
-        <h3 style="color:#0a3d62; margin-bottom:25px; font-weight:800;">
-            QUICK LINKS SLOTS
-        </h3>
-
-        <form action="{{ route('admin.footer.update') }}" method="POST">
+<div id="qlModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+            <h1 class="mb-0!">Quick Links Slots</h1>
+            <button onclick="closeModal('qlModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <form action="{{ route('admin.footer.update') }}" method="POST" class="flex-1 flex flex-col overflow-hidden">
             @csrf
-
-            <div id="ql-sortable">
+            <div id="ql-sortable" class="space-y-2 flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4">
                 @for($i = 0; $i < 7; $i++)
                     @php $current = $footer->quick_links[$i] ?? null; @endphp
-
-                    <div class="ql-row"
-                        style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:12px; display:flex; align-items:center; gap:15px; margin-bottom:10px;">
-
-                        <i class="fas fa-bars drag-handle" style="cursor:move; color:#cbd5e0; font-size:18px;"></i>
-
-
-                        <select name="ql_menu_id[]"
-                            style="flex:1; padding:11px; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; color:#334155; font-weight:bold; outline:none;">
-                            <option value="">-- No Page Selected --</option>
+                    <div class="flex items-center gap-1 p-2 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <div
+                            class="drag-handle w-8 flex justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
+                        <select name="ql_menu_id[]" class="input-field h-11! flex-1 ql-select">
+                            <option value="">⁝⁝⁝ None ⁝⁝⁝</option>
                             @foreach($menus as $menu)
                                 <option value="{{ $menu->id }}" {{ ($current && $current['menu_id'] == $menu->id) ? 'selected' : '' }}>{{ $menu->name }}</option>
-                                @foreach($menu->children as $child)
-                                    <option value="{{ $child->id }}" {{ ($current && $current['menu_id'] == $child->id) ? 'selected' : '' }} style="color:gray;">— {{ $child->name }}</option>
-                                    @foreach($child->children as $sub)
-                                        <option value="{{ $sub->id }}" {{ ($current && $current['menu_id'] == $sub->id) ? 'selected' : '' }} style="color:silver;">&nbsp;&nbsp;&nbsp;&nbsp;— {{ $sub->name }}</option>
-                                    @endforeach
-                                @endforeach
                             @endforeach
-
                         </select>
                     </div>
                 @endfor
             </div>
-
-            <button type="submit"
-                style="width:100%; background:#0a3d62; color:#fff; border:none; padding:16px; border-radius:12px; font-weight:bold; margin-top:15px;">
-                SAVE FOOTER LINKS
-            </button>
+            <div class="flex justify-end pt-4 border-t border-slate-50 mt-4">
+                <button type="submit" class="btn-primary h-10">Update</button>
+            </div>
         </form>
     </div>
 </div>
 
-<div id="followModal" class="modal-overlay" style="display:none">
-    <div class="modal-content" style="width: 550px;">
-        <button onclick="closeFooterModal('followModal')" class="modal-close"><i class="fas fa-times"></i></button>
-        <h3 style="color:#0a3d62; margin-bottom:25px; font-weight:800;">FOLLOW US & BRANDING</h3>
-        <form action="{{ route('admin.footer.update') }}" method="POST">
+<div id="followModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+            <h1 class="mb-0!">Branding & Social</h1>
+            <button onclick="closeModal('followModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <form action="{{ route('admin.footer.update') }}" method="POST"
+            class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
             @csrf
-            <div style="margin-bottom:30px; position:relative;">
-                <label class="modal-section-label">Footer Description (200 Chars)</label>
-                <textarea name="follow_us_desc" required maxlength="200" oninput="updateCounter(this, 'cnt_desc', 200)"
-                    style="width:100%; height:110px; padding:15px; border:1px solid #e2e8f0; border-radius:12px; resize:none; font-size:14px; font-weight:500;">{{ $footer->follow_us_desc }}</textarea>
-                <span class="char-limit-hint" id="cnt_desc">0/200</span>
+            <div class="flex flex-col gap-1 relative">
+                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Footer Brand Description</label>
+                <textarea name="follow_us_desc" required maxlength="200"
+                    class="input-field w-full h-28 py-4 resize-none"
+                    oninput="updateCount(this, 'cnt_desc', 200)">{{ $footer->follow_us_desc }}</textarea>
+                <span id="cnt_desc" class="absolute right-4 bottom-3 text-[9px] text-slate-300 font-bold">0/200</span>
             </div>
-
-            <div id="social-sortable">
-                @foreach($footer->social_links ?? [] as $index => $social)
-                    <div class="ql-row"
-                        style="background:#fff; border:1px solid #e2e8f0; padding:12px; border-radius:12px; display:flex; align-items:center; gap:15px; margin-bottom:10px;">
-                        <i class="fas fa-bars drag-handle" style="cursor:move; color:#cbd5e0;"></i>
-                        <div style="width:100px; font-size:11px; font-weight:900; color:#0a3d62; text-transform:uppercase;">
-                            {{ $social['platform'] }}
-                        </div>
+            <div id="social-sortable" class="space-y-2">
+                @foreach($footer->social_links ?? [] as $social)
+                    <div class="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-2xl">
+                        <div class="drag-handle w-6 text-center cursor-grab text-slate-300 hover:text-admin-blue"><i
+                                class="fas fa-bars"></i></div>
+                        <span
+                            class="w-20 text-[10px] font-black text-slate-400 uppercase tracking-tighter">{{ $social['platform'] }}</span>
                         <input type="hidden" name="social_platform[]" value="{{ $social['platform'] }}">
                         <input type="hidden" name="social_icon[]" value="{{ $social['icon'] }}">
                         <input type="text" name="social_url[]" value="{{ $social['url'] }}" placeholder="https://..."
-                            style="flex:1; padding:10px; border:1px solid #f1f5f9; border-radius:8px; font-size:13px;">
+                            class="input-field h-10! flex-1 text-xs! font-bold!">
                     </div>
                 @endforeach
             </div>
-            <button type="submit"
-                style="width:100%; background:#0a3d62; color:#fff; border:none; padding:16px; border-radius:12px; font-weight:bold; margin-top:20px;">UPDATE
-                SOCIAL CHANNELS</button>
+            <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
+                <button type="submit" class="btn-primary h-10">Update</button>
+            </div>
         </form>
     </div>
 </div>

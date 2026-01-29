@@ -2,6 +2,7 @@ import './bootstrap';
 import * as Turbo from "@hotwired/turbo";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import {
+    initGlobalHelpers,
     initLayoutUI,
     restoreSidebarScroll,
     initTreeLogic,
@@ -15,12 +16,14 @@ import {
     initNewsPage,
     initDirectorsPage,
     initJournalsPage,
-    initReportModule
+    initReportModule,
+    initFooterPage
 } from './admin/common';
 
 Turbo.start();
 
 document.addEventListener('turbo:load', () => {
+    initGlobalHelpers();
     initLayoutUI();
     restoreSidebarScroll();
     initTreeLogic();
@@ -34,5 +37,6 @@ document.addEventListener('turbo:load', () => {
     initNewsPage();
     initDirectorsPage();
     initJournalsPage();
-    initReportModule(); 
+    initReportModule();
+    initFooterPage();
 });

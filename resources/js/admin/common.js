@@ -1,5 +1,35 @@
 import Sortable from 'sortablejs';
 
+export function initGlobalHelpers() {
+    window.closeModal = (id) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+    };
+
+    window.updateCount = (el, counterId, limit) => {
+        const counter = document.getElementById(counterId);
+        if (counter) {
+            const len = el.value.length;
+            counter.innerText = `${len}/${limit}`;
+            counter.classList.toggle('text-red-500', len >= limit);
+            counter.classList.toggle('text-slate-300', len < limit);
+        }
+    };
+
+    window.handlePreview = (input, containerId) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+}
+
 export function initLayoutUI() {
     const body = document.body;
     const adminName = body.dataset.adminName;
@@ -1442,4 +1472,63 @@ export function initReportModule() {
     document.getElementById('editActive').onchange = function() {
         document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
     };
+}
+
+export function initFooterPage() {
+    const qlList = document.getElementById('ql-sortable');
+    const socialList = document.getElementById('social-sortable');
+    if (!document.querySelector('[onclick*="openFooterModal"]')) return;
+
+    if (qlList) new Sortable(qlList, { animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50' });
+    if (socialList) new Sortable(socialList, { animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50' });
+
+    window.openFooterModal = (id) => {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+        
+        modal.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(el => {
+            const oninput = el.getAttribute('oninput');
+            if (oninput) {
+                const match = oninput.match(/'([^']+)'/);
+                if (match) updateCount(el, match[1], el.getAttribute('maxlength'));
+            }
+        });
+    };
+
+    window.fetchMap = () => {
+        const url = document.getElementById('map_input').value;
+        const btn = document.getElementById('mapSaveBtn');
+        if (url.includes('google.com/maps')) {
+            document.getElementById('map_preview').src = url;
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('btn-success');
+        } else {
+            alert('Invalid URL');
+            btn.disabled = true;
+        }
+    };
+
+    document.querySelectorAll('.modal-overlay form').forEach(form => {
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => Turbo.visit(window.location.href));
+        };
+    });
+
+    document.querySelectorAll('.ql-select').forEach(select => {
+        const updateColor = () => {
+            select.classList.toggle('text-red-500', select.value !== '');
+        };
+
+        updateColor();
+
+        select.addEventListener('change', updateColor);
+    });
 }
