@@ -14,11 +14,15 @@ class PriceSensitiveInformationController extends Controller
     public function index()
     {
         $menu = Menu::where('slug', 'price-sensitive-information')->firstOrFail();
-        $items = PriceSensitiveInformation::orderBy('publication_date', 'desc')
-            ->orderBy('order', 'desc')
-            ->get();
 
-        return view('admin.price-sensitive-information.index', compact('menu', 'items'));
+        $groupedItems = PriceSensitiveInformation::orderBy('publication_date', 'desc')
+            ->orderBy('order', 'asc')
+            ->get()
+            ->groupBy(function ($item) {
+                return \Carbon\Carbon::parse($item->publication_date)->format('Y');
+            });
+
+        return view('admin.price-sensitive-information.index', compact('menu', 'groupedItems'));
     }
 
     public function store(Request $request)
@@ -27,24 +31,27 @@ class PriceSensitiveInformationController extends Controller
             'pdf' => 'required|mimes:pdf|max:51200',
             'title' => 'required|string',
             'publication_date' => 'required|date',
-            'description' => 'nullable|string|max:550'
+            'description' => 'nullable|string|max:500'
         ]);
 
-        $slug = $this->generateUniqueFilename($request->title);
-        $filename = $slug . '.pdf';
+        try {
+            $slug = $this->generateUniqueFilename($request->title);
+            $filename = $slug . '.pdf';
+            $request->file('pdf')->storeAs("price-sensitive-information", $filename, 'public');
 
-        $request->file('pdf')->storeAs("price-sensitive-information", $filename, 'public');
+            PriceSensitiveInformation::create([
+                'title' => $request->title,
+                'filename' => $filename,
+                'description' => $request->description,
+                'publication_date' => $request->publication_date,
+                'is_active' => 1,
+                'order' => (PriceSensitiveInformation::max('order') ?? 0) + 1
+            ]);
 
-        PriceSensitiveInformation::create([
-            'title' => $request->title,
-            'filename' => $filename,
-            'description' => $request->description,
-            'publication_date' => $request->publication_date,
-            'is_active' => 1,
-            'order' => PriceSensitiveInformation::max('order') + 1
-        ]);
-
-        return back()->with('success', 'Information added successfully');
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, PriceSensitiveInformation $priceSensitiveInformation)
@@ -53,32 +60,33 @@ class PriceSensitiveInformationController extends Controller
             'pdf' => 'nullable|mimes:pdf|max:51200',
             'title' => 'required|string',
             'publication_date' => 'required|date',
-            'description' => 'nullable|string|max:550'
+            'description' => 'nullable|string|max:500'
         ]);
 
-        $oldFilename = $priceSensitiveInformation->filename;
-        $slug = ($priceSensitiveInformation->title === $request->title)
-            ? str_replace('.pdf', '', $oldFilename)
-            : $this->generateUniqueFilename($request->title, $priceSensitiveInformation->id);
+        try {
+            $oldFilename = $priceSensitiveInformation->filename;
+            $newSlug = $this->generateUniqueFilename($request->title, $priceSensitiveInformation->id);
+            $newFilename = $newSlug . '.pdf';
 
-        $newFilename = $slug . '.pdf';
+            if ($request->hasFile('pdf')) {
+                Storage::disk('public')->delete("price-sensitive-information/{$oldFilename}");
+                $request->file('pdf')->storeAs("price-sensitive-information", $newFilename, 'public');
+            } elseif ($oldFilename !== $newFilename) {
+                Storage::disk('public')->move("price-sensitive-information/{$oldFilename}", "price-sensitive-information/{$newFilename}");
+            }
 
-        if ($request->hasFile('pdf')) {
-            Storage::disk('public')->delete("price-sensitive-information/{$oldFilename}");
-            $request->file('pdf')->storeAs("price-sensitive-information", $newFilename, 'public');
-        } elseif ($oldFilename != $newFilename) {
-            Storage::disk('public')->move("price-sensitive-information/{$oldFilename}", "price-sensitive-information/{$newFilename}");
+            $priceSensitiveInformation->update([
+                'title' => $request->title,
+                'filename' => $newFilename,
+                'description' => $request->description,
+                'publication_date' => $request->publication_date,
+                'is_active' => $request->input('is_active') == 1 ? 1 : 0
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        $priceSensitiveInformation->update([
-            'title' => $request->title,
-            'filename' => $newFilename,
-            'description' => $request->description,
-            'publication_date' => $request->publication_date,
-            'is_active' => $request->input('is_active') == 1 ? 1 : 0
-        ]);
-
-        return response()->json(['success' => true]);
     }
 
     public function updateOrder(Request $request)
@@ -91,9 +99,13 @@ class PriceSensitiveInformationController extends Controller
 
     public function delete(PriceSensitiveInformation $priceSensitiveInformation)
     {
-        Storage::disk('public')->delete("price-sensitive-information/{$priceSensitiveInformation->filename}");
-        $priceSensitiveInformation->delete();
-        return back()->with('success', 'Deleted successfully');
+        try {
+            Storage::disk('public')->delete("price-sensitive-information/{$priceSensitiveInformation->filename}");
+            $priceSensitiveInformation->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     private function generateUniqueFilename($title, $ignoreId = null)
