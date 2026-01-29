@@ -43,14 +43,14 @@ class BoardDirectorController extends Controller
                 'slug' => $slug,
                 'designation' => $request->designation,
                 'description' => $request->description,
-                'image_path' => "directors/{$fileName}",
+                'image_path' => $path,
                 'is_active' => 1,
-                'order' => BoardDirector::max('order') + 1
+                'order' => (BoardDirector::max('order') ?? 0) + 1
             ]);
 
-            return back()->with('success', 'Director added successfully');
+            return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -61,6 +61,7 @@ class BoardDirectorController extends Controller
             'designation' => 'required|string|max:100',
             'description' => 'required|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'is_active' => 'required'
         ]);
 
         try {
@@ -69,25 +70,24 @@ class BoardDirectorController extends Controller
                 $slug = $this->generateUniqueSlug($request->name, $boardDirector->id);
             }
 
-            if ($request->hasFile('image')) {
-                if (Storage::disk('public')->exists($boardDirector->image_path)) {
-                    Storage::disk('public')->delete($boardDirector->image_path);
-                }
-
-                $fileName = $slug . '.webp';
-                $path = "directors/{$fileName}";
-                $this->processDirectorImage($request->file('image')->getRealPath(), storage_path("app/public/{$path}"));
-                $boardDirector->image_path = $path;
-            }
-
-            $boardDirector->update([
+            $data = [
                 'name' => $request->name,
                 'slug' => $slug,
                 'designation' => $request->designation,
                 'description' => $request->description,
                 'is_active' => $request->is_active
-            ]);
+            ];
 
+            if ($request->hasFile('image')) {
+                if (Storage::disk('public')->exists($boardDirector->image_path)) {
+                    Storage::disk('public')->delete($boardDirector->image_path);
+                }
+                $path = "directors/{$slug}.webp";
+                $this->processDirectorImage($request->file('image')->getRealPath(), storage_path("app/public/{$path}"));
+                $data['image_path'] = $path;
+            }
+
+            $boardDirector->update($data);
             return response()->json(['success' => true]);
         } catch (Exception $e) {
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
@@ -199,9 +199,15 @@ class BoardDirectorController extends Controller
 
     public function delete(BoardDirector $boardDirector)
     {
-        Storage::disk('public')->delete($boardDirector->image_path);
-        $boardDirector->delete();
-        return back()->with('success', 'Director deleted successfully');
+        try {
+            if (Storage::disk('public')->exists($boardDirector->image_path)) {
+                Storage::disk('public')->delete($boardDirector->image_path);
+            }
+            $boardDirector->delete();
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function serveImage($filename)

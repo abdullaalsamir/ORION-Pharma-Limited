@@ -1143,3 +1143,98 @@ export function initNewsPage() {
         }
     };
 }
+
+export function initDirectorsPage() {
+    const list = document.getElementById('directors-sortable-list');
+    const addForm = document.querySelector('#addModal form');
+    const editForm = document.getElementById('editForm');
+    if (!list && !addForm && !editForm) return;
+
+    if (list) {
+        new Sortable(list, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
+            onEnd: () => {
+                let orders = [];
+                list.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
+                fetch('/admin/director-actions/update-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ orders })
+                });
+            }
+        });
+    }
+
+    window.openAddModal = () => {
+        const modal = document.getElementById('addModal');
+        addForm.reset();
+        addForm.scrollTop = 0;
+        document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera text-3xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[9px] uppercase tracking-widest text-center px-4 opacity-60">Upload Portrait</span>`;
+        document.getElementById('addImgError').classList.add('hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditModal = (item, fullSlug) => {
+        window.currentDirectorId = item.id;
+        const form = document.getElementById('editForm');
+        form.scrollTop = 0;
+
+        document.getElementById('editName').value = item.name;
+        document.getElementById('editDesignation').value = item.designation;
+        document.getElementById('editDesc').value = item.description;
+        
+        const toggle = document.getElementById('editActive');
+        const lbl = document.getElementById('directorStatusLabel');
+        toggle.checked = item.is_active == 1;
+        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+        
+        const filename = item.image_path.split('/').pop();
+        document.getElementById('editPreview').innerHTML = `<img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">`;
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    const handleDirectorSubmit = (e, url, isUpdate = false) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        if (isUpdate) {
+            formData.append('_method', 'PUT');
+            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        } else {
+            if (document.getElementById('addInput').files.length === 0) {
+                document.getElementById('addImgError').classList.remove('hidden');
+                document.getElementById('addPreview').classList.add('border-red-500', 'bg-red-50');
+                return;
+            }
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+        }).then(res => res.json()).then(data => {
+            if (data.success) Turbo.visit(window.location.href);
+            else alert(data.error || "Operation failed.");
+        });
+    };
+
+    if (addForm) addForm.onsubmit = (e) => handleDirectorSubmit(e, '/admin/director-actions/store', false);
+    if (editForm) {
+        editForm.onsubmit = (e) => handleDirectorSubmit(e, `/admin/director-actions/${window.currentDirectorId}`, true);
+        document.getElementById('editActive').onchange = function() {
+            document.getElementById('directorStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
+        };
+    }
+
+    window.deleteDirector = (id) => {
+        if (confirm('Delete this director profile permanently?')) {
+            fetch(`/admin/director-actions/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => Turbo.visit(window.location.href));
+        }
+    };
+}

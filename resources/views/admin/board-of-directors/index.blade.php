@@ -2,255 +2,176 @@
 @section('title', 'Board of Directors Management')
 
 @section('content')
-    <style>
-        .news-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #eef1f6;
-            margin-bottom: 10px;
-        }
-
-        .drag-handle {
-            cursor: move;
-            color: #ccc;
-            padding: 10px;
-        }
-
-        .news-details {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .news-title {
-            font-weight: 700;
-            font-size: 16px;
-            color: #1e293b;
-        }
-
-        .news-meta {
-            font-size: 12px;
-            color: #0054a6;
-            font-weight: 600;
-        }
-
-        .news-desc {
-            font-size: 13px;
-            color: #64748b;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .ratio-3-4 {
-            width: 200px;
-            margin: 0 auto;
-            aspect-ratio: 3/4;
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ratio-3-4 img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
-
-    <div class="card">
-        <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="margin:0">Board of Directors</h3>
-                <small style="color:#666">Manage profiles and reorder using drag-and-drop</small>
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div class="flex flex-col">
+                <h1>Board of Directors</h1>
+                <p class="text-xs text-slate-400">Manage profiles and reorder using drag-and-drop</p>
             </div>
-            <button onclick="openAddModal()"
-                style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+            <button onclick="openAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Director
             </button>
         </div>
 
-        <div class="card-body">
-            <div id="sortable-list">
+        <div class="admin-card-body bg-slate-50/20 custom-scrollbar">
+            <div id="directors-sortable-list" class="space-y-3">
                 @forelse($items as $item)
-                    <div class="news-row" data-id="{{ $item->id }}">
-                        <div class="drag-handle"><i class="fas fa-bars"></i></div>
-
-                        <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}"
-                            style="width: 100px; aspect-ratio:3:4; object-fit:cover; border-radius:4px; border:1px solid #ddd;">
-
-                        <div class="news-details">
-                            <div class="news-title">{{ $item->name }}</div>
-                            <div class="news-meta">{{ $item->designation }}</div>
-                            <div class="news-desc">{{ strip_tags($item->description) }}</div>
+                    <div class="sortable-item group bg-white border border-slate-200 rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all"
+                        data-id="{{ $item->id }}">
+                        <div
+                            class="drag-handle w-8 flex justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue transition-colors">
+                            <i class="fas fa-arrows-up-down-left-right"></i>
                         </div>
 
-                        <div style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
+                        <div
+                            class="w-20 aspect-3/4 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 ml-2">
+                            <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}"
+                                class="w-full h-full object-cover transition-all duration-500">
+                        </div>
+
+                        <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4 self-start">
+                            <span class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">{{ $item->name }}</span>
                             <span
-                                class="menu-badge {{ $item->is_active ? '' : 'inactive' }}">{{ $item->is_active ? 'Active' : 'Inactive' }}</span>
-                            <div class="menu-actions">
-                                <button class="icon-btn" onclick="openEditModal({{ json_encode($item) }})"><i
-                                        class="fas fa-pen"></i></button>
-                                <form action="{{ route('admin.directors.delete', $item) }}" method="POST" style="display:inline"
-                                    onsubmit="return confirm('Delete this profile?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="icon-btn" style="color:red"><i
-                                            class="fas fa-trash"></i></button>
-                                </form>
-                            </div>
+                                class="text-admin-blue font-bold text-[11px] truncate tracking-wider">{{ $item->designation }}</span>
+                            <p class="text-[11px] text-slate-400 line-clamp-3 mt-1">{{ strip_tags($item->description) }}
+                            </p>
+                        </div>
+
+                        <div class="shrink-0 px-4">
+                            <span class="badge {{ $item->is_active ? 'badge-success' : 'badge-danger' }}">
+                                {{ $item->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
+                            <button class="btn-icon w-8 p-1.5!"
+                                onclick="openEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
+                                <i class="fas fa-pencil text-xs"></i>
+                            </button>
+                            <button class="btn-danger w-8 p-1.5!" onclick="deleteDirector({{ $item->id }})">
+                                <i class="fas fa-trash-can text-xs"></i>
+                            </button>
                         </div>
                     </div>
                 @empty
-                    <div style="text-align:center; padding:50px; color:#ccc;">
-                        <i class="fas fa-user-tie" style="font-size:40px; margin-bottom:10px"></i>
-                        <p>No directors found.</p>
+                    <div
+                        class="flex flex-col items-center justify-center py-20 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-slate-300">
+                        <i class="fas fa-user-tie text-4xl mb-4"></i>
+                        <h2 class="text-slate-400!">No Directors Found</h2>
                     </div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    <div id="addModal" class="modal-overlay">
-        <div class="modal-content" style="width: 700px;">
-            <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Add New Director</h3>
-            <form action="{{ route('admin.directors.store') }}" method="POST" enctype="multipart/form-data">
+    <div id="addModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-3xl! h-[85vh]! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Add New Director</h1>
+                <button type="button" onclick="closeModal('addModal')" class="btn-icon"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form action="{{ route('admin.directors.store') }}" method="POST" enctype="multipart/form-data"
+                class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <div class="ratio-3-4" id="addPreview"><span style="color:#94a3b8">16:9 Photo Preview</span></div>
-                <input type="file" name="image" required onchange="preview(this, 'addPreview')"
-                    style="margin: 10px 0; width: 100%;">
+                <div class="grid grid-cols-12 gap-10">
+                    <div class="col-span-4 flex flex-col items-center">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase mb-2 self-start ml-1">Director Photo
+                            (3:4)</label>
+                        <input type="file" name="image" id="addInput" accept="image/*" class="hidden"
+                            onchange="handlePreview(this, 'addPreview')">
+                        <div class="w-full aspect-3/4 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
+                            id="addPreview" onclick="document.getElementById('addInput').click()">
+                            <i class="fas fa-camera text-3xl text-slate-300 mb-2 group-hover:text-admin-blue"></i>
+                            <span
+                                class="text-slate-400 font-bold text-[9px] uppercase tracking-widest text-center px-4 opacity-60">Upload
+                                Portrait</span>
+                        </div>
+                        <span id="addImgError" class="text-[10px] text-red-500 font-bold uppercase mt-2 hidden ml-1">Photo
+                            is required</span>
+                    </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:10px;">
-                    <input type="text" name="name" placeholder="Director Name" required
-                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
-                    <input type="text" name="designation" placeholder="Designation (e.g. Managing Director)" required
-                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                    <div class="col-span-8 space-y-5">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Full Name</label>
+                            <input type="text" name="name" required class="input-field w-full">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Designation</label>
+                            <input type="text" name="designation" required class="input-field w-full"
+                                placeholder="e.g. Managing Director">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Biography /
+                                Description</label>
+                            <textarea name="description" required
+                                class="input-field w-full h-48 py-3 resize-none custom-scrollbar"></textarea>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="position: relative; margin-bottom:15px;">
-                    <textarea name="description" placeholder="Biography/Profile Details..." required
-                        style="width:100%; height:150px; padding:10px; border:1px solid #ddd; border-radius:6px; resize: none;"></textarea>
+                <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
+                    <button type="submit" class="btn-success h-10">Save Director</button>
                 </div>
-
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Save
-                    Director</button>
             </form>
         </div>
     </div>
 
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content" style="width: 700px;">
-            <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Edit Director Profile</h3>
-            <form id="editForm">
-                <div class="ratio-3-4" id="editPreview"></div>
-                <input type="file" name="image" onchange="preview(this, 'editPreview')"
-                    style="margin: 10px 0; width: 100%;">
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-3xl! h-[85vh]! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Edit Director Profile</h1>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:10px;">
-                    <input type="text" id="editName" name="name" required
-                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
-                    <input type="text" id="editDesignation" name="designation" required
-                        style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            <form id="editForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
+                @csrf
+                <input type="file" name="image" id="editInput" accept="image/*" class="hidden"
+                    onchange="handlePreview(this, 'editPreview')">
+
+                <div class="grid grid-cols-12 gap-10">
+                    <div class="col-span-4">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase mb-2 block ml-1">Director Photo</label>
+                        <div class="relative group cursor-pointer w-full aspect-3/4"
+                            onclick="document.getElementById('editInput').click()">
+                            <div class="w-full h-full bg-slate-100 rounded-3xl border border-slate-200 overflow-hidden"
+                                id="editPreview"></div>
+                            <div
+                                class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-3xl">
+                                <span class="text-white font-bold text-[9px] uppercase tracking-widest">Replace Photo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-8 space-y-5">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Full Name</label>
+                            <input type="text" name="name" id="editName" required class="input-field w-full">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Designation</label>
+                            <input type="text" name="designation" id="editDesignation" required class="input-field w-full">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Biography /
+                                Description</label>
+                            <textarea name="description" id="editDesc" required
+                                class="input-field w-full h-48 py-3 resize-none custom-scrollbar"></textarea>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="position: relative; margin-bottom:10px;">
-                    <textarea id="editDesc" name="description" required
-                        style="width:100%; height:150px; padding:10px; border:1px solid #ddd; border-radius:6px; resize: none;"></textarea>
+                <div
+                    class="flex items-center justify-between mt-4 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="directorStatusLabel" class="ml-3 font-bold text-slate-600 text-sm">Active</span>
+                    </label>
+                    <button type="submit" class="btn-primary h-10">Update Profile</button>
                 </div>
-
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px; cursor:pointer;">
-                    <input type="checkbox" name="is_active" id="editActive">
-                    <span style="font-weight:600; font-size:14px;">Active Status</span>
-                </label>
-
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Update
-                    Profile</button>
             </form>
         </div>
     </div>
-
-    @include('admin.partials.css')
-
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        <script>
-            function preview(input, id) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = e => document.getElementById(id).innerHTML = `<img src="${e.target.result}">`;
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-
-            function openAddModal() {
-                document.getElementById('addModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('addModal').classList.add('active'), 10);
-            }
-
-            let currentEditId = null;
-            function openEditModal(item) {
-                currentEditId = item.id;
-                document.getElementById('editName').value = item.name;
-                document.getElementById('editDesignation').value = item.designation;
-                document.getElementById('editDesc').value = item.description;
-                document.getElementById('editActive').checked = (item.is_active == 1);
-
-                const filename = item.image_path.split('/').pop();
-                document.getElementById('editPreview').innerHTML = `<img src="/{{ $menu->full_slug }}/${filename}">`;
-
-                document.getElementById('editModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('editModal').classList.add('active'), 10);
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                setTimeout(() => document.getElementById(id).style.display = 'none', 300);
-            }
-
-            document.getElementById('editForm').onsubmit = function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-
-                fetch(`/admin/director-actions/${currentEditId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(res => res.json()).then(data => {
-                    if (data.success) window.location.reload();
-                    else alert('Error updating profile');
-                });
-            }
-
-            new Sortable(document.getElementById('sortable-list'), {
-                handle: '.drag-handle',
-                animation: 150,
-                onEnd: function () {
-                    let orders = [];
-                    document.querySelectorAll('.news-row').forEach((row, index) => {
-                        orders.push({ id: row.dataset.id, order: index + 1 });
-                    });
-                    fetch('{{ route("admin.directors.update-order") }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ orders })
-                    });
-                }
-            });
-        </script>
-    @endpush
 @endsection
