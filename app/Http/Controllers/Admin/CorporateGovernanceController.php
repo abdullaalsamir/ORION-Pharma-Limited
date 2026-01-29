@@ -14,11 +14,15 @@ class CorporateGovernanceController extends Controller
     public function index()
     {
         $menu = Menu::where('slug', 'corporate-governance')->firstOrFail();
-        $items = CorporateGovernance::orderBy('publication_date', 'desc')
-            ->orderBy('order', 'desc')
-            ->get();
 
-        return view('admin.corporate-governance.index', compact('menu', 'items'));
+        $groupedItems = CorporateGovernance::orderBy('publication_date', 'desc')
+            ->orderBy('order', 'asc')
+            ->get()
+            ->groupBy(function ($item) {
+                return \Carbon\Carbon::parse($item->publication_date)->format('Y');
+            });
+
+        return view('admin.corporate-governance.index', compact('menu', 'groupedItems'));
     }
 
     public function store(Request $request)
@@ -27,24 +31,27 @@ class CorporateGovernanceController extends Controller
             'pdf' => 'required|mimes:pdf|max:51200',
             'title' => 'required|string',
             'publication_date' => 'required|date',
-            'description' => 'nullable|string|max:550'
+            'description' => 'nullable|string|max:500'
         ]);
 
-        $slug = $this->generateUniqueFilename($request->title);
-        $filename = $slug . '.pdf';
+        try {
+            $slug = $this->generateUniqueFilename($request->title);
+            $filename = $slug . '.pdf';
+            $request->file('pdf')->storeAs("corporate-governance", $filename, 'public');
 
-        $request->file('pdf')->storeAs("corporate-governance", $filename, 'public');
+            CorporateGovernance::create([
+                'title' => $request->title,
+                'filename' => $filename,
+                'description' => $request->description,
+                'publication_date' => $request->publication_date,
+                'is_active' => 1,
+                'order' => (CorporateGovernance::max('order') ?? 0) + 1
+            ]);
 
-        CorporateGovernance::create([
-            'title' => $request->title,
-            'filename' => $filename,
-            'description' => $request->description,
-            'publication_date' => $request->publication_date,
-            'is_active' => 1,
-            'order' => CorporateGovernance::max('order') + 1
-        ]);
-
-        return back()->with('success', 'Information added successfully');
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, CorporateGovernance $corporateGovernance)
@@ -53,32 +60,33 @@ class CorporateGovernanceController extends Controller
             'pdf' => 'nullable|mimes:pdf|max:51200',
             'title' => 'required|string',
             'publication_date' => 'required|date',
-            'description' => 'nullable|string|max:550'
+            'description' => 'nullable|string|max:500'
         ]);
 
-        $oldFilename = $corporateGovernance->filename;
-        $slug = ($corporateGovernance->title === $request->title)
-            ? str_replace('.pdf', '', $oldFilename)
-            : $this->generateUniqueFilename($request->title, $corporateGovernance->id);
+        try {
+            $oldFilename = $corporateGovernance->filename;
+            $newSlug = $this->generateUniqueFilename($request->title, $corporateGovernance->id);
+            $newFilename = $newSlug . '.pdf';
 
-        $newFilename = $slug . '.pdf';
+            if ($request->hasFile('pdf')) {
+                Storage::disk('public')->delete("corporate-governance/{$oldFilename}");
+                $request->file('pdf')->storeAs("corporate-governance", $newFilename, 'public');
+            } elseif ($oldFilename !== $newFilename) {
+                Storage::disk('public')->move("corporate-governance/{$oldFilename}", "corporate-governance/{$newFilename}");
+            }
 
-        if ($request->hasFile('pdf')) {
-            Storage::disk('public')->delete("corporate-governance/{$oldFilename}");
-            $request->file('pdf')->storeAs("corporate-governance", $newFilename, 'public');
-        } elseif ($oldFilename != $newFilename) {
-            Storage::disk('public')->move("corporate-governance/{$oldFilename}", "corporate-governance/{$newFilename}");
+            $corporateGovernance->update([
+                'title' => $request->title,
+                'filename' => $newFilename,
+                'description' => $request->description,
+                'publication_date' => $request->publication_date,
+                'is_active' => $request->input('is_active') == 1 ? 1 : 0
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        $corporateGovernance->update([
-            'title' => $request->title,
-            'filename' => $newFilename,
-            'description' => $request->description,
-            'publication_date' => $request->publication_date,
-            'is_active' => $request->input('is_active') == 1 ? 1 : 0
-        ]);
-
-        return response()->json(['success' => true]);
     }
 
     public function updateOrder(Request $request)
@@ -91,9 +99,13 @@ class CorporateGovernanceController extends Controller
 
     public function delete(CorporateGovernance $corporateGovernance)
     {
-        Storage::disk('public')->delete("corporate-governance/{$corporateGovernance->filename}");
-        $corporateGovernance->delete();
-        return back()->with('success', 'Deleted successfully');
+        try {
+            Storage::disk('public')->delete("corporate-governance/{$corporateGovernance->filename}");
+            $corporateGovernance->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     private function generateUniqueFilename($title, $ignoreId = null)

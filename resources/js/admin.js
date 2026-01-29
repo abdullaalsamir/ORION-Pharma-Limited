@@ -18,7 +18,8 @@ import {
     initAnnualReportsPage,
     initQuarterlyReportsPage,
     initHalfYearlyReportsPage,
-    initPriceSensitiveInformationPage
+    initPriceSensitiveInformationPage,
+    initCorporateGovernancePage
 } from './admin/common';
 
 Turbo.start();
@@ -41,4 +42,5 @@ document.addEventListener('turbo:load', () => {
     initQuarterlyReportsPage();
     initHalfYearlyReportsPage();
     initPriceSensitiveInformationPage();
+    initCorporateGovernancePage();
 });

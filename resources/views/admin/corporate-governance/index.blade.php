@@ -1,195 +1,200 @@
 @extends('admin.layouts.app')
-@section('title', 'Corporate Governance')
-
-@section('content')
-    <div class="card" style="height: calc(100vh - 100px);">
-        <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="margin:0">Corporate Governance</h3>
-                <small style="color:#666">Manage and organize Corporate Governance documents (Sorted by Date)</small>
+@section('title', 'Corporate Governance Management')@section('content')
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div class="flex flex-col">
+                <h1>Corporate Governance</h1>
+                <p class="text-xs text-slate-400">Manage and organize Corporate Governance documents</p>
             </div>
-            <button onclick="openAddModal()"
-                style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
-                <i class="fas fa-plus"></i> Add Information
+            <button onclick="openAddModal()" class="btn-success h-10!">
+                <i class="fas fa-plus"></i> Add Report
             </button>
         </div>
 
-        <div class="card-body scrollable-content menu-tree-wrapper">
-            <div id="item-list">
-                @forelse($items as $item)
-                    <div class="menu-card" data-id="{{ $item->id }}" style="margin-bottom:8px;">
-                        <div class="menu-left" style="overflow: hidden;">
-                            <i class="fas fa-file-pdf" style="color:#e11d48; font-size:20px; margin:0 15px 0 5px;"></i>
-                            <div style="overflow: hidden; flex: 1;">
-                                <div class="menu-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    {{ $item->title }}
-                                </div>
-                                @if($item->description)
-                                    <div
-                                        style="font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">
-                                        {{ $item->description }}
-                                    </div>
-                                @endif
-                                <small style="color:#bbb; font-size: 10px;">Published:
-                                    {{ $item->publication_date->format('d/m/Y') }}</small>
-                            </div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:15px; flex-shrink: 0;">
+        <div class="admin-card-body bg-slate-50/20 custom-scrollbar">
+            <div class="space-y-4">
+                @forelse($groupedItems as $year => $reports)
+                    <div class="report-sortable-list p-4 rounded-3xl {{ $loop->index % 2 == 0 ? 'bg-red-50/50 border-red-100' : 'bg-green-50/50 border-green-100' }} border space-y-3"
+                        data-year="{{ $year }}">
+
+                        <div class="flex items-center gap-2 mb-2 ml-1">
                             <span
-                                class="menu-badge {{ $item->is_active ? '' : 'inactive' }}">{{ $item->is_active ? 'Active' : 'Inactive' }}</span>
-
-                            <a href="{{ url($menu->full_slug . '/' . $item->filename) }}" target="_blank" class="icon-btn"
-                                style="color:#0a3d62"><i class="fas fa-eye"></i></a>
-
-                            <div class="menu-actions">
-                                <button class="icon-btn" onclick="openEditModal({{ json_encode($item) }})"><i
-                                        class="fas fa-pen"></i></button>
-                                <form action="{{ route('admin.corporate-governance.delete', $item) }}" method="POST"
-                                    style="display:inline" onsubmit="return confirm('Delete?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="icon-btn" style="color:red"><i
-                                            class="fas fa-trash"></i></button>
-                                </form>
-                            </div>
+                                class="text-xl font-black uppercase tracking-[0.2em] {{ $loop->index % 2 == 0 ? 'text-red-500' : 'text-green-500' }}">
+                                {{ $year }}
+                            </span>
                         </div>
+
+                        @foreach($reports as $item)
+                            <div class="sortable-item group bg-white border border-slate-200 rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all"
+                                data-id="{{ $item->id }}" data-date="{{ $item->publication_date->format('Y-m-d') }}">
+
+                                @php
+                                    $sameDateCount = $reports->where(
+                                        fn($r) => $r->publication_date->format('Y-m-d') === $item->publication_date->format('Y-m-d')
+                                    )->count();
+                                @endphp
+
+                                <div
+                                    class="drag-handle w-8 flex justify-center {{ $sameDateCount > 1 ? 'cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue' : 'opacity-0 pointer-events-none' }}">
+                                    <i class="fas fa-arrows-up-down-left-right"></i>
+                                </div>
+
+                                <div class="w-12 h-12 flex items-center justify-center text-red-500 shrink-0">
+                                    <i class="fas fa-file-pdf text-3xl"></i>
+                                </div>
+
+                                <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-2 self-start">
+                                    <span
+                                        class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">{{ $item->title }}</span>
+                                    <p class="text-[11px] text-slate-400 line-clamp-1">{{ $item->description }}</p>
+                                    <div
+                                        class="flex items-center gap-1.5 text-[10px] font-bold text-admin-blue tracking-wider mt-2">
+                                        <i class="far fa-calendar-alt text-[9px]"></i>
+                                        {{ $item->publication_date->format('d F, Y') }}
+                                    </div>
+                                </div>
+
+                                <div class="shrink-0 px-4 flex items-center gap-3">
+                                    <a href="{{ url($menu->full_slug . '/' . $item->filename) }}" target="_blank"
+                                        class="badge badge-info hover:bg-sky-100 transition-colors">
+                                        <i class="fas fa-eye opacity-70"></i>
+                                    </a>
+                                    <span class="badge {{ $item->is_active ? 'badge-success' : 'badge-danger' }}">
+                                        {{ $item->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
+                                    <button class="btn-icon w-8 p-1.5!" onclick="openEditModal({{ json_encode($item) }})">
+                                        <i class="fas fa-pencil text-xs"></i>
+                                    </button>
+                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteReport({{ $item->id }})">
+                                        <i class="fas fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @empty
-                    <p style="text-align:center; color:#ccc; padding:50px;">No records found.</p>
+                    <div
+                        class="flex flex-col items-center justify-center py-20 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-slate-300">
+                        <i class="fas fa-file-invoice text-4xl mb-4"></i>
+                        <h2 class="text-slate-400!">No Corporate Governance Found</h2>
+                    </div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    <!-- Add Modal -->
-    <div id="addModal" class="modal-overlay">
-        <div class="modal-content" style="width: 550px;">
-            <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Add Corporate Governance</h3>
-            <form action="{{ route('admin.corporate-governance.store') }}" method="POST" enctype="multipart/form-data">
+    <div id="addModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xl! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Add Corporate Governance</h1>
+                <button type="button" onclick="closeModal('addModal')" class="btn-icon"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form action="{{ route('admin.corporate-governance.store') }}" method="POST" enctype="multipart/form-data"
+                class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <label style="font-size:12px; color:#666">Select PDF</label>
-                <input type="file" name="pdf" id="pdfInput" accept="application/pdf" required
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:12px;">
-
-                <label style="font-size:12px; color:#666">Title</label>
-                <input type="text" name="title" id="titleInput" required
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:12px;">
-
-                <label style="font-size:12px; color:#666">Description (Optional)</label>
-                <div style="position: relative;">
-                    <textarea name="description" id="addDesc" maxlength="500" oninput="updateCharCount(this, 'addCounter')"
-                        style="width:100%; height:100px; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:12px; resize:none;"></textarea>
-                    <small id="addCounter" style="position: absolute; bottom: 18px; right: 10px; color: #999;">0/500</small>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Select PDF
+                        Document</label>
+                    <input type="file" name="pdf" id="pdfInput" accept="application/pdf" required class="hidden"
+                        onchange="handlePdfSelect(this)">
+                    <div class="aspect-10/2 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
+                        id="pdfPlaceholder" onclick="document.getElementById('pdfInput').click()">
+                        <i
+                            class="fas fa-file-pdf text-3xl text-slate-300 mb-2 group-hover:text-red-500 transition-colors"></i>
+                        <span id="pdfStatusText"
+                            class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Click to
+                            select PDF</span>
+                    </div>
                 </div>
 
-                <label style="font-size:12px; color:#666">Publication Date</label>
-                <input type="date" name="publication_date" required value="{{ date('Y-m-d') }}"
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:20px;">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-8 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Report Title</label>
+                        <input type="text" name="title" id="titleInput" required class="input-field w-full"
+                            placeholder="Enter title">
+                    </div>
+                    <div class="col-span-4 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Publication Date</label>
+                        <input type="date" name="publication_date" required class="input-field w-full"
+                            value="{{ date('Y-m-d') }}">
+                    </div>
+                </div>
 
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Save
-                    Information</button>
+                <div class="relative flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Short Description (Optional)</label>
+                    <textarea name="description" id="addDesc" maxlength="500"
+                        class="input-field w-full h-24 py-3 resize-none custom-scrollbar"
+                        oninput="updateCount(this, 'addCD', 500)"></textarea>
+                    <span id="addCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
+                </div>
+
+                <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
+                    <button type="submit" class="btn-success h-10">Upload Report</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content" style="width: 550px;">
-            <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Edit Information</h3>
-            <form id="editForm">
-                <label style="font-size:12px; color:#666">Replace PDF (Optional)</label>
-                <input type="file" name="pdf" accept="application/pdf"
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:12px;">
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xl! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Edit Report Details</h1>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-                <label style="font-size:12px; color:#666">Title</label>
-                <input type="text" name="title" id="editTitle" required
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:12px;">
+            <form id="editForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
+                @csrf
+                <input type="file" name="pdf" id="editPdfInput" accept="application/pdf" class="hidden"
+                    onchange="handlePdfSelect(this, true)">
 
-                <label style="font-size:12px; color:#666">Description (Optional)</label>
-                <div style="position: relative;">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase mb-1 block">Change PDF File
+                        (Optional)</label>
+                    <div class="aspect-10/2 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center cursor-pointer transition-all hover:border-admin-blue"
+                        onclick="document.getElementById('editPdfInput').click()">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="fas fa-file-pdf text-red-400 text-2xl"></i>
+                            <span id="editPdfStatus"
+                                class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Click to Replace
+                                PDF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-8 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Report Title</label>
+                        <input type="text" name="title" id="editTitle" required class="input-field w-full">
+                    </div>
+                    <div class="col-span-4 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Date</label>
+                        <input type="date" name="publication_date" id="editDate" required class="input-field w-full">
+                    </div>
+                </div>
+
+                <div class="relative flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
                     <textarea name="description" id="editDesc" maxlength="500"
-                        oninput="updateCharCount(this, 'editCounter')"
-                        style="width:100%; height:100px; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:12px; resize:none;"></textarea>
-                    <small id="editCounter"
-                        style="position: absolute; bottom: 18px; right: 10px; color: #999;">0/500</small>
+                        class="input-field w-full h-24 py-3 resize-none custom-scrollbar"
+                        oninput="updateCount(this, 'editCD', 500)"></textarea>
+                    <span id="editCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
                 </div>
 
-                <label style="font-size:12px; color:#666">Publication Date</label>
-                <input type="date" name="publication_date" id="editDate" required
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
-
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer;">
-                    <div class="toggle-switch"><input type="checkbox" id="editActive"><span class="slider"></span></div>
-                    <span style="font-weight:600;">Active Status</span>
-                </label>
-
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px; cursor:pointer;">Update
-                    Information</button>
+                <div
+                    class="flex items-center justify-between mt-4 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="reportStatusLabel" class="ml-3 font-bold text-slate-600 text-sm">Active</span>
+                    </label>
+                    <button type="submit" class="btn-primary h-10">Update Report</button>
+                </div>
             </form>
         </div>
     </div>
-
-    @include('admin.partials.css')
-    @push('scripts')
-        <script>
-            function updateCharCount(textarea, counterId) {
-                const count = textarea.value.length;
-                const counter = document.getElementById(counterId);
-                counter.innerText = `${count}/500`;
-                counter.style.color = count >= 500 ? 'red' : '#999';
-            }
-
-            document.getElementById('pdfInput').onchange = function () {
-                if (this.files[0]) document.getElementById('titleInput').value = this.files[0].name.replace(/\.[^/.]+$/, "");
-            };
-
-            function openAddModal() {
-                const addDesc = document.getElementById('addDesc');
-                addDesc.value = '';
-                updateCharCount(addDesc, 'addCounter');
-                document.getElementById('addModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('addModal').classList.add('active'), 10);
-            }
-
-            let currentEditId = null;
-            function openEditModal(item) {
-                currentEditId = item.id;
-                document.getElementById('editTitle').value = item.title;
-
-                const editDesc = document.getElementById('editDesc');
-                editDesc.value = item.description || '';
-                updateCharCount(editDesc, 'editCounter');
-
-                document.getElementById('editDate').value = item.publication_date.split('T')[0];
-                document.getElementById('editActive').checked = item.is_active == 1;
-
-                document.getElementById('editModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('editModal').classList.add('active'), 10);
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                setTimeout(() => document.getElementById(id).style.display = 'none', 300);
-            }
-
-            document.getElementById('editForm').onsubmit = function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-                fetch(`/admin/corporate-governance-actions/${currentEditId}`, {
-                    method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(res => {
-                    if (!res.ok) return res.json().then(err => { throw err; });
-                    return res.json();
-                }).then(() => window.location.reload())
-                    .catch(err => {
-                        alert('Error: ' + (err.message || 'Validation failed. Make sure description is not over 500 characters.'));
-                    });
-            };
-        </script>
-    @endpush
 @endsection
