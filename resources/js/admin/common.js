@@ -1372,6 +1372,31 @@ export function initJournalsPage() {
     };
 }
 
+export function initComplaintsPage() {
+    if (!window.location.pathname.includes('product-complaint')) return;
+
+    window.deleteComplaint = (id) => {
+        if (confirm('Are you sure you want to delete this complaint record permanently?')) {
+            fetch(`/admin/product-complaint-actions/${id}`, {
+                method: 'DELETE',
+                headers: { 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Turbo.visit(window.location.href, { action: "replace" });
+                } else {
+                    alert("Error: " + (data.error || "Could not delete record"));
+                }
+            })
+            .catch(() => alert("A server error occurred."));
+        }
+    };
+}
+
 export function initReportModule() {
     const pageMap = {
         'annual-reports': '/admin/annual-reports-actions',

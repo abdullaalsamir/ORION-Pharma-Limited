@@ -15,8 +15,14 @@ class ProductComplaintController extends Controller
     public function index()
     {
         $menu = Menu::where('slug', 'product-complaint')->firstOrFail();
-        $complaints = ProductComplaint::latest()->get();
-        return view('admin.product-complaint.index', compact('menu', 'complaints'));
+
+        $groupedComplaints = ProductComplaint::latest()
+            ->get()
+            ->groupBy(function ($item) {
+                return \Carbon\Carbon::parse($item->complaint_date)->format('Y-m-d');
+            });
+
+        return view('admin.product-complaint.index', compact('menu', 'groupedComplaints'));
     }
 
     public function frontendIndex($menu)
@@ -58,7 +64,11 @@ class ProductComplaintController extends Controller
 
     public function delete(ProductComplaint $complaint)
     {
-        $complaint->delete();
-        return back()->with('success', 'Record deleted.');
+        try {
+            $complaint->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 }

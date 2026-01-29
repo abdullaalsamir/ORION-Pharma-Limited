@@ -16,6 +16,7 @@ import {
     initNewsPage,
     initDirectorsPage,
     initJournalsPage,
+    initComplaintsPage,
     initReportModule,
     initFooterPage
 } from './admin/common';
@@ -38,5 +39,6 @@ document.addEventListener('turbo:load', () => {
     initDirectorsPage();
     initJournalsPage();
     initReportModule();
+    initComplaintsPage();
     initFooterPage();
 });
