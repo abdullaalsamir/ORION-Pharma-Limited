@@ -1238,3 +1238,106 @@ export function initDirectorsPage() {
         }
     };
 }
+
+export function initJournalsPage() {
+    const addForm = document.querySelector('#addModal form');
+    const editForm = document.getElementById('editForm');
+    if (!addForm && !editForm) return;
+
+    document.querySelectorAll('.journal-sortable-list').forEach(list => {
+        new Sortable(list, {
+            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
+            onEnd: () => {
+                let orders = [];
+                list.querySelectorAll('.sortable-item').forEach((row, index) => {
+                    orders.push({ id: row.dataset.id, order: index + 1 });
+                });
+                fetch('/admin/journal-actions/update-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ orders })
+                });
+            }
+        });
+    });
+
+    window.handlePdfSelect = (input, isEdit = false) => {
+        if (input.files && input.files[0]) {
+            const fileName = input.files[0].name;
+            const cleanName = fileName.replace(/\.[^/.]+$/, "");
+            
+            if (isEdit) {
+                document.getElementById('editPdfStatus').innerText = fileName;
+                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
+            } else {
+                document.getElementById('pdfStatusText').innerText = fileName;
+                const titleInput = document.getElementById('titleInput');
+                if (!titleInput.value) titleInput.value = cleanName;
+            }
+        }
+    };
+
+    window.openAddModal = () => {
+        const modal = document.getElementById('addModal');
+        addForm.reset();
+        addForm.scrollTop = 0;
+        document.getElementById('pdfStatusText').innerText = "Click to select PDF";
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openEditModal = (item) => {
+        window.currentJournalId = item.id;
+        const form = document.getElementById('editForm');
+        form.scrollTop = 0;
+
+        document.getElementById('editTitle').value = item.title;
+        document.getElementById('editYear').value = item.year;
+        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
+        document.getElementById('editPdfStatus').classList.remove('text-admin-blue');
+        
+        const toggle = document.getElementById('editActive');
+        const lbl = document.getElementById('journalStatusLabel');
+        toggle.checked = item.is_active == 1;
+        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    const handleJournalSubmit = (e, url, isUpdate = false) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        if (isUpdate) {
+            formData.append('_method', 'PUT');
+            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+        }).then(res => res.json()).then(data => {
+            if (data.success) Turbo.visit(window.location.href);
+            else alert(data.error || "Operation failed.");
+        });
+    };
+
+    if (addForm) addForm.onsubmit = (e) => handleJournalSubmit(e, '/admin/journal-actions/store', false);
+    if (editForm) {
+        editForm.onsubmit = (e) => handleJournalSubmit(e, `/admin/journal-actions/${window.currentJournalId}`, true);
+        document.getElementById('editActive').onchange = function() {
+            document.getElementById('journalStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
+        };
+    }
+
+    window.deleteJournal = (id) => {
+        if (confirm('Delete this journal permanently?')) {
+            fetch(`/admin/journal-actions/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+            }).then(() => Turbo.visit(window.location.href));
+        }
+    };
+}

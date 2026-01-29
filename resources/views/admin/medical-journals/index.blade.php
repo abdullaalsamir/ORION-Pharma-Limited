@@ -1,178 +1,183 @@
 @extends('admin.layouts.app')
-@section('title', 'Medical Journals')
+@section('title', 'Medical Journals Management')
 
 @section('content')
-    <div class="card" style="height: calc(100vh - 100px);">
-        <div class="card-header" style="display:flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="margin:0">Medical Journals</h3>
-                <small>Organize PDFs by year and drag to reorder</small>
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <div class="flex flex-col">
+                <h1>Medical Journals</h1>
+                <p class="text-xs text-slate-400">Organize PDFs by year and drag to reorder within groups
+                </p>
             </div>
-            <button onclick="openAddModal()"
-                style="background:#1e7a43; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+            <button onclick="openAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Journal
             </button>
         </div>
 
-        <div class="card-body scrollable-content menu-tree-wrapper">
-            @forelse($groupedJournals as $year => $journals)
-                <div class="year-group" style="margin-bottom:30px; border-left:4px solid #0a3d62; padding-left:15px;">
-                    <h4 style="color:#0a3d62; margin-bottom:15px;"><i class="fas fa-calendar-alt"></i> {{ $year }}</h4>
-                    <div class="sortable-list" data-year="{{ $year }}">
+        <div class="admin-card-body bg-slate-50/20 custom-scrollbar">
+            <div class="space-y-4">
+                @forelse($groupedJournals as $year => $journals)
+                    <div class="journal-sortable-list p-4 rounded-3xl {{ $loop->index % 2 == 0 ? 'bg-red-50/50 border-red-100' : 'bg-green-50/50 border-green-100' }} border space-y-3"
+                        data-year="{{ $year }}">
+
+                        <div class="flex items-center gap-2 mb-2 ml-1">
+                            <span
+                                class="text-xl font-black uppercase tracking-[0.2em] {{ $loop->index % 2 == 0 ? 'text-red-500' : 'text-green-500' }}">
+                                {{ $year }}
+                            </span>
+                        </div>
+
                         @foreach($journals as $j)
-                            <div class="menu-card" data-id="{{ $j->id }}" style="margin-bottom:8px;">
-                                <div class="menu-left">
-                                    <div class="drag-handle"><i class="fas fa-bars"></i></div>
-                                    <i class="fas fa-file-pdf" style="color:#e11d48; font-size:20px; margin:0 10px;"></i>
-                                    <div class="menu-title">{{ $j->title }}</div>
+                            <div class="sortable-item group bg-white border border-slate-200 rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all"
+                                data-id="{{ $j->id }}">
+
+                                <div
+                                    class="drag-handle w-8 flex justify-center {{ count($journals) > 1 ? 'cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue' : 'opacity-0 pointer-events-none' }}">
+                                    <i class="fas fa-arrows-up-down-left-right"></i>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:15px;">
-                                    <span
-                                        class="menu-badge {{ $j->is_active ? '' : 'inactive' }}">{{ $j->is_active ? 'Active' : 'Inactive' }}</span>
 
+                                <div class="w-12 h-12 flex items-center justify-center text-red-500 ml-2 shrink-0">
+                                    <i class="fas fa-file-pdf text-3xl"></i>
+                                </div>
+
+                                <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4">
+                                    <span class="font-bold text-slate-700 text-sm truncate tracking-tight">
+                                        {{ $j->title }}
+                                    </span>
+                                </div>
+
+                                <div class="shrink-0 px-4 flex items-center gap-3">
                                     <a href="{{ url($menu->full_slug . '/' . $j->year . '/' . $j->filename) }}" target="_blank"
-                                        class="icon-btn" style="color:#0a3d62" title="Preview PDF">
-                                        <i class="fas fa-eye"></i>
+                                        class="badge badge-info hover:bg-sky-100 transition-colors">
+                                        <i class="fas fa-eye mr-1 opacity-70"></i>
                                     </a>
+                                    <span class="badge {{ $j->is_active ? 'badge-success' : 'badge-danger' }}">
+                                        {{ $j->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </div>
 
-                                    <div class="menu-actions">
-                                        <button class="icon-btn" onclick="openEditModal({{ json_encode($j) }})"><i
-                                                class="fas fa-pen"></i></button>
-                                        <form action="{{ route('admin.journals.delete', $j) }}" method="POST" style="display:inline"
-                                            onsubmit="return confirm('Delete?')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="icon-btn" style="color:red"><i
-                                                    class="fas fa-trash"></i></button>
-                                        </form>
-                                    </div>
+                                <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
+                                    <button class="btn-icon w-8 p-1.5!"
+                                        onclick="openEditModal({{ json_encode($j) }}, '{{ $menu->full_slug }}')">
+                                        <i class="fas fa-pencil text-xs"></i>
+                                    </button>
+                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteJournal({{ $j->id }})">
+                                        <i class="fas fa-trash-can text-xs"></i>
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
                     </div>
-                </div>
-            @empty
-                <p style="text-align:center; color:#ccc; padding:50px;">No journals found.</p>
-            @endforelse
+                @empty
+                    <div
+                        class="flex flex-col items-center justify-center py-20 bg-white border-2 border-dashed border-slate-200 rounded-3xl text-slate-300">
+                        <i class="fas fa-book-medical text-4xl mb-4"></i>
+                        <h2 class="text-slate-400!">No Medical Journals Found</h2>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </div>
 
-    <div id="addModal" class="modal-overlay">
-        <div class="modal-content" style="width: 500px;">
-            <button onclick="closeModal('addModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Add New Journal</h3>
-            <form action="{{ route('admin.journals.store') }}" method="POST" enctype="multipart/form-data">
+    <div id="addModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xl! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Add New Journal</h1>
+                <button type="button" onclick="closeModal('addModal')" class="btn-icon"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form action="{{ route('admin.journals.store') }}" method="POST" enctype="multipart/form-data"
+                class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <label style="font-size:13px; color:#666">Select PDF</label>
-                <input type="file" name="pdf" id="pdfInput" accept="application/pdf" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 block mb-1">Select PDF File</label>
+                    <input type="file" name="pdf" id="pdfInput" accept="application/pdf" required class="hidden"
+                        onchange="handlePdfSelect(this)">
+                    <div class="aspect-10/2 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
+                        id="pdfPlaceholder" onclick="document.getElementById('pdfInput').click()">
+                        <i
+                            class="fas fa-file-pdf text-3xl text-slate-300 mb-2 group-hover:text-red-500 transition-colors"></i>
+                        <span id="pdfStatusText"
+                            class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Click to
+                            select PDF</span>
+                    </div>
+                </div>
 
-                <label style="font-size:13px; color:#666">Filename / Title</label>
-                <input type="text" name="title" id="titleInput" placeholder="Enter title" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-8 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Journal Title</label>
+                        <input type="text" name="title" id="titleInput" required class="input-field w-full"
+                            placeholder="Auto-filled from filename">
+                    </div>
+                    <div class="col-span-4 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Publication Year</label>
+                        <select name="year" required class="input-field w-full">
+                            @for($y = date('Y'); $y >= 2000; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
 
-                <label style="font-size:13px; color:#666">Publication Year</label>
-                <select name="year" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:20px;">
-                    @for($y = date('Y'); $y >= 2000; $y--)
-                        <option value="{{ $y }}">{{ $y }}</option>
-                    @endfor
-                </select>
-
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px;">Upload
-                    Journal</button>
+                <div class="flex justify-end pt-4 sticky bottom-0 bg-white">
+                    <button type="submit" class="btn-success h-10">Upload Journal</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content" style="width: 500px;">
-            <button onclick="closeModal('editModal')" class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Edit Journal</h3>
-            <form id="editForm">
-                <label style="font-size:13px; color:#666">Replace PDF (Optional)</label>
-                <input type="file" name="pdf" accept="application/pdf"
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xl! flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
+                <h1 class="mb-0!">Edit Journal Details</h1>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+            </div>
 
-                <input type="text" name="title" id="editTitle" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
+            <form id="editForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
+                @csrf
+                <input type="file" name="pdf" id="editPdfInput" accept="application/pdf" class="hidden"
+                    onchange="handlePdfSelect(this, true)">
 
-                <select name="year" id="editYear" required
-                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:15px;">
-                    @for($y = date('Y'); $y >= 2000; $y--)
-                        <option value="{{ $y }}">{{ $y }}</option>
-                    @endfor
-                </select>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-400 uppercase mb-1 block">Change PDF File
+                        (Optional)</label>
+                    <div class="aspect-10/2 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
+                        id="editPdfPlaceholder" onclick="document.getElementById('editPdfInput').click()">
+                        <i class="fas fa-file-pdf text-3xl text-slate-300 mb-2 group-hover:text-red-500 transition-colors">
+                        </i>
+                        <span id="editPdfStatus"
+                            class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">
+                            Click to replace PDF
+                        </span>
+                    </div>
+                </div>
 
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer;">
-                    <div class="toggle-switch"><input type="checkbox" id="editActive"><span class="slider"></span></div>
-                    <span style="font-weight:600;">Active Status</span>
-                </label>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-8 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Journal Title</label>
+                        <input type="text" name="title" id="editTitle" required class="input-field w-full">
+                    </div>
+                    <div class="col-span-4 flex flex-col gap-1">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Year</label>
+                        <select name="year" id="editYear" required class="input-field w-full">
+                            @for($y = date('Y'); $y >= 2000; $y--)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
 
-                <button type="submit"
-                    style="width:100%; background:#0a3d62; color:#fff; border:none; padding:12px; border-radius:8px;">Update
-                    Journal</button>
+                <div
+                    class="flex items-center justify-between mt-4 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="editActive" name="is_active">
+                        <div class="toggle-bg"></div>
+                        <span id="journalStatusLabel" class="ml-3 font-bold text-slate-600 text-sm">Active</span>
+                    </label>
+                    <button type="submit" class="btn-primary h-10">Update Journal</button>
+                </div>
             </form>
         </div>
     </div>
-
-    @include('admin.partials.css')
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-        <script>
-            document.getElementById('pdfInput').onchange = function () {
-                if (this.files[0]) {
-                    let name = this.files[0].name.replace(/\.[^/.]+$/, "");
-                    document.getElementById('titleInput').value = name;
-                }
-            };
-
-            function openAddModal() {
-                document.getElementById('addModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('addModal').classList.add('active'), 10);
-            }
-
-            let currentEditId = null;
-            function openEditModal(j) {
-                currentEditId = j.id;
-                document.getElementById('editTitle').value = j.title;
-                document.getElementById('editYear').value = j.year;
-                document.getElementById('editActive').checked = j.is_active == 1;
-                document.getElementById('editModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('editModal').classList.add('active'), 10);
-            }
-
-            function closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-                setTimeout(() => document.getElementById(id).style.display = 'none', 300);
-            }
-
-            document.getElementById('editForm').onsubmit = function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-                fetch(`/admin/journal-actions/${currentEditId}`, {
-                    method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(() => window.location.reload());
-            };
-
-            document.querySelectorAll('.sortable-list').forEach(el => {
-                new Sortable(el, {
-                    handle: '.drag-handle', animation: 150,
-                    onEnd: function () {
-                        let orders = [];
-                        el.querySelectorAll('.menu-card').forEach((row, index) => {
-                            orders.push({ id: row.dataset.id, order: index + 1 });
-                        });
-                        fetch('{{ route("admin.journals.update-order") }}', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                            body: JSON.stringify({ orders })
-                        });
-                    }
-                });
-            });
-        </script>
-    @endpush
 @endsection

@@ -30,20 +30,24 @@ class MedicalJournalController extends Controller
             'year' => 'required|integer'
         ]);
 
-        $slug = $this->generateUniqueFilename($request->title);
-        $filename = $slug . '.pdf';
+        try {
+            $slug = $this->generateUniqueFilename($request->title);
+            $filename = $slug . '.pdf';
 
-        $request->file('pdf')->storeAs("journals/{$request->year}", $filename, 'public');
+            $request->file('pdf')->storeAs("journals/{$request->year}", $filename, 'public');
 
-        MedicalJournal::create([
-            'title' => $request->title,
-            'filename' => $filename,
-            'year' => $request->year,
-            'is_active' => 1,
-            'order' => MedicalJournal::where('year', $request->year)->max('order') + 1
-        ]);
+            MedicalJournal::create([
+                'title' => $request->title,
+                'filename' => $filename,
+                'year' => $request->year,
+                'is_active' => 1,
+                'order' => (MedicalJournal::where('year', $request->year)->max('order') ?? 0) + 1
+            ]);
 
-        return back()->with('success', 'Journal added successfully');
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, MedicalJournal $medicalJournal)
@@ -54,33 +58,33 @@ class MedicalJournalController extends Controller
             'year' => 'required|integer'
         ]);
 
-        $oldYear = $medicalJournal->year;
-        $oldFilename = $medicalJournal->filename;
+        try {
+            $oldYear = $medicalJournal->year;
+            $oldFilename = $medicalJournal->filename;
+            $newSlug = $this->generateUniqueFilename($request->title, $medicalJournal->id);
+            $newFilename = $newSlug . '.pdf';
 
-        $slug = ($medicalJournal->title === $request->title)
-            ? str_replace('.pdf', '', $oldFilename)
-            : $this->generateUniqueFilename($request->title, $medicalJournal->id);
-
-        $newFilename = $slug . '.pdf';
-
-        if ($request->hasFile('pdf')) {
-            Storage::disk('public')->delete("journals/{$oldYear}/{$oldFilename}");
-            $request->file('pdf')->storeAs("journals/{$request->year}", $newFilename, 'public');
-        } elseif ($oldYear != $request->year || $oldFilename != $newFilename) {
-            if (!Storage::disk('public')->exists("journals/{$request->year}")) {
-                Storage::disk('public')->makeDirectory("journals/{$request->year}");
+            if ($request->hasFile('pdf')) {
+                Storage::disk('public')->delete("journals/{$oldYear}/{$oldFilename}");
+                $request->file('pdf')->storeAs("journals/{$request->year}", $newFilename, 'public');
+            } elseif ($oldYear != $request->year || $oldFilename != $newFilename) {
+                if (!Storage::disk('public')->exists("journals/{$request->year}")) {
+                    Storage::disk('public')->makeDirectory("journals/{$request->year}");
+                }
+                Storage::disk('public')->move("journals/{$oldYear}/{$oldFilename}", "journals/{$request->year}/{$newFilename}");
             }
-            Storage::disk('public')->move("journals/{$oldYear}/{$oldFilename}", "journals/{$request->year}/{$newFilename}");
+
+            $medicalJournal->update([
+                'title' => $request->title,
+                'filename' => $newFilename,
+                'year' => $request->year,
+                'is_active' => $request->input('is_active') == 1 ? 1 : 0
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
-
-        $medicalJournal->update([
-            'title' => $request->title,
-            'filename' => $newFilename,
-            'year' => $request->year,
-            'is_active' => $request->input('is_active') == 1 ? 1 : 0
-        ]);
-
-        return response()->json(['success' => true]);
     }
 
     public function updateOrder(Request $request)
@@ -93,9 +97,13 @@ class MedicalJournalController extends Controller
 
     public function delete(MedicalJournal $medicalJournal)
     {
-        Storage::disk('public')->delete("journals/{$medicalJournal->year}/{$medicalJournal->filename}");
-        $medicalJournal->delete();
-        return back()->with('success', 'Deleted successfully');
+        try {
+            Storage::disk('public')->delete("journals/{$medicalJournal->year}/{$medicalJournal->filename}");
+            $medicalJournal->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     private function generateUniqueFilename($title, $ignoreId = null)
