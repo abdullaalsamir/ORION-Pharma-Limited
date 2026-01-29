@@ -36,11 +36,11 @@
                                     <i class="fas fa-arrows-up-down-left-right"></i>
                                 </div>
 
-                                <div class="w-12 h-12 flex items-center justify-center text-red-500 ml-2 shrink-0">
+                                <div class="w-12 h-12 flex items-center justify-center text-red-500 shrink-0">
                                     <i class="fas fa-file-pdf text-3xl"></i>
                                 </div>
 
-                                <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4">
+                                <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-2">
                                     <span class="font-bold text-slate-700 text-sm truncate tracking-tight">
                                         {{ $j->title }}
                                     </span>
@@ -49,7 +49,7 @@
                                 <div class="shrink-0 px-4 flex items-center gap-3">
                                     <a href="{{ url($menu->full_slug . '/' . $j->year . '/' . $j->filename) }}" target="_blank"
                                         class="badge badge-info hover:bg-sky-100 transition-colors">
-                                        <i class="fas fa-eye mr-1 opacity-70"></i>
+                                        <i class="fas fa-eye opacity-70"></i>
                                     </a>
                                     <span class="badge {{ $j->is_active ? 'badge-success' : 'badge-danger' }}">
                                         {{ $j->is_active ? 'Active' : 'Inactive' }}

@@ -14,7 +14,8 @@ import {
     initCSRPage,
     initNewsPage,
     initDirectorsPage,
-    initJournalsPage
+    initJournalsPage,
+    initAnnualReportsPage
 } from './admin/common';
 
 Turbo.start();
@@ -33,4 +34,5 @@ document.addEventListener('turbo:load', () => {
     initNewsPage();
     initDirectorsPage();
     initJournalsPage();
+    initAnnualReportsPage();
 });
