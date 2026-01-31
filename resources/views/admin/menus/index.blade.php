@@ -76,7 +76,7 @@
         <div class="modal-content">
             <div class="flex justify-between items-center mb-8 pb-2 border-b border-slate-100">
                 <h1 class="mb-0!">Edit Menu</h1>
-                <button onclick="closeModal()" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
             </div>
 
             <form method="POST" id="editForm" class="flex flex-col gap-5">

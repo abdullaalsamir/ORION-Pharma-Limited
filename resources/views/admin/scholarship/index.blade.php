@@ -8,7 +8,7 @@
                 <h1>Scholarship Management</h1>
                 <p class="text-xs text-slate-400">Manage and organize scholarship recipients</p>
             </div>
-            <button onclick="openAddModal()" class="btn-success h-10!">
+            <button onclick="openScholarAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Person
             </button>
         </div>
@@ -75,7 +75,7 @@
                                         </span>
                                         <div class="flex items-center border-l pl-3 border-slate-100 space-x-1">
                                             <button class="btn-icon w-8 p-1.5!"
-                                                onclick="openEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
+                                                onclick="openScholarEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
                                                 <i class="fas fa-pencil text-xs"></i>
                                             </button>
                                             <form action="{{ route('admin.scholarship.delete', $item) }}" method="POST"

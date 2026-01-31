@@ -77,7 +77,7 @@
                 <div class="flex gap-2">
                     <input type="text" name="map_url" id="map_input" value="{{ $footer->map_url }}"
                         placeholder="https://www.google.com/maps/embed?..." required class="input-field flex-1">
-                    <button type="button" onclick="fetchMap()" class="btn-primary h-11 px-6 bg-slate-800">Fetch
+                    <button type="button" onclick="fetchFooterMap()" class="btn-primary h-11 px-6 bg-slate-800">Fetch
                         Map</button>
                 </div>
             </div>

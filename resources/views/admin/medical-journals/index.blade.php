@@ -9,7 +9,7 @@
                 <p class="text-xs text-slate-400">Organize PDFs by year and drag to reorder within groups
                 </p>
             </div>
-            <button onclick="openAddModal()" class="btn-success h-10!">
+            <button onclick="openJournalAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Journal
             </button>
         </div>
@@ -58,7 +58,7 @@
 
                                 <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
                                     <button class="btn-icon w-8 p-1.5!"
-                                        onclick="openEditModal({{ json_encode($j) }}, '{{ $menu->full_slug }}')">
+                                        onclick="openJournalEditModal({{ json_encode($j) }}, '{{ $menu->full_slug }}')">
                                         <i class="fas fa-pencil text-xs"></i>
                                     </button>
                                     <button class="btn-danger w-8 p-1.5!" onclick="deleteJournal({{ $j->id }})">
@@ -93,7 +93,7 @@
                 <div class="flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 block mb-1">Select PDF File</label>
                     <input type="file" name="pdf" id="pdfInput" accept="application/pdf" required class="hidden"
-                        onchange="handlePdfSelect(this)">
+                        onchange="handleJournalPdfSelect(this)">
                     <div class="aspect-10/2 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
                         id="pdfPlaceholder" onclick="document.getElementById('pdfInput').click()">
                         <i

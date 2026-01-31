@@ -49,7 +49,7 @@
         <div class="modal-content max-w-6xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-8 pb-3 border-b border-slate-100">
                 <h1 id="modalTitle" class="mb-0!">Edit Page</h1>
-                <button onclick="closePageModal()" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="closeModal('pageModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
             </div>
 
             <div class="grid grid-cols-12 gap-8 flex-1 min-h-0">

@@ -6,7 +6,7 @@
                 <h1>Corporate Governance</h1>
                 <p class="text-xs text-slate-400">Manage and organize Corporate Governance documents</p>
             </div>
-            <button onclick="openAddModal()" class="btn-success h-10!">
+            <button onclick="openReportAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Report
             </button>
         </div>
@@ -65,10 +65,10 @@
                                 </div>
 
                                 <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
-                                    <button class="btn-icon w-8 p-1.5!" onclick="openEditModal({{ json_encode($item) }})">
+                                    <button class="btn-icon w-8 p-1.5!" onclick="openReportEditModal({{ json_encode($item) }})">
                                         <i class="fas fa-pencil text-xs"></i>
                                     </button>
-                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteItem({{ $item->id }})">
+                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteReportItem({{ $item->id }})">
                                         <i class="fas fa-trash-can text-xs"></i>
                                     </button>
                                 </div>

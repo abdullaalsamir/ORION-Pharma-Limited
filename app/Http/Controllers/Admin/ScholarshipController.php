@@ -136,7 +136,7 @@ class ScholarshipController extends Controller
 
         $scholarship->delete();
 
-        return back()->with('success', 'Scholarship record deleted successfully');
+        return response()->json(['success' => true]);
     }
 
     private function processScholarImage($sourcePath, $destinationPath)

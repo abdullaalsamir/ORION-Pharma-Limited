@@ -8,7 +8,7 @@
                 <h1>Board of Directors</h1>
                 <p class="text-xs text-slate-400">Manage profiles and reorder using drag-and-drop</p>
             </div>
-            <button onclick="openAddModal()" class="btn-success h-10!">
+            <button onclick="openDirectorAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Director
             </button>
         </div>
@@ -45,7 +45,7 @@
 
                         <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
                             <button class="btn-icon w-8 p-1.5!"
-                                onclick="openEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
+                                onclick="openDirectorEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
                                 <i class="fas fa-pencil text-xs"></i>
                             </button>
                             <button class="btn-danger w-8 p-1.5!" onclick="deleteDirector({{ $item->id }})">

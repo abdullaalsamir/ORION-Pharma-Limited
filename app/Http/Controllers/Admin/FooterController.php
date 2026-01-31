@@ -66,6 +66,10 @@ class FooterController extends Controller
         $footer->fill($data);
         $footer->save();
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Footer updated successfully');
     }
 }

@@ -1,5 +1,27 @@
 import Sortable from 'sortablejs';
 
+async function handleResponse(res) {
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await res.json();
+        if (res.ok) return data;
+        
+        const errorMsg = data.error || data.message || "Server validation failed.";
+        alert("Error: " + errorMsg);
+        throw new Error(errorMsg);
+    } else {
+        const text = await res.text();
+        console.error("Server returned non-JSON:", text);
+        alert("System Error: The server sent an invalid response. Please refresh and try again.");
+        throw new Error("Invalid JSON response");
+    }
+}
+
+const fetchHeaders = () => ({
+    'Accept': 'application/json',
+    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+});
+
 export function initGlobalHelpers() {
     window.closeModal = (id) => {
         const modal = document.getElementById(id);
@@ -15,7 +37,6 @@ export function initGlobalHelpers() {
             const len = el.value.length;
             counter.innerText = `${len}/${limit}`;
             counter.classList.toggle('text-red-500', len >= limit);
-            counter.classList.toggle('text-slate-300', len < limit);
         }
     };
 
@@ -23,7 +44,8 @@ export function initGlobalHelpers() {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                const container = document.getElementById(containerId);
+                if (container) container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -31,12 +53,7 @@ export function initGlobalHelpers() {
 }
 
 export function initLayoutUI() {
-    const body = document.body;
-    const adminName = body.dataset.adminName;
-    const greetingEl = document.getElementById('greetingText');
     const clockEl = document.getElementById('clock');
-    const sidebarNav = document.querySelector('.sidebar-nav');
-
     if (window.clockInterval) clearInterval(window.clockInterval);
     if (clockEl) {
         const updateClock = () => {
@@ -46,14 +63,8 @@ export function initLayoutUI() {
         updateClock();
         window.clockInterval = setInterval(updateClock, 1000);
     }
-    if (greetingEl && adminName) {
-        const hr = new Date().getHours();
-        let txt = hr < 12 ? 'Good Morning' : (hr < 17 ? 'Good Afternoon' : 'Good Evening');
-        greetingEl.innerHTML = `<span class="text-slate-400 font-normal">${txt}, </span><span class="text-slate-600 font-bold">${adminName}</span>`;
-    }
-    if (sidebarNav) {
-        sidebarNav.onscroll = () => sessionStorage.setItem('sidebar-scroll', sidebarNav.scrollTop);
-    }
+    const nav = document.querySelector('.sidebar-nav');
+    if (nav) nav.onscroll = () => sessionStorage.setItem('sidebar-scroll', nav.scrollTop);
 }
 
 export function restoreSidebarScroll() {
@@ -65,1495 +76,427 @@ export function initTreeLogic() {
     document.querySelectorAll('.collapse-toggle').forEach(btn => {
         btn.onclick = (e) => {
             e.preventDefault();
-            const targetId = btn.dataset.target;
-            const container = document.getElementById(targetId);
+            const container = document.getElementById(btn.dataset.target);
             if (!container) return;
-
-            const isExpanding = container.classList.contains('hidden');
-
-            if (isExpanding) {
+            if (container.classList.contains('hidden')) {
                 container.classList.remove('hidden');
                 requestAnimationFrame(() => container.classList.add('expanded'));
                 btn.querySelector('i').style.transform = 'rotate(90deg)';
             } else {
                 container.classList.remove('expanded');
                 btn.querySelector('i').style.transform = 'rotate(0deg)';
-                setTimeout(() => {
-                    if (!container.classList.contains('expanded')) container.classList.add('hidden');
-                }, 300);
+                setTimeout(() => { if (!container.classList.contains('expanded')) container.classList.add('hidden'); }, 300);
             }
         };
     });
 }
 
 export function initMenuPage() {
-    const modal = document.getElementById('editModal');
-    if (!modal) return;
+    const rootList = document.getElementById('root-menu-list');
+    const editForm = document.getElementById('editForm');
+    if (!rootList || !editForm || !window.location.pathname.includes('/admin/menus')) return;
 
     document.querySelectorAll('.menu-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150, handle: '.drag-handle', draggable: '.sortable-item', ghostClass: 'bg-slate-50',
-            onEnd: () => saveMenuOrder()
-        });
+        new Sortable(list, { animation: 150, handle: '.drag-handle', onEnd: () => {
+            const menus = [];
+            const process = (ul, parentId) => {
+                Array.from(ul.children).forEach((li, index) => {
+                    if (li.dataset.id) {
+                        menus.push({ id: li.dataset.id, parent_id: parentId, sort_order: index });
+                        const subUl = li.querySelector('.menu-sortable-list');
+                        if (subUl) process(subUl, li.dataset.id);
+                    }
+                });
+            };
+            process(rootList, null);
+            fetch('/admin/menus/update-order', { method: 'POST', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ menus }) }).then(handleResponse);
+        }});
     });
-
-    window.closeModal = () => {
-        modal.classList.remove('active');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    };
-
-    const editParent = document.getElementById('editParent');
-    const editActive = document.getElementById('editActive');
-    const lbl = document.getElementById('toggleLabel');
-
-    const checkParentStatus = (isParentActive) => {
-        if (isParentActive === '0') {
-            editActive.checked = false;
-            editActive.disabled = true;
-            editActive.parentElement.style.opacity = '0.7';
-            lbl.innerText = 'Inactive (by Parent)';
-            lbl.className = 'ml-3 font-bold text-red-400';
-        } else {
-            editActive.disabled = false;
-            editActive.checked = true;
-            editActive.parentElement.style.opacity = '1';
-            lbl.innerText = 'Active';
-            lbl.className = 'ml-3 font-bold text-slate-600';
-        }
-    };
 
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.onclick = (e) => {
             e.preventDefault();
             const d = btn.dataset;
-            document.getElementById('editForm').action = `/admin/menus/${d.id}`;
+            editForm.action = `/admin/menus/${d.id}`;
             document.getElementById('editName').value = d.name;
-            editParent.value = d.parent || '';
-            
-            if (d.multi == '1') document.getElementById('edit-type-multi').checked = true;
-            else document.getElementById('edit-type-functional').checked = true;
-
-            if (d.parentActive === '0') checkParentStatus('0');
-            else {
-                editActive.disabled = false;
-                editActive.parentElement.style.opacity = '1';
-                editActive.checked = d.active === '1';
-                lbl.innerText = editActive.checked ? 'Active' : 'Inactive';
-                lbl.className = 'ml-3 font-bold text-slate-600';
-            }
-
+            document.getElementById('editParent').value = d.parent || '';
+            document.getElementById(d.multi == '1' ? 'edit-type-multi' : 'edit-type-functional').checked = true;
+            document.getElementById('editActive').checked = d.active === '1';
+            document.getElementById('toggleLabel').innerText = d.active === '1' ? 'Active' : 'Inactive';
+            const modal = document.getElementById('editModal');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.add('active'), 10);
         };
     });
-
-    if(editParent) editParent.onchange = () => checkParentStatus(editParent.options[editParent.selectedIndex].dataset.active);
-    if(editActive) editActive.onchange = () => lbl.innerText = editActive.checked ? 'Active' : 'Inactive';
 }
 
-function saveMenuOrder() {
-    const menus = [];
-    const process = (ul, parentId) => {
-        Array.from(ul.children).forEach((li, index) => {
-            if (li.dataset.id) {
-                menus.push({ id: li.dataset.id, parent_id: parentId, sort_order: index });
-                const subUl = li.querySelector('.menu-sortable-list');
-                if (subUl) process(subUl, li.dataset.id);
-            }
-        });
+export function initSlidersPage() {
+    const list = document.getElementById('slider-list');
+    const addF = document.querySelector('#addModal form');
+    const editF = document.getElementById('editForm');
+    if (!list || !window.location.pathname.includes('/admin/sliders')) return;
+
+    window.openSliderAddModal = () => {
+        addF.reset();
+        document.getElementById('addPreview').innerHTML = `<i class="fas fa-cloud-arrow-up"></i>`;
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
     };
-    const root = document.getElementById('root-menu-list');
-    if (root) process(root, null);
-    fetch('/admin/menus/update-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-        body: JSON.stringify({ menus })
-    });
-}
 
-export function initPagesPage() {
-    const modal = document.getElementById('pageModal');
-    const editorEl = document.getElementById('ace-editor');
-    if (!modal || !editorEl) return;
+    window.openSliderEditModal = (slider) => {
+        window.currentSliderId = slider.id;
+        document.getElementById('editH1').value = slider.header_1;
+        document.getElementById('editH2').value = slider.header_2;
+        document.getElementById('editDesc').value = slider.description;
+        document.getElementById('editActive').checked = slider.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}" class="w-full h-full object-cover">`;
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
 
-    if (typeof ace !== 'undefined') {
-        ace.config.set("basePath", "/js/ace/src-min-noconflict");
-        const editor = ace.edit("ace-editor");
-        editor.setTheme("ace/theme/github_light_default");
-        editor.session.setMode("ace/mode/php");
-        editor.setOptions({ fontSize: "14px", showPrintMargin: false, useSoftTabs: true, tabSize: 4, wrap: true });
+    addF.onsubmit = (e) => {
+        e.preventDefault();
+        fetch('/admin/sliders', { method: 'POST', body: new FormData(addF), headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
 
-        const applyFormatting = (type) => {
-            const selectedText = editor.getSelectedText();
-            
-            const toggleTag = (text, tagName) => {
-                const startTag = `<${tagName}>`;
-                const endTag = `</${tagName}>`;
-                
-                if (text.startsWith(startTag) && text.endsWith(endTag)) {
-                    return text.substring(startTag.length, text.length - endTag.length);
-                } else {
-                    return `${startTag}${text}${endTag}`;
-                }
-            };
+    editF.onsubmit = (e) => {
+        e.preventDefault();
+        const fd = new FormData(editF);
+        fd.append('_method', 'PUT');
+        fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        fetch(`/admin/sliders/${window.currentSliderId}`, { method: 'POST', body: fd, headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
 
-            switch (type) {
-                case 'b': editor.insert(toggleTag(selectedText, 'b')); break;
-                case 'i': editor.insert(toggleTag(selectedText, 'i')); break;
-                case 'p': editor.insert(toggleTag(selectedText, 'p')); break;
-                case 'h1': editor.insert(toggleTag(selectedText, 'h1')); break;
-                case 'h2': editor.insert(toggleTag(selectedText, 'h2')); break;
-                case 'br': 
-                    editor.insert(`<br>\n`); 
-                    break;
-                case 'ul':
-                case 'ol':
-                    const lines = selectedText.split('\n');
-                    const items = lines.map(line => `  <li>${line}</li>`).join('\n');
-                    const tag = type === 'ul' ? 'ul' : 'ol';
-                    editor.insert(`<${tag}>\n${items}\n</${tag}>`);
-                    break;
-            }
-            editor.focus();
-        };
-
-        document.querySelectorAll('#editor-toolbar button').forEach(btn => {
-            btn.onclick = () => applyFormatting(btn.dataset.format);
-        });
-
-        window.closePageModal = () => {
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        };
-
-        let currentPageId = null;
-        document.querySelectorAll('.edit-page').forEach(btn => {
-            btn.onclick = (e) => {
-                e.preventDefault();
-                currentPageId = btn.dataset.id;
-                document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
-                
-                const strip = document.getElementById('imageStrip');
-                strip.innerHTML = '<div class="text-[10px] text-slate-400 font-bold px-4 uppercase italic">Loading...</div>';
-                fetch(`/admin/banners/get-for-editor/${currentPageId}`)
-                    .then(res => res.json())
-                    .then(images => {
-                        strip.innerHTML = images.length ? '' : '<div class="text-[10px] text-slate-400 font-bold px-4">No Banners Found</div>';
-                        images.forEach(img => {
-                            const div = document.createElement('div');
-                            div.className = "shrink-0 w-full h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-admin-blue cursor-pointer transition-all bg-white shadow-sm";
-                            div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
-                            div.onclick = () => {
-                                editor.insert(`<div class="img-shine">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`);
-                                editor.focus();
-                            };
-                            strip.appendChild(div);
-                        });
-                    });
-
-                const decoder = document.createElement('textarea');
-                decoder.innerHTML = btn.dataset.content || '';
-                editor.setValue(decoder.value, -1);
-
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.add('active');
-                    editor.resize();
-                    editor.focus();
-                }, 10);
-            };
-        });
-
-        const saveBtn = document.getElementById('savePage');
-        if (saveBtn) {
-            saveBtn.onclick = () => {
-                fetch(`/admin/pages/${currentPageId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify({ content: editor.getValue() })
-                }).then(() => Turbo.visit(window.location.href));
-            };
-        }
-    }
+    new Sortable(list, { animation: 150, handle: '.drag-handle', onEnd: () => {
+        let orders = [];
+        document.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
+        fetch('/admin/sliders/update-order', { method: 'POST', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ orders }) }).then(handleResponse);
+    }});
 }
 
 export function initBannersPage() {
-    const uploadForm = document.getElementById('uploadForm');
-    const editForm = document.getElementById('editForm');
-    
-    if (!document.querySelector('.leaf-menu-item')) return;
+    if (!document.querySelector('.leaf-menu-item') || !window.location.pathname.includes('/admin/banners')) return;
 
     window.loadBanners = (menuId, el) => {
         document.querySelectorAll('.leaf-menu-item').forEach(i => i.classList.remove('active', 'border-admin-blue', 'bg-slate-100'));
         el.classList.add('active', 'border-admin-blue', 'bg-slate-100');
-        
         window.currentMenuId = menuId;
-
-        fetch(`/admin/banners/fetch/${menuId}`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('imageArea').innerHTML = data.html;
-            });
+        fetch(`/admin/banners/fetch/${menuId}`, { headers: fetchHeaders() }).then(handleResponse).then(data => { document.getElementById('imageArea').innerHTML = data.html; });
     };
 
-    window.openUploadModal = () => {
+    window.openBannerUploadModal = () => {
         if (!window.currentMenuId) { alert("Please select a page first"); return; }
-        uploadForm.reset();
-        document.getElementById('uploadPreviewContainer').innerHTML = `
-            <i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>
-            <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Click to select 48:9 image</span>
-        `;
+        document.getElementById('uploadForm').reset();
         const modal = document.getElementById('uploadModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
 
-    window.openEditModal = (id, name, fullSlug, isActive) => {
+    window.openBannerEditModal = (id, name, fullSlug, isActive) => {
         window.currentBannerId = id;
-        editForm.reset();
-        document.getElementById('editPreviewContainer').innerHTML = `<img src="/${fullSlug}/${name}?t=${Date.now()}" class="w-full h-full object-cover">`;
-        
-        const toggle = document.getElementById('editActiveToggle');
-        const lbl = document.getElementById('editStatusLabel');
-        toggle.checked = (isActive == 1);
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
+        document.getElementById('editPreviewContainer').innerHTML = `<img src="/${fullSlug}/${name}" class="w-full h-full object-cover">`;
+        document.getElementById('editActiveToggle').checked = (isActive == 1);
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
 
-    window.closeModal = (id) => {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
+    document.getElementById('uploadForm').onsubmit = function(e) {
+        e.preventDefault();
+        fetch(`/admin/banners/upload/${window.currentMenuId}`, { method: 'POST', body: new FormData(this), headers: fetchHeaders() })
+        .then(handleResponse).then(() => { closeModal('uploadModal'); loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); });
     };
 
-    window.handlePreview = (input, containerId) => {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
+    document.getElementById('editForm').onsubmit = function(e) {
+        e.preventDefault();
+        const fd = new FormData(this);
+        fd.append('is_active', document.getElementById('editActiveToggle').checked ? 1 : 0);
+        fetch(`/admin/banners/${window.currentBannerId}`, { method: 'POST', body: fd, headers: fetchHeaders() })
+        .then(handleResponse).then(() => { closeModal('editModal'); loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); });
     };
 
-    window.deleteImage = (id) => {
-        if (confirm('Delete this banner permanently?')) {
-            fetch(`/admin/banners/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => {
-                const activeItem = document.querySelector('.leaf-menu-item.active');
-                if (activeItem) loadBanners(window.currentMenuId, activeItem);
-            });
-        }
+    window.deleteBannerImage = (id) => {
+        if (confirm('Delete banner?')) fetch(`/admin/banners/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')));
     };
-
-    if (uploadForm) {
-        uploadForm.onsubmit = function(e) {
-            e.preventDefault();
-            fetch(`/admin/banners/upload/${window.currentMenuId}`, {
-                method: 'POST',
-                body: new FormData(this),
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => { 
-                closeModal('uploadModal'); 
-                loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); 
-            });
-        };
-    }
-
-    if (editForm) {
-        editForm.onsubmit = function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            formData.append('is_active', document.getElementById('editActiveToggle').checked ? 1 : 0);
-            
-            fetch(`/admin/banners/${window.currentBannerId}`, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => { 
-                closeModal('editModal'); 
-                loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); 
-            });
-        };
-        
-        document.getElementById('editActiveToggle').onchange = function() {
-            document.getElementById('editStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-}
-
-export function initSlidersPage() {
-    const list = document.getElementById('slider-list');
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!list && !addForm && !editForm) return;
-
-    window.closeModal = (id) => {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-    };
-
-    window.handlePreview = (input, containerId) => {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    window.updateCount = (el, counterId, limit) => {
-        const counter = document.getElementById(counterId);
-        if (counter) {
-            const len = el.value.length;
-            counter.innerText = `${len}/${limit}`;
-            if (len >= limit) {
-                counter.className = 'absolute right-3 bottom-2.5 text-[9px] text-red-500 font-bold';
-            } else {
-                counter.className = 'absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold';
-            }
-        }
-    };
-
-    window.openAddModal = () => {
-        addForm.reset();
-        document.getElementById('addPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Click to select 23:9 image</span>`;
-        const modal = document.getElementById('addModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.openEditModal = (slider) => {
-        window.currentSliderId = slider.id;
-        document.getElementById('editH1').value = slider.header_1;
-        document.getElementById('editH2').value = slider.header_2;
-        document.getElementById('editDesc').value = slider.description;
-        document.getElementById('editBT').value = slider.button_text || 'Explore More';
-        document.getElementById('editLink').value = slider.link_url || '';
-        document.getElementById('editActive').checked = slider.is_active == 1;
-        document.getElementById('sliderStatusLabel').innerText = slider.is_active == 1 ? 'Active' : 'Inactive';
-        document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}" class="w-full h-full object-cover">`;
-
-        ['editH1', 'editH2', 'editDesc', 'editBT'].forEach(id => {
-            const el = document.getElementById(id);
-            const counterId = id.replace('edit', 'editC').replace('H1', '1').replace('H2', '2').replace('Desc', 'D').replace('BT', 'BT');
-            updateCount(el, counterId, el.getAttribute('maxlength'));
-        });
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    const submitForm = (form, url, isUpdate = false) => {
-        const formData = new FormData(form);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        })
-        .then(async res => {
-            const data = await res.json();
-            if (res.ok) Turbo.visit(window.location.href);
-            else alert("Error: " + (data.error || "Validation failed"));
-        })
-        .catch(() => alert("Server error occurred"));
-    };
-
-    if (addForm) {
-        addForm.onsubmit = (e) => {
-            e.preventDefault();
-            submitForm(addForm, '/admin/sliders', false);
-        };
-    }
-
-    if (editForm) {
-        editForm.onsubmit = (e) => {
-            e.preventDefault();
-            submitForm(editForm, `/admin/sliders/${window.currentSliderId}`, true);
-        };
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('sliderStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    if (list) {
-        new Sortable(list, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                document.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
-                fetch('/admin/sliders/update-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    }
 }
 
 export function initProductsPage() {
-    const genForm = document.getElementById('genForm');
-    const prodForm = document.getElementById('prodForm');
-    if (!genForm && !prodForm) return;
-
-    window.closeModal = (id) => {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-    };
-
-    const showInlineError = (inputId, errorId, message) => {
-        const input = document.getElementById(inputId);
-        const error = document.getElementById(errorId);
-        if (input) {
-            input.classList.add('border-red-500', 'bg-red-50');
-            input.classList.remove('border-slate-200', 'bg-white');
-        }
-        if (error) {
-            error.innerText = message;
-            error.classList.remove('hidden');
-        }
-    };
-
-    const clearInlineError = (inputId, errorId) => {
-        const input = document.getElementById(inputId);
-        const error = document.getElementById(errorId);
-        if (input) {
-            input.classList.remove('border-red-500', 'bg-red-50');
-            input.classList.add('border-slate-200', 'bg-white');
-        }
-        if (error) error.classList.add('hidden');
-    };
-
-    window.handlePreview = (input, containerId) => {
-        if (input.files && input.files[0]) {
-            const previewBox = document.getElementById('prodPreview');
-            const errorMsg = document.getElementById('prodImageError');
-            if (previewBox) {
-                previewBox.classList.remove('border-red-500', 'bg-red-50');
-                previewBox.classList.add('border-slate-200', 'bg-slate-50');
-            }
-            if (errorMsg) errorMsg.classList.add('hidden');
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById(containerId).innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    const updateSidebarSelection = (el) => {
-        document.querySelectorAll('.generic-list-item').forEach(item => {
-            item.classList.remove('active', 'border-admin-blue', 'bg-blue-50/50', 'border-red-500', 'bg-red-50', 'shadow-inner');
-            
-            if (item.classList.contains('archived-item')) {
-                item.classList.add('bg-red-50/50', 'border-red-100');
-            } else {
-                item.classList.add('bg-white', 'border-slate-200');
-            }
-
-            const nameSpan = item.querySelector('.generic-name');
-            if (nameSpan) nameSpan.classList.remove('text-admin-blue', 'text-red-700');
-        });
-
-        if (el.classList.contains('archived-item')) {
-            el.classList.add('active', 'border-red-500', 'bg-red-50', 'shadow-inner');
-            el.classList.remove('bg-red-50/50', 'border-red-100');
-            el.querySelector('.generic-name').classList.add('text-red-700');
-        } else {
-            el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50', 'shadow-inner');
-            el.classList.remove('bg-white', 'border-slate-200');
-            el.querySelector('.generic-name').classList.add('text-admin-blue');
-        }
-    };
-
-    const genNameInput = document.getElementById('genName');
-    if (genNameInput) genNameInput.oninput = () => clearInlineError('genName', 'genNameError');
+    const gForm = document.getElementById('genForm');
+    const pForm = document.getElementById('prodForm');
+    if (!gForm || !pForm || !window.location.pathname.includes('/admin/products')) return;
 
     window.loadProducts = (id, el) => {
-        updateSidebarSelection(el);
+        document.querySelectorAll('.generic-list-item').forEach(i => i.classList.remove('active', 'border-admin-blue', 'bg-blue-50/50'));
+        el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50');
         window.currentGenId = id;
-        fetch(`/admin/products-actions/fetch/${id}`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('productArea').innerHTML = data.html;
-            });
+        fetch(`/admin/products-actions/fetch/${id}`, { headers: fetchHeaders() }).then(handleResponse).then(data => { document.getElementById('productArea').innerHTML = data.html; });
     };
 
     window.openGenericModal = () => {
         window.currentEditGenericId = null;
-        genForm.reset();
-        clearInlineError('genName', 'genNameError');
+        gForm.reset();
         document.getElementById('genTitle').innerText = "Add Generic";
-        document.getElementById('genActiveWrapper').classList.add('hidden');
-        document.getElementById('genSubmitBtn').innerText = "Save Generic";
-        const modal = document.getElementById('genericModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
+        document.getElementById('genericModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('genericModal').classList.add('active'), 10);
     };
 
     window.openEditGeneric = (g) => {
         window.currentEditGenericId = g.id;
-        document.getElementById('genTitle').innerText = "Edit Generic";
         document.getElementById('genName').value = g.name;
-        
-        const toggle = document.getElementById('genActive');
-        const lbl = document.getElementById('genStatusLabel');
-        toggle.checked = (g.is_active == 1);
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        document.getElementById('genActiveWrapper').classList.remove('hidden');
-        document.getElementById('genSubmitBtn').innerText = "Save Changes";
-        const modal = document.getElementById('genericModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
+        document.getElementById('genActive').checked = (g.is_active == 1);
+        document.getElementById('genTitle').innerText = "Edit Generic";
+        document.getElementById('genericModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('genericModal').classList.add('active'), 10);
     };
 
-    const genActive = document.getElementById('genActive');
-    if(genActive) {
-        genActive.onchange = () => {
-            document.getElementById('genStatusLabel').innerText = genActive.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    if (genForm) {
-        genForm.onsubmit = function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const url = window.currentEditGenericId ? `/admin/products-actions/generic-update/${window.currentEditGenericId}` : `/admin/products-actions/generic-store`;
-            if (window.currentEditGenericId) formData.append('_method', 'PUT');
-            formData.set('is_active', document.getElementById('genActive').checked ? 1 : 0);
-
-            fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
-                .then(async res => {
-                    const data = await res.json();
-                    if (res.ok) window.location.reload();
-                    else {
-                        showInlineError('genName', 'genNameError', data.error || "Name already exists.");
-                    }
-                });
-        };
-    }
-
-    window.deleteGeneric = (id) => {
-        if (confirm('Delete this Generic? All products will move to "Archived Products".')) {
-            fetch(`/admin/products-actions/generic-delete/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
-                .then(res => res.json()).then(data => { if (data.success) window.location.reload(); });
-        }
+    gForm.onsubmit = (e) => {
+        e.preventDefault();
+        const url = window.currentEditGenericId ? `/admin/products-actions/generic-update/${window.currentEditGenericId}` : `/admin/products-actions/generic-store`;
+        const fd = new FormData(gForm);
+        if (window.currentEditGenericId) fd.append('_method', 'PUT');
+        fd.set('is_active', document.getElementById('genActive').checked ? 1 : 0);
+        fetch(url, { method: 'POST', body: fd, headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload());
     };
-
-    const prodNameInput = document.getElementById('p_trade_name');
-    if (prodNameInput) prodNameInput.oninput = () => clearInlineError('p_trade_name', 'prodNameError');
 
     window.openAddProduct = () => {
-        prodForm.reset();
-        prodForm.dataset.id = "";
-        clearInlineError('p_trade_name', 'prodNameError');
-
-        document.getElementById('p_generic_id_wrapper').classList.add('hidden');
-        
-        const previewBox = document.getElementById('prodPreview');
-        const errorMsg = document.getElementById('prodImageError');
-        if (previewBox) {
-            previewBox.classList.remove('border-red-500', 'bg-red-50');
-            previewBox.classList.add('border-slate-200', 'bg-slate-50');
-        }
-        if (errorMsg) errorMsg.classList.add('hidden');
-        
+        pForm.reset();
+        window.currentEditProductId = null;
         document.getElementById('prodTitle').innerText = "Add Product";
-        document.getElementById('prodReplaceOverlay').classList.add('hidden');
-        document.getElementById('prodPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select 16:9 Image</span>`;
-        document.getElementById('prodActiveWrapper').classList.add('opacity-0', 'pointer-events-none');
-        
-        const modal = document.getElementById('productModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
+        document.getElementById('productModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('productModal').classList.add('active'), 10);
     };
 
     window.openEditProduct = (p) => {
-        prodForm.reset();
-        prodForm.dataset.id = p.id;
-        clearInlineError('p_trade_name', 'prodNameError');
-
-        const genWrapper = document.getElementById('p_generic_id_wrapper');
-        if (!p.generic_id) {
-            genWrapper.classList.remove('hidden');
-        } else {
-            genWrapper.classList.add('hidden');
-        }
-
-        document.getElementById('prodTitle').innerText = "Edit Product";
-        document.getElementById('prodReplaceOverlay').classList.remove('hidden');
-        
+        window.currentEditProductId = p.id;
         const fields = ['trade_name', 'preparation', 'therapeutic_class', 'indications', 'dosage_admin', 'use_children', 'use_pregnancy_lactation', 'contraindications', 'precautions', 'side_effects', 'drug_interactions', 'high_risk', 'overdosage', 'storage', 'presentation', 'how_supplied', 'commercial_pack', 'packaging', 'official_specification'];
-        fields.forEach(f => {
-            const el = document.getElementById('p_' + f);
-            if (el) el.value = p[f] || '';
-        });
-
-        const genSelect = document.getElementById('p_generic_id');
-        if(genSelect) genSelect.value = p.generic_id || '';
-
-        const toggle = document.getElementById('p_active');
-        const lbl = document.getElementById('prodStatusLabel');
-        toggle.checked = (p.is_active == 1);
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
+        fields.forEach(f => { if(document.getElementById('p_' + f)) document.getElementById('p_' + f).value = p[f] || ''; });
+        document.getElementById('p_active').checked = (p.is_active == 1);
         document.getElementById('prodPreview').innerHTML = `<img src="/storage/${p.image_path}" class="w-full h-full object-cover">`;
-        document.getElementById('prodActiveWrapper').classList.remove('opacity-0', 'pointer-events-none');
-        
-        const modal = document.getElementById('productModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
+        document.getElementById('productModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('productModal').classList.add('active'), 10);
     };
 
-    const pActive = document.getElementById('p_active');
-    if(pActive) {
-        pActive.onchange = () => {
-            document.getElementById('prodStatusLabel').innerText = pActive.checked ? 'Active' : 'Inactive';
-        };
-    }
+    pForm.onsubmit = (e) => {
+        e.preventDefault();
+        const url = window.currentEditProductId ? `/admin/products-actions/product-update/${window.currentEditProductId}` : `/admin/products-actions/product-store/${window.currentGenId}`;
+        const fd = new FormData(pForm);
+        if (window.currentEditProductId) fd.append('_method', 'PUT');
+        fd.set('is_active', document.getElementById('p_active').checked ? 1 : 0);
+        fetch(url, { method: 'POST', body: fd, headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload());
+    };
 
-    if (prodForm) {
-        prodForm.onsubmit = function(e) {
-            e.preventDefault();
-            
-            const id = this.dataset.id;
-            const fileInput = document.getElementById('prodInput');
-            const previewBox = document.getElementById('prodPreview');
-            const errorMsg = document.getElementById('prodImageError');
+    window.deleteGeneric = (id) => { if (confirm('Delete Generic?')) fetch(`/admin/products-actions/generic-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
+    window.deleteProduct = (id) => { if (confirm('Delete Product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
+}
 
-            if (!id && fileInput.files.length === 0) {
-                previewBox.classList.add('border-red-500', 'bg-red-50');
-                previewBox.classList.remove('border-slate-200', 'bg-slate-50');
-                if (errorMsg) errorMsg.classList.remove('hidden');
-                prodForm.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
+function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
+    if (!window.location.pathname.includes(pathPart)) return;
+    const addF = document.querySelector('#addModal form');
+    const editF = document.getElementById('editForm');
 
-            const url = id ? `/admin/products-actions/product-update/${id}` : `/admin/products-actions/product-store/${window.currentGenId}`;
-            const formData = new FormData(this);
-            if (id) {
-                formData.append('_method', 'PUT');
-                formData.append('is_active', document.getElementById('p_active').checked ? 1 : 0);
-            }
+    if (addF) addF.onsubmit = (e) => {
+        e.preventDefault();
+        fetch(storeUrl, { method: 'POST', body: new FormData(addF), headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
 
-            fetch(url, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            })
-            .then(async res => {
-                const data = await res.json();
-                if (res.ok) {
-                    closeModal('productModal'); 
-                    window.location.reload();
-                } else {
-                    showInlineError('p_trade_name', 'prodNameError', data.error || "Trade name already exists in this generic.");
-                    prodForm.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            });
-        };
-    }
-
-    window.deleteProduct = (id) => {
-        if (confirm('Delete product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }})
-            .then(() => window.location.reload());
+    if (editF) editF.onsubmit = (e) => {
+        e.preventDefault();
+        const fd = new FormData(editF);
+        fd.append('_method', 'PUT');
+        fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        fetch(`${updateUrlPrefix}/${window[currentIdKey]}`, { method: 'POST', body: fd, headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
     };
 }
 
 export function initScholarshipPage() {
-    const list = document.getElementById('scholar-sortable-list');
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!list && !addForm && !editForm) return;
-
-    if (list) {
-        new Sortable(list, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                document.querySelectorAll('#scholar-sortable-list tr').forEach((el, index) => {
-                    orders.push({ id: el.dataset.id, order: index + 1 });
-                });
-                fetch('/admin/scholarship-actions/update-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    }
-
-    window.openAddModal = () => {
+    setupModule('scholarship', '/admin/scholarship-actions/store', '/admin/scholarship-actions', 'curScholarId');
+    window.openScholarAddModal = () => {
+        document.querySelector('#addModal form').reset();
+        document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera"></i>`;
         const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera text-3xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[9px] uppercase tracking-widest text-center px-4 opacity-60">Upload Portrait</span>`;
-        document.getElementById('addImgError').classList.add('hidden');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    window.openEditModal = (item, fullSlug) => {
-        window.currentScholarId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
+    window.openScholarEditModal = (item, slug) => {
+        window.curScholarId = item.id;
         document.getElementById('editName').value = item.name;
         document.getElementById('editCollege').value = item.medical_college;
-        
-        document.getElementById('editSession').value = item.session ? item.session.replace('Session: ', '') : '';
-        document.getElementById('editRoll').value = item.roll_no ? item.roll_no.replace('Roll No: ', '') : '';
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('scholarStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-        
-        const filename = item.image_path.split('/').pop();
-        const imageUrl = `/${fullSlug}/${filename}?t=${Date.now()}`;
-        
-        document.getElementById('editPreview').innerHTML = `<img src="${imageUrl}" class="w-full h-full object-cover">`;
-
+        document.getElementById('editActive').checked = item.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}" class="w-full h-full object-cover">`;
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    const handleScholarSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        } else {
-            if (document.getElementById('addInput').files.length === 0) {
-                document.getElementById('addImgError').classList.remove('hidden');
-                e.target.scrollTop = 0;
-                return;
-            }
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    if (addForm) addForm.onsubmit = (e) => handleScholarSubmit(e, '/admin/scholarship-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleScholarSubmit(e, `/admin/scholarship-actions/${window.currentScholarId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('scholarStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
 }
 
 export function initCSRPage() {
-    const editForm = document.getElementById('editForm');
-    const addForm = document.querySelector('#addModal form');
-    if (!editForm && !addForm) return;
-
-    document.querySelectorAll('.csr-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            draggable: '.sortable-item',
-            ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-
-                fetch('/admin/csr-actions/update-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.openAddModal = () => {
+    setupModule('csr-list', '/admin/csr-actions/store', '/admin/csr-actions', 'curCsrId');
+    window.openCsrAddModal = () => {
+        document.querySelector('#addModal form').reset();
         const modal = document.getElementById('addModal');
-
-        addForm.reset();
-        addForm.scrollTop = 0;
-
-        document.getElementById('addPreview').innerHTML = `
-            <i class="fas fa-camera text-3xl text-slate-300 mb-2"></i>
-            <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4 opacity-60">
-                Select Image
-            </span>
-        `;
-
-        document.getElementById('addImgError').classList.add('hidden');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    window.openEditModal = (item, fullSlug) => {
-        window.currentCsrId = item.id;
-
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
+    window.openCsrEditModal = (item, slug) => {
+        window.curCsrId = item.id;
         document.getElementById('editTitle').value = item.title;
         document.getElementById('editDesc').value = item.description;
         document.getElementById('editDate').value = item.csr_date.split('T')[0];
-
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('csrStatusLabel');
-
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        const filename = item.image_path.split('/').pop();
-        document.getElementById('editPreview').innerHTML = `
-            <img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">
-        `;
-
-        updateCount(document.getElementById('editTitle'), 'editC1', 100);
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
+        document.getElementById('editActive').checked = item.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}" class="w-full h-full object-cover">`;
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    const handleCsrSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append(
-                'is_active',
-                document.getElementById('editActive').checked ? 1 : 0
-            );
-        } else {
-            if (document.getElementById('addInput').files.length === 0) {
-                document.getElementById('addImgError').classList.remove('hidden');
-                document.getElementById('addPreview')
-                    .classList.add('border-red-500', 'bg-red-50');
-                return;
-            }
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Validation failed.");
-        })
-        .catch(err => {
-            console.error(err);
-            alert("A server error occurred.");
-        });
-    };
-
-    if (addForm) {
-        addForm.onsubmit = (e) =>
-            handleCsrSubmit(e, '/admin/csr-actions/store', false);
-    }
-
-    if (editForm) {
-        editForm.onsubmit = (e) =>
-            handleCsrSubmit(e, `/admin/csr-actions/${window.currentCsrId}`, true);
-
-        document.getElementById('editActive').onchange = function () {
-            document.getElementById('csrStatusLabel').innerText =
-                this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteCsr = (id) => {
-        if (confirm('Delete this CSR item permanently?')) {
-            fetch(`/admin/csr-actions/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    Turbo.visit(window.location.href, { action: "replace" });
-                } else {
-                    alert("Error: " + data.error);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("A system error occurred.");
-            });
-        }
-    };
+    window.deleteCsr = (id) => { if(confirm('Delete?')) fetch(`/admin/csr-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initNewsPage() {
-    const editForm = document.getElementById('editForm');
-    const addForm = document.querySelector('#addModal form');
-    if (!editForm && !addForm) return;
-
-    document.querySelectorAll('.news-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150,
-            handle: '.drag-handle',
-            draggable: '.sortable-item',
-            ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-                fetch('/admin/news-actions/update-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.openAddModal = () => {
+    setupModule('news-and-announcements', '/admin/news-actions/store', '/admin/news-actions', 'curNewsId');
+    window.openNewsAddModal = () => {
+        document.querySelector('#addModal form').reset();
         const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('addPreview').innerHTML = `
-            <i class="fas fa-camera text-3xl text-slate-300 mb-2"></i>
-            <span class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4 opacity-60">
-                Select Image
-            </span>`;
-        document.getElementById('addImgError').classList.add('hidden');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    window.openEditModal = (item, fullSlug) => {
-        window.currentNewsId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
+    window.openNewsEditModal = (item, slug) => {
+        window.curNewsId = item.id;
         document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDesc').value = item.description;
         document.getElementById('editDate').value = item.news_date.split('T')[0];
-
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('newsStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        const filename = item.image_path.split('/').pop();
-        document.getElementById('editPreview').innerHTML = `
-            <img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">
-        `;
-
-        updateCount(document.getElementById('editTitle'), 'editC1', 100);
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
+        document.getElementById('editActive').checked = item.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}" class="w-full h-full object-cover">`;
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    const handleNewsSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append(
-                'is_active',
-                document.getElementById('editActive').checked ? 1 : 0
-            );
-        } else {
-            if (document.getElementById('addInput').files.length === 0) {
-                document.getElementById('addImgError').classList.remove('hidden');
-                document.getElementById('addPreview')
-                    .classList.add('border-red-500', 'bg-red-50');
-                return;
-            }
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Validation failed.");
-        })
-        .catch(err => {
-            console.error(err);
-            alert("A server error occurred.");
-        });
-    };
-
-    if (addForm) {
-        addForm.onsubmit = (e) =>
-            handleNewsSubmit(e, '/admin/news-actions/store', false);
-    }
-
-    if (editForm) {
-        editForm.onsubmit = (e) =>
-            handleNewsSubmit(e, `/admin/news-actions/${window.currentNewsId}`, true);
-
-        document.getElementById('editActive').onchange = function () {
-            document.getElementById('newsStatusLabel').innerText =
-                this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteNews = (id) => {
-        if (confirm('Delete this News item permanently?')) {
-            fetch(`/admin/news-actions/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    Turbo.visit(window.location.href, { action: "replace" });
-                } else {
-                    alert("Error: " + data.error);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("A system error occurred.");
-            });
-        }
-    };
+    window.deleteNews = (id) => { if(confirm('Delete?')) fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initDirectorsPage() {
-    const list = document.getElementById('directors-sortable-list');
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!list && !addForm && !editForm) return;
-
-    if (list) {
-        new Sortable(list, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
-                fetch('/admin/director-actions/update-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    }
-
-    window.openAddModal = () => {
+    setupModule('board-of-directors', '/admin/director-actions/store', '/admin/director-actions', 'curDirId');
+    window.openDirectorAddModal = () => {
+        document.querySelector('#addModal form').reset();
         const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera text-3xl text-slate-300 mb-2"></i><span class="text-slate-400 font-bold text-[9px] uppercase tracking-widest text-center px-4 opacity-60">Upload Portrait</span>`;
-        document.getElementById('addImgError').classList.add('hidden');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    window.openEditModal = (item, fullSlug) => {
-        window.currentDirectorId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
+    window.openDirectorEditModal = (item, slug) => {
+        window.curDirId = item.id;
         document.getElementById('editName').value = item.name;
         document.getElementById('editDesignation').value = item.designation;
-        document.getElementById('editDesc').value = item.description;
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('directorStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-        
-        const filename = item.image_path.split('/').pop();
-        document.getElementById('editPreview').innerHTML = `<img src="/${fullSlug}/${filename}?t=${Date.now()}" class="w-full h-full object-cover">`;
-
+        document.getElementById('editActive').checked = item.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}" class="w-full h-full object-cover">`;
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    const handleDirectorSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        } else {
-            if (document.getElementById('addInput').files.length === 0) {
-                document.getElementById('addImgError').classList.remove('hidden');
-                document.getElementById('addPreview').classList.add('border-red-500', 'bg-red-50');
-                return;
-            }
-        }
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    if (addForm) addForm.onsubmit = (e) => handleDirectorSubmit(e, '/admin/director-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleDirectorSubmit(e, `/admin/director-actions/${window.currentDirectorId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('directorStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-        };
-    }
-
-    window.deleteDirector = (id) => {
-        if (confirm('Delete this director profile permanently?')) {
-            fetch(`/admin/director-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
+    window.deleteDirector = (id) => { if(confirm('Delete?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initJournalsPage() {
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-    if (!addForm && !editForm) return;
-
-    document.querySelectorAll('.journal-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-                fetch('/admin/journal-actions/update-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    window.handlePdfSelect = (input, isEdit = false) => {
-        if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            const cleanName = fileName.replace(/\.[^/.]+$/, "");
-            
-            if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
-            } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
-                const titleInput = document.getElementById('titleInput');
-                if (!titleInput.value) titleInput.value = cleanName;
-            }
-        }
-    };
-
-    window.openAddModal = () => {
-        const modal = document.getElementById('addModal');
-        addForm.reset();
-        addForm.scrollTop = 0;
+    setupModule('medical-journals', '/admin/journal-actions/store', '/admin/journal-actions', 'curJId');
+    window.openJournalAddModal = () => {
+        document.querySelector('#addModal form').reset();
         document.getElementById('pdfStatusText').innerText = "Click to select PDF";
+        const modal = document.getElementById('addModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    window.openEditModal = (item) => {
-        window.currentJournalId = item.id;
-        const form = document.getElementById('editForm');
-        form.scrollTop = 0;
-
+    window.openJournalEditModal = (item) => {
+        window.curJId = item.id;
         document.getElementById('editTitle').value = item.title;
         document.getElementById('editYear').value = item.year;
-        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
-        document.getElementById('editPdfStatus').classList.remove('text-admin-blue');
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('journalStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
+        document.getElementById('editActive').checked = item.is_active == 1;
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.deleteJournal = (id) => { if(confirm('Delete?')) fetch(`/admin/journal-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+}
 
-    const handleJournalSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
+export function initReportModule() {
+    const map = { 'annual-reports': '/admin/annual-reports-actions', 'quarterly-reports': '/admin/quarterly-reports-actions', 'half-yearly-reports': '/admin/half-yearly-reports-actions', 'price-sensitive-information': '/admin/price-sensitive-information-actions', 'corporate-governance': '/admin/corporate-governance-actions' };
+    const seg = window.location.pathname.split('/')[2];
+    const base = map[seg];
+    if (!base) return;
 
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
+    setupModule(seg, `${base}/store`, base, 'curRepId');
+    window.openReportAddModal = () => {
+        document.querySelector('#addModal form').reset();
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.openReportEditModal = (item) => {
+        window.curRepId = item.id;
+        document.getElementById('editTitle').value = item.title;
+        document.getElementById('editDate').value = item.publication_date ? item.publication_date.split('T')[0] : '';
+        document.getElementById('editActive').checked = item.is_active == 1;
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+    window.deleteReportItem = (id) => { if(confirm('Delete?')) fetch(`${base}/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+}
 
-    if (addForm) addForm.onsubmit = (e) => handleJournalSubmit(e, '/admin/journal-actions/store', false);
-    if (editForm) {
-        editForm.onsubmit = (e) => handleJournalSubmit(e, `/admin/journal-actions/${window.currentJournalId}`, true);
-        document.getElementById('editActive').onchange = function() {
-            document.getElementById('journalStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
+export function initPagesPage() {
+    const modal = document.getElementById('pageModal');
+    if (!modal || !window.location.pathname.includes('/admin/pages')) return;
+
+    if (typeof ace !== 'undefined') {
+        const editor = ace.edit("ace-editor");
+        let curPageId = null;
+        document.querySelectorAll('.edit-page').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                curPageId = btn.dataset.id;
+                document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
+                fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() }).then(handleResponse).then(images => {
+                    const strip = document.getElementById('imageStrip');
+                    strip.innerHTML = images.length ? '' : 'No Banners';
+                    images.forEach(img => {
+                        const div = document.createElement('div');
+                        div.className = "shrink-0 w-full h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-admin-blue cursor-pointer transition-all bg-white shadow-sm";
+                        div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
+                        div.onclick = () => { editor.insert(`<div class="img-shine">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`); editor.focus(); };
+                        strip.appendChild(div);
+                    });
+                });
+                const dec = document.createElement('textarea'); dec.innerHTML = btn.dataset.content || '';
+                editor.setValue(dec.value, -1);
+                modal.classList.remove('hidden');
+                setTimeout(() => { modal.classList.add('active'); editor.resize(); }, 10);
+            };
+        });
+        const save = document.getElementById('savePage');
+        if (save) save.onclick = () => {
+            fetch(`/admin/pages/${curPageId}`, { method: 'PUT', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ content: editor.getValue() }) })
+            .then(handleResponse).then(() => Turbo.visit(window.location.href));
         };
     }
-
-    window.deleteJournal = (id) => {
-        if (confirm('Delete this journal permanently?')) {
-            fetch(`/admin/journal-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
 }
 
 export function initComplaintsPage() {
     if (!window.location.pathname.includes('product-complaint')) return;
-
-    window.deleteComplaint = (id) => {
-        if (confirm('Are you sure you want to delete this complaint record permanently?')) {
-            fetch(`/admin/product-complaint-actions/${id}`, {
-                method: 'DELETE',
-                headers: { 
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    Turbo.visit(window.location.href, { action: "replace" });
-                } else {
-                    alert("Error: " + (data.error || "Could not delete record"));
-                }
-            })
-            .catch(() => alert("A server error occurred."));
-        }
-    };
-}
-
-export function initReportModule() {
-    const pageMap = {
-        'annual-reports': '/admin/annual-reports-actions',
-        'quarterly-reports': '/admin/quarterly-reports-actions',
-        'half-yearly-reports': '/admin/half-yearly-reports-actions',
-        'price-sensitive-information': '/admin/price-sensitive-information-actions',
-        'corporate-governance': '/admin/corporate-governance-actions'
-    };
-
-    const segment = window.location.pathname.split('/')[2];
-    const baseUrl = pageMap[segment];
-
-    const addForm = document.querySelector('#addModal form');
-    const editForm = document.getElementById('editForm');
-
-    window.openAddModal = () => {
-        const modal = document.getElementById('addModal');
-        if(!modal) return;
-        addForm.reset();
-        addForm.scrollTop = 0;
-        document.getElementById('pdfStatusText').innerText = "Click to select PDF";
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.deleteItem = (id) => {
-        if (!baseUrl) return;
-        if (confirm('Delete this record permanently?')) {
-            fetch(`${baseUrl}/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
-        }
-    };
-
-    window.openEditModal = (item) => {
-        if(!editForm) return;
-        window.currentReportItemId = item.id;
-        editForm.reset();
-        editForm.scrollTop = 0;
-
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.publication_date ? item.publication_date.split('T')[0] : '';
-        document.getElementById('editDesc').value = item.description || '';
-        document.getElementById('editPdfStatus').innerText = "Click to replace PDF";
-        
-        const toggle = document.getElementById('editActive');
-        const lbl = document.getElementById('reportStatusLabel');
-        toggle.checked = item.is_active == 1;
-        lbl.innerText = toggle.checked ? 'Active' : 'Inactive';
-
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    if (!baseUrl || !addForm || !editForm) return;
-
-    document.querySelectorAll('.report-sortable-list').forEach(list => {
-        new Sortable(list, {
-            animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50',
-            onEnd: () => {
-                let orders = [];
-                list.querySelectorAll('.sortable-item').forEach((row, index) => {
-                    orders.push({ id: row.dataset.id, order: index + 1 });
-                });
-                fetch(`${baseUrl}/update-order`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify({ orders })
-                });
-            }
-        });
-    });
-
-    const handleFormSubmit = (e, url, isUpdate = false) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        if (isUpdate) {
-            formData.append('_method', 'PUT');
-            formData.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        }
-        fetch(url, {
-            method: 'POST', body: formData,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        }).then(res => res.json()).then(data => {
-            if (data.success) Turbo.visit(window.location.href);
-            else alert(data.error || "Operation failed.");
-        });
-    };
-
-    addForm.onsubmit = (e) => handleFormSubmit(e, `${baseUrl}/store`, false);
-    editForm.onsubmit = (e) => handleFormSubmit(e, `${baseUrl}/${window.currentReportItemId}`, true);
-    
-    document.getElementById('editActive').onchange = function() {
-        document.getElementById('reportStatusLabel').innerText = this.checked ? 'Active' : 'Inactive';
-    };
+    window.deleteComplaint = (id) => { if(confirm('Delete?')) fetch(`/admin/product-complaint-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href, { action: "replace" })); };
 }
 
 export function initFooterPage() {
-    const qlList = document.getElementById('ql-sortable');
-    const socialList = document.getElementById('social-sortable');
-    if (!document.querySelector('[onclick*="openFooterModal"]')) return;
-
-    if (qlList) new Sortable(qlList, { animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50' });
-    if (socialList) new Sortable(socialList, { animation: 150, handle: '.drag-handle', ghostClass: 'bg-slate-50' });
-
-    window.openFooterModal = (id) => {
-        const modal = document.getElementById(id);
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-        
-        modal.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(el => {
-            const oninput = el.getAttribute('oninput');
-            if (oninput) {
-                const match = oninput.match(/'([^']+)'/);
-                if (match) updateCount(el, match[1], el.getAttribute('maxlength'));
-            }
-        });
-    };
-
-    window.fetchMap = () => {
+    if (!window.location.pathname.includes('/admin/footer')) return;
+    window.fetchFooterMap = () => {
         const url = document.getElementById('map_input').value;
-        const btn = document.getElementById('mapSaveBtn');
-        if (url.includes('google.com/maps')) {
-            document.getElementById('map_preview').src = url;
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.classList.add('btn-success');
-        } else {
-            alert('Invalid URL');
-            btn.disabled = true;
-        }
+        if (url.includes('google.com/maps')) { document.getElementById('map_preview').src = url; document.getElementById('mapSaveBtn').disabled = false; }
     };
-
     document.querySelectorAll('.modal-overlay form').forEach(form => {
         form.onsubmit = (e) => {
             e.preventDefault();
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-            }).then(() => Turbo.visit(window.location.href));
+            fetch(form.action, { method: 'POST', body: new FormData(form), headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href));
         };
-    });
-
-    document.querySelectorAll('.ql-select').forEach(select => {
-        const updateColor = () => {
-            select.classList.toggle('text-red-500', select.value !== '');
-        };
-
-        updateColor();
-
-        select.addEventListener('change', updateColor);
     });
 }
