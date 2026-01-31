@@ -41,8 +41,7 @@ footer h1::after {
 }
 
 .page-content p:not(:last-child) {
-    line-height: 1.7;
-    margin-bottom: 20px;
+    @apply text-base text-justify leading-relaxed text-slate-600 mb-4;
 }
 
 @layer utilities {
@@ -94,6 +93,10 @@ footer h1::after {
         opacity: 1 !important;
         visibility: visible !important;
         transform: translateX(0%) !important;
+    }
+
+    .banner img {
+        @apply w-full rounded-2xl mb-8;
     }
 }
 

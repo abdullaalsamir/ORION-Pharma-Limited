@@ -464,7 +464,7 @@ export function initPagesPage() {
                         const div = document.createElement('div');
                         div.className = "shrink-0 w-full h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-admin-blue cursor-pointer transition-all bg-white shadow-sm";
                         div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
-                        div.onclick = () => { editor.insert(`<div class="img-shine">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`); editor.focus(); };
+                        div.onclick = () => { editor.insert(`<div class="banner">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`); editor.focus(); };
                         strip.appendChild(div);
                     });
                 });

@@ -119,7 +119,7 @@ class BannerController extends Controller
         imagealphablending($src, true);
         imagesavealpha($src, true);
 
-        $targetRatio = 48 / 9;
+        $targetRatio = 16 / 9;
         $currentRatio = $width / $height;
 
         if ($currentRatio > $targetRatio) {
