@@ -3,7 +3,7 @@
 @section('content')
     <div class="pb-10">
         <div id="main-smooth-wrapper" class="smooth-container">
-            <div id="csr-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="csr-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                 @foreach($items as $item)
                     <a href="{{ url($menu->full_slug . '/' . $item->slug) }}"
                         class="product-card group bg-white rounded-xl overflow-hidden flex flex-col">
