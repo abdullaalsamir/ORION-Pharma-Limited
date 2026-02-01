@@ -1,5 +1,4 @@
 import './bootstrap';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import Swiper from 'swiper';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
@@ -8,7 +7,100 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
+function animateHeight(selector, updateLogic) {
+    const container = document.querySelector(selector);
+    if (!container) {
+        updateLogic();
+        return;
+    }
+
+    const startHeight = container.offsetHeight;
+    container.style.height = startHeight + 'px';
+    
+    void container.offsetHeight; 
+
+    updateLogic();
+
+    container.style.height = 'auto';
+    const endHeight = container.offsetHeight;
+
+    container.style.height = startHeight + 'px';
+    
+    void container.offsetHeight;
+
+    container.style.height = endHeight + 'px';
+
+    const onEnd = (e) => {
+        if (e.propertyName === 'height') {
+            container.style.height = 'auto';
+            container.removeEventListener('transitionend', onEnd);
+        }
+    };
+    container.addEventListener('transitionend', onEnd);
+}
+
+window.setFilterMode = function(mode) {
+    window.filterMode = mode;
+    document.querySelectorAll('.filter-mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('mode-' + mode).classList.add('active');
+    animateHeight('#main-smooth-wrapper', () => applyFilter());
+};
+
+window.setLetter = function(letter, event) {
+    window.selectedLetter = letter;
+    document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+    if(event && event.target) event.target.classList.add('active');
+    animateHeight('#main-smooth-wrapper', () => applyFilter());
+};
+
+function applyFilter() {
+    const cards = document.querySelectorAll('.product-card');
+    let visibleCount = 0;
+    const mode = window.filterMode || 'generic';
+    const letter = window.selectedLetter || 'all';
+
+    cards.forEach(card => {
+        const compareVal = mode === 'generic' ? card.dataset.generic : card.dataset.trade;
+        if (letter === 'all' || compareVal.startsWith(letter)) {
+            card.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+    document.getElementById('no-results').classList.toggle('hidden', visibleCount > 0);
+}
+
+window.switchTab = function(name) {
+    animateHeight('#show-smooth-wrapper', () => {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-content-' + name).classList.remove('hidden');
+        document.getElementById('tab-btn-' + name).classList.add('active');
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    const productImages = document.querySelectorAll('.product-image');
+    
+    productImages.forEach(img => {
+        const revealImage = () => {
+            img.parentElement.classList.remove('shimmer');
+            img.classList.add('is-loaded');
+        };
+
+        if (img.complete) {
+            revealImage();
+        } else {
+            img.addEventListener('load', revealImage);
+            
+            img.addEventListener('error', () => {
+                img.parentElement.classList.remove('shimmer');
+                img.parentElement.classList.add('bg-slate-100');
+            });
+        }
+    });
+
     const subMenuItems = document.querySelectorAll('.group\\/sub');
 
     subMenuItems.forEach(item => {

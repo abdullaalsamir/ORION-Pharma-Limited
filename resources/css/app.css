@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 
 @theme {
     --color-orion-blue: #0054a6;
@@ -42,6 +43,88 @@ footer h1::after {
 
 .page-content p:not(:last-child) {
     @apply text-base text-justify leading-relaxed text-slate-600 mb-4;
+}
+
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+
+.shimmer {
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+
+.smooth-container {
+    transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    height: auto;
+}
+
+.product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid #e2e8f0;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    border-color: var(--color-orion-blue) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 84, 166, 0.1);
+}
+
+.product-card.hidden {
+    display: none;
+}
+
+.filter-mode-btn {
+    color: #64748b;
+}
+
+.filter-mode-btn.active {
+    background: var(--color-orion-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 84, 166, 0.2);
+}
+
+.letter-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-weight: 700;
+    color: #64748b;
+    transition: 0.2s;
+}
+
+.letter-btn:hover {
+    background: #f1f5f9;
+    color: var(--color-orion-blue);
+}
+
+.letter-btn.active {
+    background: var(--color-orion-blue);
+    color: white;
+}
+
+.alphabet-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tab-btn {
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--color-orion-blue) !important;
+    border-bottom: 2px solid var(--color-orion-blue) !important;
+    background-color: white;
 }
 
 @layer utilities {
