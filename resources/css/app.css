@@ -221,6 +221,22 @@ footer h1::after {
     }
 }
 
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.tr-slide-in {
+    opacity: 0;
+    animation: slideIn 0.4s ease-out forwards;
+}
+
 @media (max-width: 768px) {
     .swiper-button-next, .swiper-button-prev {
         display: none !important;

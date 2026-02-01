@@ -6,29 +6,28 @@
             <div class="flex flex-wrap items-center justify-between gap-6">
                 <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                     <button onclick="setFilterMode('generic')" id="mode-generic"
-                        class="filter-mode-btn active px-6 py-2 rounded-lg text-xs font-bold transition-all">
+                        class="filter-mode-btn active px-6 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all">
                         Generic
                     </button>
                     <button onclick="setFilterMode('trade')" id="mode-trade"
-                        class="filter-mode-btn px-6 py-2 rounded-lg text-xs font-bold transition-all">
+                        class="filter-mode-btn px-6 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all">
                         Trade
                     </button>
                 </div>
 
                 <div class="flex items-center gap-1 overflow-x-auto pb-2 md:pb-0 alphabet-container">
                     <button onclick="setLetter('all', event)"
-                        class="letter-btn text-xs border border-slate-200 active">All</button>
+                        class="letter-btn text-xs border border-slate-200 cursor-pointer active">All</button>
                     @foreach(range('A', 'Z') as $char)
                         <button onclick="setLetter('{{ $char }}', event)"
-                            class="letter-btn text-xs border border-slate-200">{{ $char }}</button>
+                            class="letter-btn text-xs border border-slate-200 cursor-pointer">{{ $char }}</button>
                     @endforeach
                 </div>
             </div>
         </div>
 
         <div id="main-smooth-wrapper" class="smooth-container">
-            <div id="product-grid"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 items-stretch">
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                 @foreach($products as $p)
                     <a href="{{ url('products/' . $p->generic->slug . '/' . Str::slug($p->trade_name)) }}"
                         class="product-card group bg-white rounded-xl overflow-hidden"
