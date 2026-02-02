@@ -1,68 +1,72 @@
 @extends('layouts.app')
+
 @section('content')
-    <div class="py-16 bg-slate-50 min-h-screen">
-        <div class="max-w-5xl mx-auto px-4">
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50/80 border-b border-slate-100">
-                                <th
-                                    class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] text-center w-20">
-                                    SL</th>
-                                <th
-                                    class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] text-left border-l border-slate-100">
-                                    Disclosures</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            @forelse($items as $index => $j)
-                                <tr class="hover:bg-blue-50/40 transition-colors duration-300 group">
-                                    <td
-                                        class="px-6 py-5 text-center font-bold text-slate-300 group-hover:text-orion-blue align-top">
-                                        {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
-                                    </td>
-                                    <td class="px-6 py-5 border-l border-slate-100">
-                                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                                            <div class="flex-grow">
-                                                <h3
-                                                    class="text-slate-700 font-bold text-base md:text-lg group-hover:text-slate-900 leading-snug">
-                                                    {{ $j->title }}
-                                                </h3>
-                                                @if($j->description)
-                                                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">{{ $j->description }}</p>
-                                                @endif
-                                                <div
-                                                    class="mt-3 text-[11px] font-bold text-orion-blue uppercase tracking-widest">
-                                                    Publication Date: {{ $j->publication_date->format('d/m/Y') }}
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-3 shrink-0 pt-1">
-                                                <a href="{{ url($menu->full_slug . '/' . $j->filename) }}" target="_blank"
-                                                    class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-orion-blue hover:text-white flex items-center justify-center transition-all shadow-sm"
-                                                    title="View PDF">
-                                                    <i class="fa-solid fa-eye text-sm"></i>
-                                                </a>
-                                                <a href="{{ url($menu->full_slug . '/' . $j->filename) }}"
-                                                    download="{{ $j->title }}.pdf"
-                                                    class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all shadow-sm"
-                                                    title="Download">
-                                                    <i class="fa-solid fa-download text-sm"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2" class="text-center py-20 text-slate-400 italic">No information available.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+    @forelse($items->groupBy(fn($item) => $item->publication_date->format('Y')) as $year => $reports)
+        <div class="mb-12 tr-slide-in">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-1.5 h-8 bg-orion-blue rounded-full"></div>
+                <h2 class="text-2xl font-bold text-slate-800 tracking-tight">{{ $year }}</h2>
+                <div class="flex-1 h-px bg-linear-to-r from-orion-blue/40 to-transparent"></div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="divide-y divide-slate-100">
+                    @foreach($reports as $index => $item)
+                        <div class="group flex flex-col sm:flex-row items-center gap-6 px-6 py-4 transition-all duration-300">
+
+                            <div class="flex items-center gap-5 shrink-0">
+                                <span class="text-sm text-slate-300">
+                                    {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
+                                </span>
+                                <div class="text-rose-500 flex items-center justify-center">
+                                    <i class="fa-solid fa-file-pdf text-3xl"></i>
+                                </div>
+                            </div>
+
+                            <div class="grow text-center sm:text-left">
+                                <h3
+                                    class="text-base font-semibold text-slate-700 group-hover:text-orion-blue transition-colors leading-snug">
+                                    {{ $item->title }}
+                                </h3>
+
+                                @if($item->description)
+                                    <p class="text-sm text-slate-500 mt-1 line-clamp-2">
+                                        {{ $item->description }}
+                                    </p>
+                                @endif
+
+                                <div class="mt-2 text-xs text-slate-400 uppercase tracking-wide">
+                                    {{ $item->publication_date->format('d F, Y') }}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 shrink-0">
+                                <a href="{{ url($menu->full_slug . '/' . $item->filename) }}" target="_blank"
+                                    class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-orion-blue hover:bg-orion-blue hover:text-white font-bold text-xs transition-all duration-300 border border-slate-200 hover:border-orion-blue"
+                                    title="View Report">
+                                    <i class="fa-solid fa-eye text-[10px]"></i>
+                                    View
+                                </a>
+
+                                <a href="{{ url($menu->full_slug . '/' . $item->filename) }}" download="{{ $item->title }}.pdf"
+                                    class="w-9 h-9 rounded-lg bg-white text-emerald-600 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-all duration-300 border border-slate-100"
+                                    title="Download PDF">
+                                    <i class="fa-solid fa-download text-xs"></i>
+                                </a>
+                            </div>
+
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
-    </div>
+    @empty
+        <div class="p-24 text-center">
+            <div class="relative inline-block mb-6">
+                <i class="fa-solid fa-file-invoice text-slate-200 text-8xl"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-500 mb-2 uppercase tracking-wide">No Reports Found</h3>
+            <p class="text-slate-400 font-medium">There Are Currently No Half Yearly Reports Available For Viewing.</p>
+        </div>
+    @endforelse
 @endsection
