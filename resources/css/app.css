@@ -237,6 +237,15 @@ footer h1::after {
     animation: slideIn 0.4s ease-out forwards;
 }
 
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #999 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
 @media (max-width: 768px) {
     .swiper-button-next, .swiper-button-prev {
         display: none !important;

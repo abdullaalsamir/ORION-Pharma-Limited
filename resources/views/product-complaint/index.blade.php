@@ -1,164 +1,180 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="py-16 bg-slate-50 min-h-screen">
-        <div class="grid grid-cols-1 lg:grid-cols-10 gap-12 max-w-[1400px] mx-auto px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-10 gap-12 max-w-350 mx-auto">
 
-            <div class="lg:col-span-6">
-                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 p-8 md:p-12">
-                    <div class="flex justify-between items-center mb-10 border-b border-slate-100 pb-6">
-                        <h2 class="text-2xl font-black text-slate-800">Product Complaint Form</h2>
-                        <div class="text-right">
-                            <span class="block text-[10px] uppercase font-bold text-slate-400 tracking-widest">Complaint
-                                Raising Date</span>
-                            <span class="text-orion-blue font-black text-lg">{{ $raisingDate }}</span>
+        <div class="lg:col-span-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-8 md:p-12">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-100 pb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">Product Complaint Form</h2>
+                    <div class="text-right">
+                        <span class="block text-[10px] uppercase font-bold text-slate-400 tracking-widest">Raising
+                            Date</span>
+                        <span class="text-orion-blue font-bold text-lg">{{ $raisingDate }}</span>
+                    </div>
+                </div>
+
+                @if(session('success'))
+                    <div id="successModal"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300">
+
+                        <div
+                            class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 relative transform translate-y-8 opacity-0 transition-all duration-300 ease-out">
+
+                            <div class="flex justify-center mb-4">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-3xl"></i>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-bold text-center text-slate-800 mb-2">
+                                Complaint Submitted Successfully
+                            </h3>
+                            <p class="text-center text-slate-600">
+                                Thank you for reporting the issue. Our team will review it shortly.
+                            </p>
+
+                            <div class="mt-6 text-center">
+                                <button onclick="closeSuccessModal()"
+                                    class="px-6 py-3 bg-orion-blue text-white rounded-lg font-bold hover:bg-blue-900 cursor-pointer transition">
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
+                @endif
 
-                    @if(session('success'))
-                        <div
-                            class="mb-8 p-4 bg-green-50 text-green-700 rounded-2xl border border-green-100 font-bold text-center">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+                <form action="{{ route('complaint.submit') }}" method="POST" class="space-y-10">
+                    @csrf
 
-                    <form action="{{ route('complaint.submit') }}" method="POST" class="space-y-10">
-                        @csrf
-
-                        <div>
-                            <h3
-                                class="text-orion-blue font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                                <span class="w-8 h-px bg-orion-blue/20"></span> SECTION – A: Product Identification
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Product Name</label>
-                                    <input type="text" name="product_name" required
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Batch Number</label>
-                                    <input type="text" name="batch_number" required
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Manufacturing
-                                        Date</label>
-                                    <input type="date" name="mfg_date" required
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Expiry Date</label>
-                                    <input type="date" name="exp_date" required
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Strength</label>
-                                    <input type="text" name="strength"
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Dosage Form</label>
-                                    <input type="text" name="dosage_form"
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3
-                                class="text-orion-blue font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                                <span class="w-8 h-px bg-orion-blue/20"></span> SECTION – B: Nature of Complaint
-                            </h3>
-                            <div class="space-y-6">
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Type of Complaint</label>
-                                    <input type="text" name="complaint_type"
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Description of
-                                        Complaint</label>
-                                    <textarea name="complaint_description" rows="4"
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all resize-none"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3
-                                class="text-orion-blue font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                                <span class="w-8 h-px bg-orion-blue/20"></span> SECTION – C: Complainant Information
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Name of
-                                        Complainant</label>
-                                    <input type="text" name="complainant_name" required
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">Contact Number</label>
-                                    <input type="text" name="contact_number" required
-                                        class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all">
-                                </div>
+                    <div>
+                        <h3
+                            class="text-orion-blue font-bold uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                            SECTION A: Product Identification
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Product Name</label>
+                                <input type="text" name="product_name" required
+                                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl transition-all">
                             </div>
                             <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Address</label>
-                                <textarea name="address" rows="3"
-                                    class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orion-blue transition-all resize-none"></textarea>
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Batch Number</label>
+                                <input type="text" name="batch_number" required
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
                             </div>
-                        </div>
-
-                        <button type="submit"
-                            class="w-full py-5 bg-orion-blue text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-                            Submit Complaint
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="lg:col-span-4">
-                <div class="sticky top-[110px] space-y-6">
-                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
-                        <p class="text-slate-500 font-medium mb-8 leading-relaxed">For any inquiry or to report Product
-                            Complaint, please contact us:</p>
-
-                        <div class="space-y-8">
-                            <div class="flex items-start gap-6 group">
-                                <div
-                                    class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-orion-blue shrink-0 group-hover:bg-orion-blue group-hover:text-white transition-all">
-                                    <i class="fa-solid fa-phone-volume text-xl"></i>
-                                </div>
-                                <div>
-                                    <div
-                                        class="bg-orion-blue text-white px-4 py-1 rounded-lg font-black text-lg inline-block mb-2 shadow-md italic tracking-wider">
-                                        +88 01897 65 31 31
-                                    </div>
-                                    <p class="text-sm font-bold text-slate-700">10:00 - 18:00</p>
-                                    <p class="text-xs text-slate-400 font-medium italic">Except Friday and Government
-                                        Holidays</p>
-                                </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Manufacturing
+                                    Date</label>
+                                <input type="date" name="mfg_date" required
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
                             </div>
-
-                            <div class="flex items-start gap-6 group border-t border-slate-50 pt-8">
-                                <div
-                                    class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-orion-blue shrink-0 group-hover:bg-orion-blue group-hover:text-white transition-all">
-                                    <i class="fa-solid fa-envelope-open-text text-xl"></i>
-                                </div>
-                                <div>
-                                    <div
-                                        class="bg-orion-blue text-white px-4 py-1 rounded-lg font-black text-lg inline-block shadow-md italic tracking-wider uppercase">
-                                        pc@orion-group.net
-                                    </div>
-                                </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Expiry Date</label>
+                                <input type="date" name="exp_date" required
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Strength</label>
+                                <input type="text" name="strength"
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Dosage Form</label>
+                                <input type="text" name="dosage_form"
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
                             </div>
                         </div>
                     </div>
 
-                    <div class="px-8 py-6 bg-orion-blue/5 rounded-3xl border border-orion-blue/10">
-                        <p class="text-[10px] font-black text-orion-blue uppercase tracking-[0.3em] text-center">Quality
-                            Assurance Division</p>
+                    <div>
+                        <h3
+                            class="text-orion-blue font-bold uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                            SECTION B: Nature of Complaint
+                        </h3>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Type of Complaint</label>
+                                <input type="text" name="complaint_type"
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Description of
+                                    Complaint</label>
+                                <textarea name="complaint_description" rows="4"
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all resize-none"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3
+                            class="text-orion-blue font-bold uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                            SECTION C: Complainant Information
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Name of
+                                    Complainant</label>
+                                <input type="text" name="complainant_name" required
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase ml-1">Contact Number</label>
+                                <input type="text" name="contact_number" required
+                                    class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Address</label>
+                            <textarea name="address" rows="3"
+                                class="w-full px-3 py-2 bg-slate-50  border border-slate-200 rounded-lg transition-all resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-4 bg-orion-blue text-white font-bold uppercase rounded-lg hover:bg-blue-900 cursor-pointer transition-all">
+                        Submit Complaint
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-4">
+            <div class="sticky top-27.5 space-y-6">
+                <div class="bg-white border border-slate-200 rounded-xl p-6">
+
+                    <div class="grid grid-cols-[auto_max-content] gap-x-5 gap-y-4 items-center">
+
+                        <div></div>
+                        <div class="text-slate-500 text-base font-semibold text-center max-w-xs">
+                            For any inquiry or to report Product Complaint, please contact us:
+                        </div>
+
+                        <div class="flex items-center justify-center">
+                            <div class="bg-blue-50 text-orion-blue w-10 h-10 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-orion-blue text-white rounded-lg px-4 py-3 space-y-1 text-center flex flex-col items-center justify-center">
+                            <div class="text-3xl font-bold">+88 01897 65 31 31</div>
+                            <div class="text-base text-slate-300">10:00 - 18:00</div>
+                            <div class="text-xs text-slate-300">
+                                (Except Friday and Government Holidays)
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center">
+                            <div class="bg-blue-50 text-orion-blue w-10 h-10 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-orion-blue text-white rounded-lg px-4 py-3 text-base font-medium text-center flex items-center justify-center">
+                            pc@orion-group.net
+                        </div>
                     </div>
                 </div>
             </div>
