@@ -181,6 +181,43 @@ footer h1::after {
     .banner img {
         @apply w-full rounded-2xl mb-8;
     }
+
+     .adverse-event-reporting-section-title {
+        @apply flex items-center gap-3 text-orion-blue font-bold text-lg uppercase mt-8 mb-4;
+    }
+
+    .adverse-event-reporting-section-title:first-of-type {
+        @apply mt-0;
+    }
+
+    .adverse-event-reporting-list {
+        @apply list-none p-0 mb-6;
+    }
+
+    .adverse-event-reporting-list li {
+        @apply relative pl-6 mb-2 text-slate-600;
+    }
+
+    .adverse-event-reporting-list li::before {
+        content: "•";
+        @apply absolute left-0 text-orion-blue font-bold;
+    }
+
+    .pdf-download-card {
+        @apply block bg-rose-50 border border-rose-200 p-8 rounded-2xl text-center transition-colors;
+    }
+
+    .pdf-download-card:hover {
+        @apply bg-rose-100 border-rose-300;
+    }
+
+    .pdf-download-card-content {
+        @apply transition-transform duration-300;
+    }
+
+    .pdf-download-card:hover .pdf-download-card-content {
+        @apply -translate-y-1;
+    }
 }
 
 .homeSwiper {
