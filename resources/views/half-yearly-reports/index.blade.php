@@ -30,7 +30,7 @@
                                 </h3>
 
                                 @if($item->description)
-                                    <p class="text-sm text-slate-500 mt-1 line-clamp-2">
+                                    <p class="text-sm text-slate-500 mt-1">
                                         {{ $item->description }}
                                     </p>
                                 @endif

@@ -1,9 +1,9 @@
-<header class="fixed top-0 left-0 w-full z-[100]">
+<header class="fixed top-0 left-0 w-full z-100">
     <div class="relative z-50 bg-white shadow-sm">
-        <div class="container mx-auto w-[90%] max-w-[1400px]">
-            <div class="flex justify-between items-center h-[90px]">
+        <div class="container mx-auto w-[90%] max-w-350">
+            <div class="flex justify-between items-center h-22.5">
                 
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     <a href="{{ url('/') }}" class="flex items-center">
                         <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="h-18 w-auto">
                     </a>
@@ -15,7 +15,7 @@
                             @if($menu->isEffectivelyActive())
                                 @php $hasChildren = $menu->children->count() > 0; @endphp
 
-                                <li class="relative group flex items-center h-[90px]">
+                                <li class="relative group flex items-center h-22.5">
                                     <a href="{{ !$hasChildren ? url($menu->full_slug) : 'javascript:void(0)' }}" 
                                     class="relative z-50 px-3 h-full text-[15px] font-semibold text-orion-blue group-hover:bg-orion-blue group-hover:text-white flex items-center gap-1 transition-all duration-200">
                                         {{ $menu->name }}
@@ -72,7 +72,7 @@
             </div>
         </div>
     </div>
-    <div id="mobile-nav" class="hidden lg:hidden bg-white border-t border-gray-100 relative z-[60]">
+    <div id="mobile-nav" class="hidden lg:hidden bg-white border-t border-gray-100 relative z-60">
         <div class="px-4 py-4 space-y-1">
             @foreach($menus as $menu)
                 <a href="{{ url($menu->full_slug) }}" class="block px-3 py-2 text-base font-medium text-orion-blue hover:bg-gray-50">{{ $menu->name }}</a>
