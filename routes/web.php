@@ -163,6 +163,10 @@ Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
 Route::get('products/{path}', [ProductController::class, 'serveProductImage'])
     ->where('path', '.*\.webp$');
 
+Route::get('{path}/{filename}', [NewsController::class, 'serveNewsPdf'])
+    ->where('path', '.*news-and-announcements')
+    ->where('filename', '.*\.pdf$');
+
 Route::get('{path}/{year}/{filename}', [MedicalJournalController::class, 'servePdf'])
     ->where('path', '.*')
     ->where('year', '^[0-9]{4}$')

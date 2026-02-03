@@ -308,6 +308,7 @@ function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
         e.preventDefault();
         const fd = new FormData(editF);
         fd.append('_method', 'PUT');
+        fd.append('is_pin', document.getElementById('editPin').checked ? 1 : 0);
         fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
         fetch(`${updateUrlPrefix}/${window[currentIdKey]}`, { method: 'POST', body: fd, headers: fetchHeaders() })
         .then(handleResponse).then(() => Turbo.visit(window.location.href));
@@ -367,16 +368,107 @@ export function initNewsPage() {
     };
     window.openNewsEditModal = (item, slug) => {
         window.curNewsId = item.id;
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.news_date.split('T')[0];
-        document.getElementById('editActive').checked = item.is_active == 1;
-        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}" class="w-full h-full object-cover">`;
+    document.getElementById('editTitle').value = item.title;
+    document.getElementById('editDate').value = item.news_date.split('T')[0];
+    document.getElementById('editDesc').value = item.description;
+    document.getElementById('editActive').checked = item.is_active == 1;
+
+        const pinCheckbox = document.getElementById('editPin');
+        pinCheckbox.checked = item.is_pin == 1;
+        togglePinText(pinCheckbox, 'editPinLabel');
+
+        const preview = document.getElementById('editPreview');
+        preview.classList.remove('p-6');
+
+        if (item.file_type === 'pdf') {
+            preview.classList.add('p-6');
+            preview.innerHTML = `
+                <div class="flex flex-col items-center justify-center text-center">
+                    <i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                        PDF Document
+                    </span>
+                </div>
+            `;
+        } else {
+            preview.innerHTML = `
+                <img src="/${slug}/${item.file_path.split('/').pop()}"
+                    class="w-full h-full object-cover">
+            `;
+        }
+        
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
     window.deleteNews = (id) => { if(confirm('Delete?')) fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
+
+window.handleNewsPreview = function (input, previewId, fileNameId) {
+    const preview = document.getElementById(previewId);
+    const fileNameEl = document.getElementById(fileNameId);
+
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const mime = file.type;
+
+    if (fileNameEl) {
+        fileNameEl.textContent = file.name;
+        fileNameEl.classList.remove('hidden');
+    }
+
+    preview.innerHTML = '';
+    preview.classList.remove('p-6');
+
+    if (mime === 'application/pdf') {
+        preview.classList.add('p-6');
+
+        preview.innerHTML = `
+            <div class="flex flex-col items-center justify-center text-center">
+                <i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i>
+                <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                    PDF Document
+                </span>
+            </div>
+        `;
+        return;
+    }
+
+    if (mime.startsWith('image/')) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            preview.innerHTML = `
+                <img 
+                    src="${e.target.result}" 
+                    class="w-full h-full object-cover"
+                    alt="Preview"
+                >
+            `;
+        };
+
+        reader.readAsDataURL(file);
+        return;
+    }
+
+    preview.innerHTML = `
+        <span class="text-xs text-slate-400 font-bold">
+            Unsupported file
+        </span>
+    `;
+};
+
+window.togglePinText = (el, labelId) => {
+    const label = document.getElementById(labelId);
+    if (el.checked) {
+        label.innerText = "Pin Yes";
+        label.classList.replace('text-slate-500', 'text-admin-blue');
+    } else {
+        label.innerText = "Pin No";
+        label.classList.replace('text-admin-blue', 'text-slate-500');
+    }
+};
 
 export function initDirectorsPage() {
     setupModule('board-of-directors', '/admin/director-actions/store', '/admin/director-actions', 'curDirId');

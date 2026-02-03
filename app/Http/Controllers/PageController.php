@@ -110,6 +110,9 @@ class PageController extends Controller
             }
 
             if ($parentMenu->slug === 'news-and-announcements') {
+                if (str_ends_with($itemSlug, '.pdf')) {
+                    return (new NewsController)->serveNewsPdf($parentPath, $itemSlug);
+                }
                 return (new NewsController)->frontendShow($parentMenu, $itemSlug);
             }
 
