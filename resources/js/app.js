@@ -7,7 +7,11 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
-function animateHeight(selector, updateLogic) {
+import Alpine from 'alpinejs'
+window.Alpine = Alpine
+Alpine.start()
+
+window.animateHeight = function (selector, updateLogic) {
     const container = document.querySelector(selector);
     if (!container) {
         updateLogic();
