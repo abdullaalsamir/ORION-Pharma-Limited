@@ -7,7 +7,7 @@
         <div id="journals-smooth-wrapper" class="smooth-container">
 
             <div x-show="!selectedYear"
-                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 not-[]:gap-6 tr-slide-in pt-2">
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-6 tr-slide-in pt-2">
 
                 @foreach($groupedJournals as $year => $journals)
                     <button @click="selectYear({{ $year }})"
