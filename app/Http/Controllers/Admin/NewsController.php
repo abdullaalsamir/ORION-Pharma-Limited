@@ -69,7 +69,7 @@ class NewsController extends Controller
                 'file_type' => $fileType,
                 'file_path' => $path,
                 'is_active' => 1,
-                'is_pin' => $request->has('is_pin') ? 1 : 0,
+                'is_pin' => $request->boolean('is_pin'),
                 'order' => (NewsItem::where('news_date', $request->news_date)->max('order') ?? 0) + 1,
             ]);
 
@@ -132,8 +132,8 @@ class NewsController extends Controller
                 'title' => $request->title,
                 'description' => $request->description,
                 'news_date' => $request->news_date,
-                'is_pin' => $request->has('is_pin') ? 1 : 0,
-                'is_active' => $request->input('is_active') == 'on' || $request->input('is_active') == 1 ? 1 : 0,
+                'is_pin' => $request->boolean('is_pin'),
+                'is_active' => $request->boolean('is_active'),
             ]);
 
             return response()->json(['success' => true]);
@@ -264,12 +264,18 @@ class NewsController extends Controller
 
     public function frontendIndex($menu)
     {
+        $pinned = NewsItem::where('is_active', 1)
+            ->where('is_pin', 1)
+            ->orderBy('news_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
         $items = NewsItem::where('is_active', 1)
             ->orderBy('news_date', 'desc')
-            ->orderBy('order', 'asc')
-            ->paginate(9);
+            ->orderBy('order', 'desc')
+            ->paginate(10);
 
-        return view('news.index', compact('items', 'menu'));
+        return view('news.index', compact('items', 'menu', 'pinned'));
     }
 
     public function frontendShow($menu, $slug)

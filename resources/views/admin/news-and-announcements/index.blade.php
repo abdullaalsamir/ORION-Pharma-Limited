@@ -145,8 +145,10 @@
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Pin News</label>
                         <div class="input-field flex items-center justify-between h-10.5!">
                             <span id="addPinLabel" class="text-xs font-bold text-slate-500">Pin No</span>
+                            <input type="hidden" name="is_pin" value="0">
                             <label class="toggle-switch scale-75">
-                                <input type="checkbox" name="is_pin" onchange="togglePinText(this, 'addPinLabel')">
+                                <input type="checkbox" name="is_pin" value="1"
+                                    onchange="togglePinText(this, 'addPinLabel')">
                                 <div class="toggle-bg"></div>
                             </label>
                         </div>
@@ -223,8 +225,9 @@
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Pin News</label>
                         <div class="input-field flex items-center justify-between h-10.5!">
                             <span id="editPinLabel" class="text-xs font-bold text-slate-500">Pin No</span>
+                            <input type="hidden" name="is_pin" value="0">
                             <label class="toggle-switch scale-75">
-                                <input type="checkbox" id="editPin" name="is_pin"
+                                <input type="checkbox" id="editPin" name="is_pin" value="1"
                                     onchange="togglePinText(this, 'editPinLabel')">
                                 <div class="toggle-bg"></div>
                             </label>
