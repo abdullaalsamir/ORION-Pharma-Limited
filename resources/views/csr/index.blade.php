@@ -6,7 +6,7 @@
             <div id="csr-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                 @foreach($items as $item)
                     <a href="{{ url($menu->full_slug . '/' . $item->slug) }}"
-                        class="product-card group bg-white rounded-xl overflow-hidden flex flex-col">
+                        class="index-card group bg-white rounded-xl overflow-hidden flex flex-col">
 
                         <div class="aspect-video overflow-hidden shimmer relative border-b border-slate-200">
                             <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}"

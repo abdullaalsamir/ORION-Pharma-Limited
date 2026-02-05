@@ -30,7 +30,7 @@
             <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                 @foreach($products as $p)
                     <a href="{{ url('products/' . $p->generic->slug . '/' . Str::slug($p->trade_name)) }}"
-                        class="product-card group bg-white rounded-xl overflow-hidden"
+                        class="index-card group bg-white rounded-xl overflow-hidden"
                         data-generic="{{ strtoupper($p->generic->name) }}" data-trade="{{ strtoupper($p->trade_name) }}">
 
                         <div class="aspect-video border-b border-slate-200 overflow-hidden shimmer relative">

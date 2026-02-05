@@ -58,7 +58,7 @@ window.setLetter = function(letter, event) {
 };
 
 function applyFilter() {
-    const cards = document.querySelectorAll('.product-card');
+    const cards = document.querySelectorAll('.index-card');
     let visibleCount = 0;
     const mode = window.filterMode || 'generic';
     const letter = window.selectedLetter || 'all';
@@ -216,4 +216,132 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(showSuccessModal, 150);
     }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const allSections = document.querySelectorAll('section.mt-16');
+    let newsSection = null;
+    
+    allSections.forEach(sec => {
+        const h2 = sec.querySelector('h2');
+        if (h2 && h2.textContent.trim() === 'News & Announcements') {
+            newsSection = sec;
+        }
+    });
+
+    if (!newsSection) return;
+
+    setTimeout(() => {
+        const newsRightCol = newsSection.querySelector('.lg\\:col-span-8');
+        const newsTrack = newsRightCol ? newsRightCol.querySelector('.space-y-3') : null;
+
+        if (!newsTrack || newsTrack.children.length === 0) return;
+
+        const items = Array.from(newsTrack.children);
+        const totalItems = items.length;
+        const VISIBLE_COUNT = 4;
+
+        if (totalItems <= VISIBLE_COUNT) return;
+
+        const injectStyles = () => {
+            newsRightCol.style.position = 'relative';
+            newsRightCol.style.overflow = 'hidden';
+            
+            const firstItem = items[0];
+            const itemHeight = firstItem.offsetHeight;
+            const gap = 12;
+            const viewportHeight = (itemHeight * VISIBLE_COUNT) + (gap * (VISIBLE_COUNT - 1));
+            
+            newsRightCol.style.height = `${viewportHeight}px`;
+
+            newsTrack.style.position = 'absolute';
+            newsTrack.style.top = '0';
+            newsTrack.style.left = '0';
+            newsTrack.style.width = '100%';
+            newsTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            newsTrack.style.margin = '0';
+
+            items.forEach(item => {
+                item.style.marginRight = '20px';
+            });
+
+            return { itemHeight, gap, viewportHeight };
+        };
+
+        const dimensions = injectStyles();
+        const STEP_HEIGHT = dimensions.itemHeight + dimensions.gap;
+
+        const scrollbar = document.createElement('div');
+        scrollbar.className = 'news-scrollbar-injected';
+        Object.assign(scrollbar.style, {
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            width: '6px',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            borderRadius: '3px',
+            zIndex: '10'
+        });
+
+        const thumb = document.createElement('div');
+        Object.assign(thumb.style, {
+            position: 'absolute',
+            top: '0',
+            width: '100%',
+            backgroundColor: '#0054a6',
+            borderRadius: '3px',
+            transition: 'top 0.6s ease-out'
+        });
+
+        scrollbar.appendChild(thumb);
+        newsRightCol.appendChild(scrollbar);
+
+        let currentIndex = 0;
+        let autoTimer = null;
+
+        const updateScrollbarThumb = () => {
+            const thumbHeight = dimensions.viewportHeight / totalItems;
+            thumb.style.height = `${thumbHeight}px`;
+            thumb.style.top = `${(currentIndex * thumbHeight)}px`;
+        };
+
+        const goToIndex = (index) => {
+            if (index >= totalItems) {
+                currentIndex = 0;
+            } else if (index < 0) {
+                currentIndex = 0;
+            } else {
+                currentIndex = index;
+            }
+
+            newsTrack.style.transform = `translateY(-${STEP_HEIGHT * currentIndex}px)`;
+            updateScrollbarThumb();
+        };
+
+        const startAuto = () => {
+            stopAuto();
+            autoTimer = setInterval(() => {
+                goToIndex(currentIndex + 1);
+            }, 4000);
+        };
+
+        const stopAuto = () => {
+            if (autoTimer) clearInterval(autoTimer);
+        };
+
+        updateScrollbarThumb();
+        startAuto();
+
+        newsRightCol.addEventListener('mouseenter', stopAuto);
+        newsRightCol.addEventListener('mouseleave', startAuto);
+
+        window.addEventListener('resize', () => {
+            const d = injectStyles();
+            dimensions.itemHeight = d.itemHeight;
+            dimensions.viewportHeight = d.viewportHeight;
+            goToIndex(currentIndex);
+        });
+
+    }, 200);
 });

@@ -1,16 +1,16 @@
-@extends('layouts.app')
+@if(isset($newsMenu) && ($pinnedNews || $homeNews->isNotEmpty()))
+    <section class="mt-16">
+        <h2 class="text-left text-orion-blue text-2xl uppercase font-bold mb-6">News & Announcements</h2>
 
-@section('content')
- <div class="pb-10">
         <div class="grid grid-cols-12 gap-8">
-            
+                
             <div class="col-span-12 lg:col-span-4">
                 <div class="sticky top-24">
-                    @if($pinned)
+                    @if($pinnedNews)
                         <div class="index-card group bg-white rounded-xl overflow-hidden flex flex-col border border-slate-200 hover:border-slate-200!">
                             <div class="aspect-video overflow-hidden shimmer relative border-b border-slate-200">
-                                @if($pinned->file_type === 'image')
-                                    <img src="{{ url($menu->full_slug . '/' . basename($pinned->file_path)) }}"
+                                @if($pinnedNews->file_type === 'image')
+                                    <img src="{{ url($newsMenu->full_slug . '/' . basename($pinnedNews->file_path)) }}"
                                         class="product-image w-full h-full object-cover transition-transform duration-300">
                                 @else
                                     <div class="w-full h-full bg-red-50 flex items-center justify-center">
@@ -26,24 +26,24 @@
 
                             <div class="p-6 flex flex-col grow">
                                 <span class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mb-3">
-                                    {{ $pinned->news_date->format('d F, Y') }}
+                                    {{ $pinnedNews->news_date->format('d F, Y') }}
                                 </span>
                                 <h3 class="text-xl font-bold text-slate-900 mb-3 line-clamp-2">
-                                    {{ $pinned->title }}
+                                    {{ $pinnedNews->title }}
                                 </h3>
                                 <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-6">
-                                    {{ $pinned->description }}
+                                    {{ $pinnedNews->description }}
                                 </p>
-                                
+                                    
                                 <div class="mt-auto">
-                                    @if($pinned->file_type === 'image')
-                                        <a href="{{ url($menu->full_slug . '/' . $pinned->slug) }}"
+                                    @if($pinnedNews->file_type === 'image')
+                                        <a href="{{ url($newsMenu->full_slug . '/' . $pinnedNews->slug) }}"
                                             class="text-orion-blue font-bold text-sm flex items-center gap-2 group/btn">
                                             Read Full News
                                             <i class="fas fa-arrow-right mt-1 group-hover/btn:translate-x-1 transition-transform"></i>
                                         </a>
                                     @else
-                                        <a href="{{ url($menu->full_slug . '/' . basename($pinned->file_path)) }}" target="_blank"
+                                        <a href="{{ url($newsMenu->full_slug . '/' . basename($pinnedNews->file_path)) }}" target="_blank"
                                             class="flex items-center justify-center gap-2 w-full py-2.5 text-slate-700 text-xs font-bold uppercase rounded-lg border border-slate-200 hover:text-orion-blue hover:border-orion-blue transition-all">
                                             View PDF Document
                                         </a>
@@ -61,16 +61,16 @@
 
             <div class="col-span-12 lg:col-span-8">
                 <div class="space-y-3">
-                    @forelse($items as $item)
+                    @foreach($homeNews as $item)
                         @php 
                             $filename = basename($item->file_path);
-                            $fileUrl = url($menu->full_slug . '/' . $filename);
+                            $fileUrl = url($newsMenu->full_slug . '/' . $filename);
                         @endphp
 
                         @if($item->file_type === 'image')
-                            <a href="{{ url($menu->full_slug . '/' . $item->slug) }}"
+                            <a href="{{ url($newsMenu->full_slug . '/' . $item->slug) }}"
                                 class="group bg-white border border-slate-200 rounded-xl p-3 flex items-center hover:border-orion-blue transition-all">
-                                
+                                    
                                 <div class="w-40 aspect-video rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                                     <img src="{{ $fileUrl }}" class="w-full h-full object-cover">
                                 </div>
@@ -93,7 +93,6 @@
                             </a>
                         @else
                             <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center">
-                                
                                 <div class="w-40 aspect-video rounded-lg overflow-hidden bg-red-50 shrink-0 flex items-center justify-center border border-red-100">
                                     <i class="fas fa-file-pdf text-3xl text-red-500"></i>
                                 </div>
@@ -126,21 +125,9 @@
                                 </div>
                             </div>
                         @endif
-
-                    @empty
-                        <div class="flex flex-col items-center justify-center py-20 bg-white border-2 border-dashed border-slate-200 rounded-xl text-slate-300">
-                            <i class="fas fa-bullhorn text-4xl mb-4"></i>
-                            <h2 class="text-slate-400 text-sm font-semibold">No News Items Found</h2>
-                        </div>
-                    @endforelse
-
-                    @if($items->hasPages())
-                        <div class="pt-6">
-                            {{ $items->links() }}
-                        </div>
-                    @endif
+                    @endforeach
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    </section>
+@endif

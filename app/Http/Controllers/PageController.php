@@ -21,9 +21,55 @@ class PageController extends Controller
 {
     public function home()
     {
-        $menu = Menu::where('slug', 'home')->first();
-        $sliders = \App\Models\Slider::where('is_active', 1)->orderBy('order')->get();
-        return view('layouts.app', compact('menu', 'sliders'));
+        $menu = Menu::where('slug', 'home')
+            ->first();
+
+        $sliders = \App\Models\Slider::where('is_active', 1)
+            ->orderBy('order')->get();
+
+        $csrItems = \App\Models\CsrItem::where('is_active', 1)
+            ->latest('csr_date')
+            ->take(6)
+            ->get();
+
+        $csrMenu = Menu::where('slug', 'csr-list')
+            ->first();
+
+        $homeProducts = \App\Models\Product::where('is_active', 1)
+            ->whereHas('generic', fn($q) => $q
+                ->where('is_active', 1))
+            ->with('generic')
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $productsMenu = Menu::where('slug', 'products')
+            ->first();
+
+        $newsMenu = Menu::where('slug', 'news-and-announcements')
+            ->first();
+
+        $pinnedNews = \App\Models\NewsItem::where('is_active', 1)
+            ->where('is_pin', 1)
+            ->latest('news_date')
+            ->first();
+
+        $homeNews = \App\Models\NewsItem::where('is_active', 1)
+            ->latest('news_date')
+            ->take(5)
+            ->get();
+
+        return view('layouts.app', compact(
+            'menu',
+            'sliders',
+            'csrItems',
+            'csrMenu',
+            'homeProducts',
+            'productsMenu',
+            'pinnedNews',
+            'homeNews',
+            'newsMenu'
+        ));
     }
 
     public function page(string $slug)

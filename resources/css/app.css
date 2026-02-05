@@ -64,7 +64,7 @@ footer h1::after {
     height: auto;
 }
 
-.product-card {
+.index-card {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -72,11 +72,11 @@ footer h1::after {
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.product-card:hover {
+.index-card:hover {
     border-color: var(--color-orion-blue) !important;
 }
 
-.product-card.hidden {
+.index-card.hidden {
     display: none;
 }
 
