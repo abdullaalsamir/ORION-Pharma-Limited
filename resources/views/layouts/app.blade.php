@@ -18,7 +18,7 @@
         @include('partials.swiper-slider')
     @endif
 
-    <main class="grow w-full {{ request()->is('/') ? 'pt-0' : 'pt-22.5' }}">
+    <main class="grow w-full {{ request()->is('/') ? 'pt-0' : 'pt-22.5' }} pb-16">
         <div class="container mx-auto w-[90%] max-w-350">
             @isset($menu)
                 <div class="flex flex-col">
