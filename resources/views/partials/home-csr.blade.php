@@ -1,6 +1,16 @@
 @if(isset($csrItems) && $csrItems->isNotEmpty() && $csrMenu)
     <section class="mt-16">
-        <h2 class="text-left text-orion-blue text-2xl uppercase font-bold mb-6">Corporate Social Responsibilities</h2>
+
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-left text-orion-blue text-2xl uppercase font-bold">
+                Corporate Social Responsibilities
+            </h2>
+
+            <a href="{{ url($csrMenu->full_slug) }}"
+                class="text-slate-400 font-semibold uppercase text-sm tracking-wider hover:text-orion-blue mt-1">
+                View All
+            </a>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 grid-rows-1 overflow-hidden items-stretch">
             @foreach($csrItems as $item)
@@ -28,5 +38,6 @@
                 </a>
             @endforeach
         </div>
+
     </section>
 @endif

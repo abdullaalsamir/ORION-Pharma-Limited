@@ -1,6 +1,16 @@
 @if(isset($homeProducts) && $homeProducts->isNotEmpty() && $productsMenu)
     <section class="mt-16">
-        <h2 class="text-left text-orion-blue text-2xl uppercase font-bold mb-6">New Products</h2>
+
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-left text-orion-blue text-2xl uppercase font-bold">
+                New Products
+            </h2>
+
+            <a href="{{ url($productsMenu->full_slug) }}"
+                class="text-slate-400 font-semibold uppercase text-sm tracking-wider hover:text-orion-blue mt-1">
+                View All
+            </a>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 grid-rows-2 overflow-hidden items-stretch">
             @foreach($homeProducts as $p)
@@ -24,5 +34,6 @@
                 </a>
             @endforeach
         </div>
+
     </section>
 @endif

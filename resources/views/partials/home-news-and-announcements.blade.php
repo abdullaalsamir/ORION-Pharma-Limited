@@ -1,6 +1,16 @@
 @if(isset($newsMenu) && ($pinnedNews || $homeNews->isNotEmpty()))
     <section class="mt-16">
-        <h2 class="text-left text-orion-blue text-2xl uppercase font-bold mb-6">News & Announcements</h2>
+
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-left text-orion-blue text-2xl uppercase font-bold">
+                News & Announcements
+            </h2>
+
+            <a href="{{ url($newsMenu->full_slug) }}"
+                class="text-slate-400 font-semibold uppercase text-sm tracking-wider hover:text-orion-blue mt-1">
+                View All
+            </a>
+        </div>
 
         <div class="grid grid-cols-12 gap-8">
                 
