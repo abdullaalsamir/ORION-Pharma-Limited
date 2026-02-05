@@ -57,12 +57,28 @@
 
                 <div class="divide-y divide-slate-100">
                     @foreach($related as $rel)
-                        <a href="{{ url($menu->full_slug . '/' . $rel->slug) }}"
+                        @php
+                            $isPdf = $rel->file_type === 'pdf';
+                            $link = $isPdf
+                                ? url($menu->full_slug . '/' . basename($rel->file_path))
+                                : url($menu->full_slug . '/' . $rel->slug);
+                        @endphp
+
+                        <a href="{{ $link }}" @if($isPdf) target="_blank" @endif
                             class="group flex p-5 hover:bg-slate-50 transition-colors">
-                            <div class="w-20 h-14 rounded-lg overflow-hidden shrink-0 shimmer relative border border-slate-100">
-                                <img src="{{ url($menu->full_slug . '/' . basename($rel->file_path)) }}"
-                                    class="product-image w-full h-full object-cover transition-transform duration-500">
-                            </div>
+
+                            @if(!$isPdf)
+                                <div class="w-20 h-14 rounded-lg overflow-hidden shrink-0 shimmer relative border border-slate-100">
+                                    <img src="{{ url($menu->full_slug . '/' . basename($rel->file_path)) }}"
+                                        class="product-image w-full h-full object-cover transition-transform duration-500">
+                                </div>
+                            @else
+                                <div
+                                    class="w-20 h-14 rounded-lg overflow-hidden bg-red-50 shrink-0 flex items-center justify-center border border-red-100 transition-colors group-hover:bg-red-100">
+                                    <i class="fas fa-file-pdf text-xl text-red-500"></i>
+                                </div>
+                            @endif
+
                             <div class="ml-4">
                                 <h5
                                     class="text-xs font-bold text-slate-800 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug mb-1">
