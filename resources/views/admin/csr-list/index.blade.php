@@ -106,10 +106,7 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-8 relative flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">CSR Title</label>
-                        <input type="text" name="title" maxlength="100" required class="input-field w-full"
-                            oninput="updateCount(this, 'addC1', 100)">
-                        <span id="addC1"
-                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/100</span>
+                        <input type="text" name="title" id="addTitle" required class="input-field w-full">
                     </div>
                     <div class="col-span-4 flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Event Date</label>
@@ -119,10 +116,8 @@
 
                 <div class="relative flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
-                    <textarea name="description" maxlength="500" required
-                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"
-                        oninput="updateCount(this, 'addCD', 500)"></textarea>
-                    <span id="addCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
+                    <textarea name="description" id="addDesc" required
+                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
                 </div>
 
                 <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
@@ -160,10 +155,7 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-8 relative flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">CSR Title</label>
-                        <input type="text" name="title" id="editTitle" maxlength="100" required class="input-field w-full"
-                            oninput="updateCount(this, 'editC1', 100)">
-                        <span id="editC1"
-                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/100</span>
+                        <input type="text" name="title" id="editTitle" required class="input-field w-full">
                     </div>
                     <div class="col-span-4 flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Event Date</label>
@@ -173,10 +165,8 @@
 
                 <div class="relative flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
-                    <textarea name="description" id="editDesc" maxlength="500" required
-                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"
-                        oninput="updateCount(this, 'editCD', 500)"></textarea>
-                    <span id="editCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
+                    <textarea name="description" id="editDesc" required
+                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
                 </div>
 
                 <div

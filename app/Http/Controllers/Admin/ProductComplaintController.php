@@ -28,10 +28,15 @@ class ProductComplaintController extends Controller
     public function frontendIndex($menu)
     {
         $raisingDate = now()->format('d/m/Y');
+
         try {
-            $response = Http::get('http://worldtimeapi.org/api/timezone/Asia/Dhaka');
+            $response = Http::timeout(2)
+                ->get('https://timeapi.io/api/Time/current/zone', [
+                    'timeZone' => 'Asia/Dhaka'
+                ]);
+
             if ($response->successful()) {
-                $raisingDate = date('d/m/Y', strtotime($response->json('datetime')));
+                $raisingDate = date('d/m/Y', strtotime($response->json('dateTime')));
             }
         } catch (\Exception $e) {
         }

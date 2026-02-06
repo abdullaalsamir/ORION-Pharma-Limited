@@ -28,8 +28,8 @@ class CsrController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:100',
-            'description' => 'required|string|max:500',
+            'title' => 'required|string',
+            'description' => 'required|string',
             'csr_date' => 'required|date',
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200',
         ]);
@@ -63,8 +63,8 @@ class CsrController extends Controller
     public function update(Request $request, CsrItem $csrItem)
     {
         $request->validate([
-            'title' => 'required|string|max:100',
-            'description' => 'required|string|max:500',
+            'title' => 'required|string',
+            'description' => 'required|string',
             'csr_date' => 'required|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
         ]);
@@ -198,7 +198,7 @@ class CsrController extends Controller
         $items = CsrItem::where('is_active', 1)
             ->orderBy('csr_date', 'desc')
             ->orderBy('order', 'asc')
-            ->paginate(9);
+            ->get();
 
         return view('csr.index', compact('items', 'menu'));
     }

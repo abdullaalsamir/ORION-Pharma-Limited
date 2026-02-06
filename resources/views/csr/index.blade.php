@@ -14,13 +14,14 @@
                         </div>
 
                         <div class="p-6 flex flex-col grow">
-                            <span class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mb-3">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">
                                 {{ $item->csr_date->format('d F, Y') }}
                             </span>
-                            <h3 class="text-xl font-bold text-slate-900 mb-3">
+                            <h3
+                                class="text-xl font-bold text-slate-800 capitalize group-hover:text-orion-blue transition-colors transition all duraion-300 line-clamp-3 mb-3">
                                 {{ $item->title }}
                             </h3>
-                            <p class="text-slate-600 text-sm leading-relaxed line-clamp-3">
+                            <p class="text-slate-600 text-base leading-relaxed line-clamp-3">
                                 {{ $item->description }}
                             </p>
                         </div>
@@ -28,11 +29,5 @@
                 @endforeach
             </div>
         </div>
-
-        @if($items->hasPages())
-            <div class="mt-12">
-                {{ $items->links() }}
-            </div>
-        @endif
     </div>
 @endsection

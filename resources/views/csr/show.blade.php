@@ -7,39 +7,37 @@
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
             <a href="{{ url($menu->full_slug) }}" class="hover:text-orion-blue">CSR List</a>
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            <span class="text-orion-blue truncate max-w-50">{{ $item->title }}</span>
+            <span class="capitalize line-clamp-1">{{ $item->title }}</span>
         </nav>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <article class="lg:col-span-8">
-            <div class="rounded-xl overflow-hidden mb-8 aspect-video shimmer relative border border-slate-200">
+            <div class="rounded-2xl overflow-hidden mb-8 aspect-video shimmer relative border border-slate-200">
                 <img src="{{ url($menu->full_slug . '/' . basename($item->image_path)) }}" alt="{{ $item->title }}"
                     class="product-image w-full h-full object-cover">
             </div>
 
-            <div class="mb-8">
-                <h2 class="text-3xl md:text-4xl font-bold text-orion-blue leading-tight mb-4">
-                    {{ $item->title }}
-                </h2>
-                <div class="flex items-center gap-2 text-slate-500 font-semibold uppercase tracking-wider text-xs">
-                    {{ $item->csr_date->format('d F, Y') }}
-                </div>
+            <div class="flex items-center gap-2 text-slate-400 font-semibold uppercase tracking-wider text-xs mb-4">
+                {{ $item->csr_date->format('d F, Y') }}
+            </div>
+            <div class="text-2xl font-bold text-orion-blue leading-tight capitalize mb-4">
+                {{ $item->title }}
             </div>
 
             <div class="prose prose-lg max-w-none text-slate-700 leading-relaxed text-justify">
-                {!! $item->description !!}
+                {!! nl2br(e($item->description)) !!}
             </div>
 
-            <div class="mt-12 pt-8 border-t border-slate-200 flex items-center gap-4">
-                <span class="font-bold text-slate-700">Share this impact:</span>
+            <div class="mt-8 pt-8 border-t border-slate-200 flex items-center gap-4">
+                <span class="font-bold text-slate-500">Share this impact:</span>
                 <div class="flex gap-2">
                     <a href="#"
-                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500">
+                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500 border border-slate-200">
                         <i class="fa-brands fa-facebook-f"></i>
                     </a>
                     <a href="#"
-                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500">
+                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500 border border-slate-200">
                         <i class="fa-brands fa-linkedin-in"></i>
                     </a>
                 </div>
@@ -47,29 +45,29 @@
         </article>
 
         <aside class="lg:col-span-4">
-            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden sticky top-27.5">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-                    <h4 class="text-base font-bold text-slate-900 flex items-center gap-3">
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden sticky top-27.5">
+                <div class="p-6 border-b border-slate-200 bg-slate-50/50">
+                    <span class="text-xl font-bold text-slate-900 flex items-center gap-3">
                         <span class="flex-none w-1 h-5 bg-orion-blue rounded-full"></span>
                         Recent Initiatives
-                    </h4>
+                    </span>
                 </div>
 
                 <div class="divide-y divide-slate-100">
                     @foreach($related as $rel)
                         <a href="{{ url($menu->full_slug . '/' . $rel->slug) }}"
                             class="group flex p-5 hover:bg-slate-50 transition-colors">
-                            <div class="w-20 h-14 rounded-lg overflow-hidden shrink-0 shimmer relative border border-slate-100">
+                            <div class="w-20 h-14 rounded-md overflow-hidden shrink-0 shimmer relative border border-slate-200">
                                 <img src="{{ url($menu->full_slug . '/' . basename($rel->image_path)) }}"
                                     class="product-image w-full h-full object-cover transition-transform duration-500">
                             </div>
                             <div class="ml-4">
-                                <h5
-                                    class="text-xs font-bold text-slate-800 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug mb-1">
+                                <span
+                                    class="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug -mt-[3px] mb-1">
                                     {{ $rel->title }}
-                                </h5>
+                                </span>
                                 <div
-                                    class="flex items-center gap-2 text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                                    class="flex items-center gap-2 text-xs text-slate-400 font-semibold uppercase tracking-wider">
                                     {{ $rel->csr_date->format('d F, Y') }}
                                 </div>
                             </div>
@@ -79,9 +77,9 @@
 
                 <div class="p-4 bg-slate-50/50">
                     <a href="{{ url($menu->full_slug) }}"
-                        class="flex items-center justify-center gap-2 w-full py-3 bg-white text-orion-blue text-xs font-bold uppercase tracking-widest rounded-lg border border-slate-200 hover:border-orion-blue hover:bg-orion-blue hover:text-white transition-all duration-300">
+                        class="flex items-center justify-center gap-2 w-full py-3 bg-white text-orion-blue text-xs font-bold uppercase tracking-wider rounded-xl border border-slate-200 hover:border-orion-blue hover:bg-orion-blue hover:text-white transition-all duration-300">
                         View All Stories
-                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
                     </a>
                 </div>
             </div>

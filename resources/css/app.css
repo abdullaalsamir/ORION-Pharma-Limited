@@ -16,12 +16,12 @@ body {
     @apply bg-slate-50 text-slate-800 font-sans;
 }
 
-.page-content {
-    @apply w-full text-base text-justify;
+h1 {
+    @apply flex items-center text-center text-orion-blue text-3xl uppercase font-bold tracking-wider my-8;
 }
 
-h1 {
-    @apply flex items-center text-center text-orion-blue text-2xl uppercase font-bold my-8;
+h2 {
+    @apply flex items-center text-center text-orion-blue text-2xl uppercase font-bold tracking-wider;
 }
 
 h1::before,
@@ -41,8 +41,12 @@ footer h1::after {
     content: none !important;
 }
 
-.page-content p:not(:last-child) {
-    @apply text-base text-justify leading-relaxed text-slate-600 mb-4;
+.page-content p {
+  @apply mb-4;
+}
+
+.page-content p:last-of-type {
+  @apply mb-0;
 }
 
 @keyframes shimmer {
@@ -135,6 +139,15 @@ footer h1::after {
 }
 
 @layer components {
+    .full-bleed {
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+    }
+
     .level-2-menu {
         transform: translateY(-100%) !important;
         opacity: 0;
@@ -181,7 +194,55 @@ footer h1::after {
         @apply w-full rounded-2xl mb-8;
     }
 
-     .adverse-event-reporting-section-title {
+    .stats-container {
+        @apply mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3;
+    }
+
+    .flag-box {
+        @apply w-24 h-16 flex items-center justify-center;
+    }
+
+    .flag-fill {
+        @apply w-full h-full object-contain;
+    }
+
+    .country {
+        @apply w-[100px] text-center;
+    }
+
+    .country-name {
+        @apply mt-2 text-sm leading-5 text-center;
+    }
+
+    .quote-mark-open {
+        @apply absolute -top-[35px] -left-[20px]
+            text-[2.5rem] font-serif
+            text-orion-blue opacity-30;
+    }
+
+    .quote-mark-close {
+        @apply absolute -bottom-[25px] -right-[10px]
+            text-[2.5rem] font-serif
+            text-orion-blue opacity-30;
+    }
+
+    .hover-translate-x {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-translate-x:hover {
+        transform: translateX(5px);
+    }
+
+    .hover-translate-y {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-translate-y:hover {
+        transform: translateY(-5px);
+    }
+
+    .adverse-event-reporting-section-title {
         @apply flex items-center gap-3 text-orion-blue font-bold text-lg uppercase mt-8 mb-4;
     }
 

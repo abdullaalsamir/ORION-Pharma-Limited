@@ -31,6 +31,7 @@ export function initGlobalHelpers() {
     };
 
     window.updateCount = (el, counterId, limit) => {
+        if (!el) return;
         const counter = document.getElementById(counterId);
         if (counter) {
             const len = el.value.length;
@@ -208,7 +209,7 @@ export function initSlidersPage() {
         ['editH1', 'editH2', 'editDesc'].forEach(id => {
             const el = document.getElementById(id);
             const counterId = id.replace('edit', 'editC').replace('H1', '1').replace('H2', '2').replace('Desc', 'D');
-            updateCount(el, counterId, el.getAttribute('maxlength'));
+            updateCount(el, counterId, el?.getAttribute('maxlength'));
         });
 
         const modal = document.getElementById('editModal');
@@ -292,18 +293,11 @@ export function initProductsPage() {
     window.loadProducts = (id, el) => {
         document.querySelectorAll('.generic-list-item').forEach(item => {
             item.classList.remove('active', 'border-admin-blue', 'bg-blue-50/50', 'border-red-500', 'bg-red-50', 'shadow-inner');
-            if (item.classList.contains('archived-item')) {
-                item.classList.add('bg-red-50/50', 'border-red-100');
-            } else {
-                item.classList.add('bg-white', 'border-slate-200');
-            }
+            if (item.classList.contains('archived-item')) item.classList.add('bg-red-50/50', 'border-red-100');
+            else item.classList.add('bg-white', 'border-slate-200');
         });
-
-        if (el.classList.contains('archived-item')) {
-            el.classList.add('active', 'border-red-500', 'bg-red-50', 'shadow-inner');
-        } else {
-            el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50', 'shadow-inner');
-        }
+        if (el.classList.contains('archived-item')) el.classList.add('active', 'border-red-500', 'bg-red-50', 'shadow-inner');
+        else el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50', 'shadow-inner');
 
         window.currentGenId = id;
         fetch(`/admin/products-actions/fetch/${id}`, { headers: fetchHeaders() }).then(handleResponse).then(data => { document.getElementById('productArea').innerHTML = data.html; });
@@ -333,10 +327,8 @@ export function initProductsPage() {
         const fd = new FormData(gForm);
         if (window.currentEditGenericId) fd.append('_method', 'PUT');
         fd.set('is_active', document.getElementById('genActive').checked ? 1 : 0);
-        
         fetch(url, { method: 'POST', body: fd, headers: fetchHeaders() })
-            .then(handleResponse)
-            .then(() => window.location.reload())
+            .then(handleResponse).then(() => window.location.reload())
             .catch(() => showInlineError('genName', 'genNameError', "Generic name already exists."));
     };
 
@@ -363,21 +355,14 @@ export function initProductsPage() {
 
     pForm.onsubmit = (e) => {
         e.preventDefault();
-        
         const fileInput = document.getElementById('prodInput');
-        if (!window.currentEditProductId && fileInput.files.length === 0) {
-            alert("Please select a product image.");
-            return;
-        }
-
+        if (!window.currentEditProductId && fileInput.files.length === 0) { alert("Please select a product image."); return; }
         const url = window.currentEditProductId ? `/admin/products-actions/product-update/${window.currentEditProductId}` : `/admin/products-actions/product-store/${window.currentGenId}`;
         const fd = new FormData(pForm);
         if (window.currentEditProductId) fd.append('_method', 'PUT');
         fd.set('is_active', document.getElementById('p_active').checked ? 1 : 0);
-        
         fetch(url, { method: 'POST', body: fd, headers: fetchHeaders() })
-            .then(handleResponse)
-            .then(() => window.location.reload())
+            .then(handleResponse).then(() => window.location.reload())
             .catch(() => showInlineError('p_trade_name', 'prodNameError', "Trade name already exists."));
     };
 
@@ -433,8 +418,6 @@ export function initCSRPage() {
     window.openCsrAddModal = () => {
         const form = document.querySelector('#addModal form');
         form.reset();
-        updateCount(document.getElementById('addTitle'), 'addC1', 100);
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
         const modal = document.getElementById('addModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -446,10 +429,6 @@ export function initCSRPage() {
         document.getElementById('editDate').value = item.csr_date.split('T')[0];
         document.getElementById('editActive').checked = item.is_active == 1;
         document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
-        
-        updateCount(document.getElementById('editTitle'), 'editC1', 100);
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -474,25 +453,20 @@ export function initNewsPage() {
         document.getElementById('editDate').value = item.news_date.split('T')[0];
         document.getElementById('editDesc').value = item.description;
         document.getElementById('editActive').checked = item.is_active == 1;
-        
         updateCount(document.getElementById('editTitle'), 'editC1', 100);
         updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
-        const pinCheckbox = document.getElementById('editPin');
-        if(pinCheckbox) {
-            pinCheckbox.checked = item.is_pin == 1;
-            togglePinText(pinCheckbox, 'editPinLabel');
+        if(document.getElementById('editPin')) {
+            document.getElementById('editPin').checked = item.is_pin == 1;
+            togglePinText(document.getElementById('editPin'), 'editPinLabel');
         }
-
         const preview = document.getElementById('editPreview');
         preview.classList.remove('p-6');
         if (item.file_type === 'pdf') {
             preview.classList.add('p-6');
-            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase">PDF Document</span></div>`;
+            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase">PDF Notice</span></div>`;
         } else {
             preview.innerHTML = `<img src="/${slug}/${item.file_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
         }
-        
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -505,21 +479,20 @@ window.handleNewsPreview = function (input, previewId, fileNameId) {
     if (!input.files || !input.files[0]) return;
     const file = input.files[0];
     
-    const titleInput = input.closest('form').querySelector('input[name="title"]');
-    if (titleInput && !titleInput.value) {
-        titleInput.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-        const counter = titleInput.getAttribute('oninput')?.match(/'([^']+)'/);
-        if(counter) updateCount(titleInput, counter[1], titleInput.getAttribute('maxlength'));
+    const form = input.closest('form');
+    const titleInp = form.querySelector('input[name="title"]');
+    if (titleInp && !titleInp.value) {
+        titleInp.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+        const counterId = titleInp.getAttribute('oninput')?.match(/'([^']+)'/)?.[1];
+        if(counterId) updateCount(titleInp, counterId, titleInp.getAttribute('maxlength'));
     }
 
     if (fileNameEl) { fileNameEl.textContent = file.name; fileNameEl.classList.remove('hidden'); }
-    preview.innerHTML = '';
-    preview.classList.remove('p-6');
-
+    preview.innerHTML = ''; preview.classList.remove('p-6');
     if (file.type === 'application/pdf') {
         preview.classList.add('p-6');
-        preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase">PDF</span></div>`;
-    } else if (file.type.startsWith('image/')) {
+        preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase font-sans">PDF Notice</span></div>`;
+    } else {
         const reader = new FileReader();
         reader.onload = (e) => preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
         reader.readAsDataURL(file);
@@ -529,13 +502,8 @@ window.handleNewsPreview = function (input, previewId, fileNameId) {
 window.togglePinText = (el, labelId) => {
     const label = document.getElementById(labelId);
     if (!label) return;
-    if (el.checked) {
-        label.innerText = "Pin Yes";
-        label.classList.add('text-admin-blue');
-    } else {
-        label.innerText = "Pin No";
-        label.classList.remove('text-admin-blue');
-    }
+    label.innerText = el.checked ? "Pin Yes" : "Pin No";
+    label.classList.toggle('text-admin-blue', el.checked);
 };
 
 export function initDirectorsPage() {
@@ -556,27 +524,24 @@ export function initDirectorsPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteDirector = (id) => { if(confirm('Delete?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initJournalsPage() {
     setupModule('medical-journals', '/admin/journal-actions/store', '/admin/journal-actions', 'curJId');
-    
     window.handlePdfSelect = (input, isEdit = false) => {
         if (input.files && input.files[0]) {
-            const fileName = input.files[0].name;
-            const cleanName = fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+            const file = input.files[0];
+            const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
             if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = fileName;
+                document.getElementById('editPdfStatus').innerText = file.name;
                 document.getElementById('editPdfStatus').classList.add('text-admin-blue');
             } else {
-                document.getElementById('pdfStatusText').innerText = fileName;
+                document.getElementById('pdfStatusText').innerText = file.name;
                 const titleInput = document.getElementById('titleInput');
-                if (!titleInput.value) titleInput.value = cleanName;
+                if (titleInput && !titleInput.value) titleInput.value = cleanName;
             }
         }
     };
-
     window.openJournalAddModal = () => {
         document.querySelector('#addModal form').reset();
         document.getElementById('pdfStatusText').innerText = "Click to select PDF";
@@ -593,7 +558,6 @@ export function initJournalsPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteJournal = (id) => { if(confirm('Delete?')) fetch(`/admin/journal-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initReportModule() {
@@ -601,7 +565,6 @@ export function initReportModule() {
     const seg = window.location.pathname.split('/')[2];
     const base = map[seg];
     if (!base) return;
-
     setupModule(seg, `${base}/store`, base, 'curRepId');
     window.openReportAddModal = () => {
         document.querySelector('#addModal form').reset();
@@ -616,9 +579,7 @@ export function initReportModule() {
         document.getElementById('editDate').value = item.publication_date ? item.publication_date.split('T')[0] : '';
         document.getElementById('editDesc').value = item.description || '';
         document.getElementById('editActive').checked = item.is_active == 1;
-        
         updateCount(document.getElementById('editDesc'), 'editCD', 500);
-
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -629,10 +590,8 @@ export function initReportModule() {
 export function initPagesPage() {
     const modal = document.getElementById('pageModal');
     if (!modal || !window.location.pathname.includes('/admin/pages')) return;
-
     if (typeof ace !== 'undefined') {
         const editor = ace.edit("ace-editor");
-
         const applyFormatting = (type) => {
             const selectedText = editor.getSelectedText();
             const toggleTag = (text, tagName) => {
@@ -654,11 +613,7 @@ export function initPagesPage() {
             }
             editor.focus();
         };
-
-        document.querySelectorAll('#editor-toolbar button').forEach(btn => {
-            btn.onclick = () => applyFormatting(btn.dataset.format);
-        });
-
+        document.querySelectorAll('#editor-toolbar button').forEach(btn => btn.onclick = () => applyFormatting(btn.dataset.format));
         let curPageId = null;
         document.querySelectorAll('.edit-page').forEach(btn => {
             btn.onclick = (e) => {
@@ -697,7 +652,6 @@ export function initComplaintsPage() {
 
 export function initFooterPage() {
     if (!window.location.pathname.includes('/admin/footer')) return;
-    
     window.openFooterModal = (id) => {
         const modal = document.getElementById(id);
         if (!modal) return;
@@ -708,15 +662,10 @@ export function initFooterPage() {
             if (match) updateCount(el, match[1], el.getAttribute('maxlength'));
         });
     };
-
     window.fetchFooterMap = () => {
         const url = document.getElementById('map_input').value;
-        if (url.includes('google.com/maps')) { 
-            document.getElementById('map_preview').src = url; 
-            document.getElementById('mapSaveBtn').disabled = false; 
-        }
+        if (url.includes('google.com/maps')) { document.getElementById('map_preview').src = url; document.getElementById('mapSaveBtn').disabled = false; }
     };
-    
     document.querySelectorAll('.modal-overlay form').forEach(form => {
         form.onsubmit = (e) => {
             e.preventDefault();
