@@ -30,10 +30,10 @@ class SliderController extends Controller
     {
         $request->validate([
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200',
-            'header_1' => 'required|string|max:22',
-            'header_2' => 'required|string|max:22',
-            'description' => 'required|string|max:150',
-            'button_text' => 'nullable|string|max:15',
+            'header_1' => 'required|string|max:220',
+            'header_2' => 'required|string|max:220',
+            'description' => 'required|string|max:1500',
+            'button_text' => 'nullable|string|max:150',
             'link_url' => 'nullable|string',
         ]);
 
@@ -66,10 +66,10 @@ class SliderController extends Controller
     {
         $request->validate([
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
-            'header_1' => 'required|string|max:22',
-            'header_2' => 'required|string|max:22',
-            'description' => 'required|string|max:150',
-            'button_text' => 'nullable|string|max:15',
+            'header_1' => 'required|string|max:220',
+            'header_2' => 'required|string|max:220',
+            'description' => 'required|string|max:1500',
+            'button_text' => 'nullable|string|max:150',
             'link_url' => 'nullable|string',
             'is_active' => 'required'
         ]);

@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stopAuto();
             autoTimer = setInterval(() => {
                 goToIndex(currentIndex + 1);
-            }, 4000);
+            }, 3000);
         };
 
         const stopAuto = () => {

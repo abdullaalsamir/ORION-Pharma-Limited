@@ -21,6 +21,7 @@
             <div class="flex items-center gap-2 text-slate-400 font-semibold uppercase tracking-wider text-xs mb-4">
                 {{ $item->csr_date->format('d F, Y') }}
             </div>
+
             <div class="text-2xl font-bold text-orion-blue leading-tight capitalize mb-4">
                 {{ $item->title }}
             </div>
@@ -53,7 +54,7 @@
                     </span>
                 </div>
 
-                <div class="divide-y divide-slate-100">
+                <div class="divide-y divide-slate-200">
                     @foreach($related as $rel)
                         <a href="{{ url($menu->full_slug . '/' . $rel->slug) }}"
                             class="group flex p-5 hover:bg-slate-50 transition-colors">
@@ -63,7 +64,7 @@
                             </div>
                             <div class="ml-4">
                                 <span
-                                    class="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug -mt-[3px] mb-1">
+                                    class="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug -mt-0.75 mb-1">
                                     {{ $rel->title }}
                                 </span>
                                 <div

@@ -16,13 +16,33 @@ class CsrController extends Controller
         $menu = Menu::where('slug', 'csr-list')->firstOrFail();
 
         $groupedCsr = CsrItem::orderBy('csr_date', 'desc')
-            ->orderBy('order', 'asc')
+            ->orderBy('order', 'desc')
             ->get()
             ->groupBy(function ($item) {
                 return \Carbon\Carbon::parse($item->csr_date)->format('Y-m-d');
             });
 
         return view('admin.csr-list.index', compact('menu', 'groupedCsr'));
+    }
+
+    private function generateUniqueSlug($title, $ignoreId = null)
+    {
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (
+            CsrItem::where('slug', $slug)
+                ->when($ignoreId, function ($query) use ($ignoreId) {
+                    return $query->where('id', '!=', $ignoreId);
+                })
+                ->exists()
+        ) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     public function store(Request $request)
@@ -35,18 +55,21 @@ class CsrController extends Controller
         ]);
 
         try {
-            $file = $request->file('image');
-            $fileName = time() . '.webp';
-            $path = "csr/{$fileName}";
+            $slug = $this->generateUniqueSlug($request->title);
+            $path = "csr/{$slug}.webp";
 
             if (!Storage::disk('public')->exists('csr')) {
                 Storage::disk('public')->makeDirectory('csr');
             }
 
-            $this->processCsrImage($file->getRealPath(), storage_path("app/public/{$path}"));
+            $this->processCsrImage(
+                $request->file('image')->getRealPath(),
+                storage_path("app/public/{$path}")
+            );
 
             CsrItem::create([
                 'title' => $request->title,
+                'slug' => $slug,
                 'description' => $request->description,
                 'csr_date' => $request->csr_date,
                 'image_path' => $path,
@@ -67,20 +90,55 @@ class CsrController extends Controller
             'description' => 'required|string',
             'csr_date' => 'required|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'is_active' => 'required'
         ]);
 
         try {
-            if ($request->hasFile('image')) {
-                Storage::disk('public')->delete($csrItem->image_path);
-                $this->processCsrImage($request->file('image')->getRealPath(), storage_path("app/public/{$csrItem->image_path}"));
+            $slug = $csrItem->slug;
+            if ($request->title !== $csrItem->title) {
+                $slug = $this->generateUniqueSlug($request->title, $csrItem->id);
             }
 
-            $csrItem->update([
+            $data = [
                 'title' => $request->title,
+                'slug' => $slug,
                 'description' => $request->description,
                 'csr_date' => $request->csr_date,
-                'is_active' => $request->is_active
-            ]);
+                'is_active' => $request->is_active,
+            ];
+
+            if ($request->hasFile('image')) {
+                if (Storage::disk('public')->exists($csrItem->image_path)) {
+                    Storage::disk('public')->delete($csrItem->image_path);
+                }
+
+                $path = "csr/{$slug}.webp";
+                $this->processCsrImage(
+                    $request->file('image')->getRealPath(),
+                    storage_path("app/public/{$path}")
+                );
+
+                $data['image_path'] = $path;
+            }
+
+            $oldSlug = $csrItem->slug;
+
+            if (
+                $slug !== $oldSlug &&
+                !$request->hasFile('file') &&
+                $csrItem->file_path
+            ) {
+                $oldPath = $csrItem->file_path;
+                $ext = pathinfo($oldPath, PATHINFO_EXTENSION);
+                $newPath = "news/{$slug}.{$ext}";
+
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->move($oldPath, $newPath);
+                    $data['file_path'] = $newPath;
+                }
+            }
+
+            $csrItem->update($data);
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {
@@ -197,7 +255,7 @@ class CsrController extends Controller
     {
         $items = CsrItem::where('is_active', 1)
             ->orderBy('csr_date', 'desc')
-            ->orderBy('order', 'asc')
+            ->orderBy('order', 'desc')
             ->get();
 
         return view('csr.index', compact('items', 'menu'));
@@ -210,7 +268,7 @@ class CsrController extends Controller
         $related = CsrItem::where('is_active', 1)
             ->where('id', '!=', $item->id)
             ->latest('csr_date')
-            ->take(3)
+            ->take(5)
             ->get();
 
         return view('csr.show', compact('item', 'related', 'menu'));

@@ -17,23 +17,45 @@ class NewsController extends Controller
         $menu = Menu::where('slug', 'news-and-announcements')->firstOrFail();
 
         $groupedNews = NewsItem::orderBy('news_date', 'desc')
-            ->orderBy('order', 'asc')
+            ->orderBy('order', 'desc')
             ->get()
             ->groupBy(fn($item) => \Carbon\Carbon::parse($item->news_date)->format('Y-m-d'));
 
         return view('admin.news-and-announcements.index', compact('menu', 'groupedNews'));
     }
 
+    private function generateUniqueSlug($title, $ignoreId = null)
+    {
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 2;
+
+        while (
+            NewsItem::where('slug', $slug)
+                ->when($ignoreId, function ($query) use ($ignoreId) {
+                    return $query->where('id', '!=', $ignoreId);
+                })
+                ->exists()
+        ) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:100',
-            'description' => 'required|string|max:500',
+            'title' => 'required|string',
+            'description' => 'required|string',
             'news_date' => 'required|date',
             'file' => 'required|mimes:jpg,jpeg,png,webp,pdf|max:51200',
         ]);
 
         try {
+            $slug = $this->generateUniqueSlug($request->title);
+
             $file = $request->file('file');
             $mime = $file->getMimeType();
 
@@ -47,11 +69,9 @@ class NewsController extends Controller
                 abort(422, 'Unsupported file type');
             }
 
-            $slug = Str::slug($request->title);
-            $fileName = "{$slug}.{$ext}";
-            $path = "news/{$fileName}";
+            $path = "news/{$slug}.{$ext}";
 
-            \Storage::disk('public')->makeDirectory('news');
+            Storage::disk('public')->makeDirectory('news');
 
             if ($fileType === 'image') {
                 $this->processNewsImage(
@@ -59,11 +79,12 @@ class NewsController extends Controller
                     storage_path("app/public/{$path}")
                 );
             } else {
-                $file->storeAs('news', $fileName, 'public');
+                $file->storeAs('news', "{$slug}.{$ext}", 'public');
             }
 
             NewsItem::create([
                 'title' => $request->title,
+                'slug' => $slug,
                 'description' => $request->description,
                 'news_date' => $request->news_date,
                 'file_type' => $fileType,
@@ -75,27 +96,38 @@ class NewsController extends Controller
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
     public function update(Request $request, NewsItem $newsItem)
     {
         $request->validate([
-            'title' => 'required|string|max:100',
-            'description' => 'required|string|max:500',
+            'title' => 'required|string',
+            'description' => 'required|string',
             'news_date' => 'required|date',
             'file' => 'nullable|mimes:jpg,jpeg,png,webp,pdf|max:51200',
+            'is_active' => 'required'
         ]);
 
         try {
-            if ($request->hasFile('file')) {
+            $slug = $newsItem->slug;
+            if ($request->title !== $newsItem->title) {
+                $slug = $this->generateUniqueSlug($request->title, $newsItem->id);
+            }
 
-                if (\Storage::disk('public')->exists($newsItem->file_path)) {
-                    \Storage::disk('public')->delete($newsItem->file_path);
+            $data = [
+                'title' => $request->title,
+                'slug' => $slug,
+                'description' => $request->description,
+                'news_date' => $request->news_date,
+                'is_pin' => $request->boolean('is_pin'),
+                'is_active' => $request->boolean('is_active'),
+            ];
+
+            if ($request->hasFile('file')) {
+                if (Storage::disk('public')->exists($newsItem->file_path)) {
+                    Storage::disk('public')->delete($newsItem->file_path);
                 }
 
                 $file = $request->file('file');
@@ -111,9 +143,7 @@ class NewsController extends Controller
                     abort(422, 'Unsupported file type');
                 }
 
-                $slug = Str::slug($request->title);
-                $fileName = "{$slug}.{$ext}";
-                $path = "news/{$fileName}";
+                $path = "news/{$slug}.{$ext}";
 
                 if ($fileType === 'image') {
                     $this->processNewsImage(
@@ -121,27 +151,35 @@ class NewsController extends Controller
                         storage_path("app/public/{$path}")
                     );
                 } else {
-                    $file->storeAs('news', $fileName, 'public');
+                    $file->storeAs('news', "{$slug}.{$ext}", 'public');
                 }
 
-                $newsItem->file_type = $fileType;
-                $newsItem->file_path = $path;
+                $data['file_type'] = $fileType;
+                $data['file_path'] = $path;
             }
 
-            $newsItem->update([
-                'title' => $request->title,
-                'description' => $request->description,
-                'news_date' => $request->news_date,
-                'is_pin' => $request->boolean('is_pin'),
-                'is_active' => $request->boolean('is_active'),
-            ]);
+            $oldSlug = $newsItem->slug;
+
+            if (
+                $slug !== $oldSlug &&
+                !$request->hasFile('file') &&
+                $newsItem->file_path
+            ) {
+                $oldPath = $newsItem->file_path;
+                $ext = pathinfo($oldPath, PATHINFO_EXTENSION);
+                $newPath = "news/{$slug}.{$ext}";
+
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->move($oldPath, $newPath);
+                    $data['file_path'] = $newPath;
+                }
+            }
+
+            $newsItem->update($data);
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -273,7 +311,7 @@ class NewsController extends Controller
         $items = NewsItem::where('is_active', 1)
             ->orderBy('news_date', 'desc')
             ->orderBy('order', 'desc')
-            ->paginate(10);
+            ->get();
 
         return view('news.index', compact('items', 'menu', 'pinned'));
     }
@@ -285,7 +323,7 @@ class NewsController extends Controller
         $related = NewsItem::where('is_active', 1)
             ->where('id', '!=', $item->id)
             ->latest('news_date')
-            ->take(3)
+            ->take(5)
             ->get();
 
         return view('news.show', compact('item', 'related', 'menu'));

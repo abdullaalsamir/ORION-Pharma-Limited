@@ -33,7 +33,7 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4 self-start">
-                                    <span class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">
+                                    <span class="font-bold text-slate-700 text-sm capitalize truncate tracking-tight mt-1">
                                         {{ $item->title }}
                                     </span>
 

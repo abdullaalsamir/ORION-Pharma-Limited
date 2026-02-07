@@ -40,12 +40,12 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4 self-start">
-                                    <span class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">
+                                    <span class="font-bold text-slate-700 text-sm capitalize truncate tracking-tight mt-1">
                                         {{ $item->title }}
                                     </span>
 
                                     <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">
-                                        {{ $item->description }}
+                                        {{ html_entity_decode(strip_tags($item->description)) }}
                                     </p>
 
                                     <div
@@ -130,10 +130,7 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-12 relative flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">News Title</label>
-                        <input type="text" name="title" maxlength="100" required class="input-field w-full"
-                            oninput="updateCount(this, 'addC1', 100)">
-                        <span id="addC1"
-                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/100</span>
+                        <input type="text" name="title" required class="input-field w-full">
                     </div>
 
                     <div class="col-span-6 flex flex-col gap-1">
@@ -144,10 +141,10 @@
                     <div class="col-span-6 flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Pin News</label>
                         <div class="input-field flex items-center justify-between h-10.5!">
-                            <span id="addPinLabel" class="text-xs font-bold text-slate-500">Pin No</span>
+                            <span id="addPinLabel" class="text-xs font-bold text-admin-blue">Pin Yes</span>
                             <input type="hidden" name="is_pin" value="0">
                             <label class="toggle-switch scale-75">
-                                <input type="checkbox" name="is_pin" value="1"
+                                <input type="checkbox" name="is_pin" value="1" checked
                                     onchange="togglePinText(this, 'addPinLabel')">
                                 <div class="toggle-bg"></div>
                             </label>
@@ -157,10 +154,8 @@
 
                 <div class="relative flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
-                    <textarea name="description" maxlength="500" required
-                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"
-                        oninput="updateCount(this, 'addCD', 500)"></textarea>
-                    <span id="addCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
+                    <textarea name="description" required
+                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
                 </div>
 
                 <div class="flex justify-end pt-4 sticky bottom-0 bg-white border-t border-slate-50">
@@ -210,10 +205,7 @@
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-12 relative flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">News Title</label>
-                        <input type="text" name="title" id="editTitle" maxlength="100" required class="input-field w-full"
-                            oninput="updateCount(this, 'editC1', 100)">
-                        <span id="editC1"
-                            class="absolute right-3 bottom-2.5 text-[9px] text-slate-300 font-bold">0/100</span>
+                        <input type="text" name="title" id="editTitle" required class="input-field w-full">
                     </div>
 
                     <div class="col-span-6 flex flex-col gap-1">
@@ -237,10 +229,8 @@
 
                 <div class="relative flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
-                    <textarea name="description" id="editDesc" maxlength="500" required
-                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"
-                        oninput="updateCount(this, 'editCD', 500)"></textarea>
-                    <span id="editCD" class="absolute right-3 bottom-2 text-[9px] text-slate-300 font-bold">0/500</span>
+                    <textarea name="description" id="editDesc" required
+                        class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
                 </div>
 
                 <div

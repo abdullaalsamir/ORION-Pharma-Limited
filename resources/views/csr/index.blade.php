@@ -18,7 +18,7 @@
                                 {{ $item->csr_date->format('d F, Y') }}
                             </span>
                             <h3
-                                class="text-xl font-bold text-slate-800 capitalize group-hover:text-orion-blue transition-colors transition all duraion-300 line-clamp-3 mb-3">
+                                class="text-xl font-bold text-slate-800 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-3 mb-3">
                                 {{ $item->title }}
                             </h3>
                             <p class="text-slate-600 text-base leading-relaxed line-clamp-3">

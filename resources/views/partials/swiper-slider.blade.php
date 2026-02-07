@@ -9,10 +9,10 @@
                     <div class="absolute inset-0 bg-linear-to-r from-black/75 to-transparent to-50% flex items-center">
                         <div class="container mx-auto w-[90%] max-w-350">
                             <div class="max-w-2xl text-white space-y-4 slide-content">
-                                <h2 class="text-4xl md:text-6xl font-bold leading-tight">
+                                <span class="text-4xl md:text-6xl font-bold leading-tight">
                                     {{ $slider->header_1 }} <br>
                                     <span class="text-blue-400">{{ $slider->header_2 }}</span>
-                                </h2>
+                                </span>
                                 <p class="text-lg opacity-90">
                                     {{ $slider->description }}
                                 </p>

@@ -425,8 +425,8 @@ export function initCSRPage() {
     window.openCsrEditModal = (item, slug) => {
         window.curCsrId = item.id;
         document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDesc').value = item.description;
         document.getElementById('editDate').value = item.csr_date.split('T')[0];
+        document.getElementById('editDesc').value = item.description;
         document.getElementById('editActive').checked = item.is_active == 1;
         document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
         const modal = document.getElementById('editModal');
@@ -441,8 +441,15 @@ export function initNewsPage() {
     window.openNewsAddModal = () => {
         const form = document.querySelector('#addModal form');
         form.reset();
-        updateCount(document.getElementById('addTitle'), 'addC1', 100);
-        updateCount(document.getElementById('addDesc'), 'addCD', 500);
+
+        const pin = form.querySelector('input[name="is_pin"][type="checkbox"]');
+        const label = document.getElementById('addPinLabel');
+
+        if (pin) {
+            pin.checked = true;
+            togglePinText(pin, 'addPinLabel');
+        }
+
         const modal = document.getElementById('addModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -453,8 +460,6 @@ export function initNewsPage() {
         document.getElementById('editDate').value = item.news_date.split('T')[0];
         document.getElementById('editDesc').value = item.description;
         document.getElementById('editActive').checked = item.is_active == 1;
-        updateCount(document.getElementById('editTitle'), 'editC1', 100);
-        updateCount(document.getElementById('editDesc'), 'editCD', 500);
         if(document.getElementById('editPin')) {
             document.getElementById('editPin').checked = item.is_pin == 1;
             togglePinText(document.getElementById('editPin'), 'editPinLabel');
@@ -471,6 +476,7 @@ export function initNewsPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.deleteNews = (id) => { if(confirm('Delete?')) fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 window.handleNewsPreview = function (input, previewId, fileNameId) {
@@ -524,6 +530,7 @@ export function initDirectorsPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.deleteDirector = (id) => { if(confirm('Delete?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initJournalsPage() {

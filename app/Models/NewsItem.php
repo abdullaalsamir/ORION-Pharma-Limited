@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class NewsItem extends Model
 {
@@ -20,13 +19,4 @@ class NewsItem extends Model
     ];
 
     protected $casts = ['news_date' => 'date'];
-
-    protected static function booted()
-    {
-        static::saving(function ($item) {
-            if (empty($item->slug) || $item->isDirty('title')) {
-                $item->slug = Str::slug($item->title);
-            }
-        });
-    }
 }

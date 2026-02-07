@@ -7,7 +7,7 @@
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
             <a href="{{ url($menu->full_slug) }}" class="hover:text-orion-blue">Board of Directors</a>
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            <span class="text-orion-blue font-bold">{{ $item->name }}</span>
+            <span class="capitalize line-clamp-1">{{ $item->name }}</span>
         </nav>
 
         <div class="overflow-hidden">
@@ -30,7 +30,7 @@
                 </p>
 
                 <div class="prose prose-slate max-w-none text-slate-700 leading-relaxed text-justify">
-                    {!! $item->description !!}
+                    {!! nl2br($item->description) !!}
                 </div>
             </div>
 
