@@ -290,17 +290,81 @@ export function initProductsPage() {
     const pForm = document.getElementById('prodForm');
     if (!gForm || !pForm || !window.location.pathname.includes('/admin/products')) return;
 
+    const toolbar = document.getElementById('product-editor-toolbar');
+    let activeTextarea = null;
+
+    if (toolbar) {
+        document.querySelectorAll('#prodForm textarea').forEach(ta => {
+            ta.addEventListener('focus', () => {
+                activeTextarea = ta;
+            });
+        });
+
+        const applyFormatting = (type) => {
+            if (!activeTextarea) return;
+
+            const textarea = activeTextarea;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+
+            const toggleTag = (text, tagName) => {
+                const open = `<${tagName}>`;
+                const close = `</${tagName}>`;
+                return (text.startsWith(open) && text.endsWith(close))
+                    ? text.slice(open.length, -close.length)
+                    : `${open}${text}${close}`;
+            };
+
+            let insertText = '';
+
+            switch (type) {
+                case 'b': insertText = toggleTag(selectedText, 'b'); break;
+                case 'i': insertText = toggleTag(selectedText, 'i'); break;
+                case 'p': insertText = toggleTag(selectedText, 'p'); break;
+                case 'h1': insertText = toggleTag(selectedText, 'h1'); break;
+                case 'h2': insertText = toggleTag(selectedText, 'h2'); break;
+                case 'br': insertText = `<br>\n`; break;
+
+                case 'ul':
+                case 'ol':
+                    const items = selectedText
+                        .split('\n')
+                        .map(line => `  <li>${line}</li>`)
+                        .join('\n');
+                    insertText = `<${type}>\n${items}\n</${type}>`;
+                    break;
+            }
+
+            textarea.setRangeText(insertText, start, end, 'end');
+            textarea.focus();
+        };
+
+        toolbar.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', e => e.preventDefault());
+            btn.onclick = () => applyFormatting(btn.dataset.format);
+        });
+    }
+
     window.loadProducts = (id, el) => {
         document.querySelectorAll('.generic-list-item').forEach(item => {
-            item.classList.remove('active', 'border-admin-blue', 'bg-blue-50/50', 'border-red-500', 'bg-red-50', 'shadow-inner');
+            item.classList.remove('active', 'border-admin-blue', 'bg-blue-50/50', 'border-red-500', 'bg-red-50');
             if (item.classList.contains('archived-item')) item.classList.add('bg-red-50/50', 'border-red-100');
             else item.classList.add('bg-white', 'border-slate-200');
         });
-        if (el.classList.contains('archived-item')) el.classList.add('active', 'border-red-500', 'bg-red-50', 'shadow-inner');
-        else el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50', 'shadow-inner');
+        if (el.classList.contains('archived-item')) el.classList.add('active', 'border-red-500', 'bg-red-50');
+        else el.classList.add('active', 'border-admin-blue', 'bg-blue-50/50');
 
         window.currentGenId = id;
-        fetch(`/admin/products-actions/fetch/${id}`, { headers: fetchHeaders() }).then(handleResponse).then(data => { document.getElementById('productArea').innerHTML = data.html; });
+        window.isArchivedMode = (id === 0);
+
+        fetch(`/admin/products-actions/fetch/${id}`, {
+            headers: fetchHeaders()
+        })
+        .then(handleResponse)
+        .then(data => {
+            document.getElementById('productArea').innerHTML = data.html;
+        });
     };
 
     window.openGenericModal = () => {
@@ -335,22 +399,70 @@ export function initProductsPage() {
     window.openAddProduct = () => {
         pForm.reset();
         window.currentEditProductId = null;
-        clearInlineError('p_trade_name', 'prodNameError');
+
+        document.getElementById('p_generic_id_wrapper').classList.add('hidden');
+
         document.getElementById('prodTitle').innerText = "Add Product";
-        document.getElementById('prodPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>`;
+
+        const btn = document.getElementById('prodSubmitBtn');
+        btn.innerText = "Add Product";
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+
+        document.getElementById('prodPreview').innerHTML =
+            `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>`;
+
         document.getElementById('productModal').classList.remove('hidden');
         setTimeout(() => document.getElementById('productModal').classList.add('active'), 10);
     };
 
     window.openEditProduct = (p) => {
         window.currentEditProductId = p.id;
+
         clearInlineError('p_trade_name', 'prodNameError');
-        const fields = ['trade_name', 'preparation', 'therapeutic_class', 'indications', 'dosage_admin', 'use_children', 'use_pregnancy_lactation', 'contraindications', 'precautions', 'side_effects', 'drug_interactions', 'high_risk', 'overdosage', 'storage', 'presentation', 'how_supplied', 'commercial_pack', 'packaging', 'official_specification'];
-        fields.forEach(f => { if(document.getElementById('p_' + f)) document.getElementById('p_' + f).value = p[f] || ''; });
+        document.getElementById('prodTitle').innerText = "Edit Product";
+
+        const btn = document.getElementById('prodSubmitBtn');
+        btn.innerText = "Update Product";
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-primary');
+
+        const wrapper = document.getElementById('p_generic_id_wrapper');
+        const select = document.getElementById('p_generic_id');
+
+        if (window.isArchivedMode) {
+            wrapper.classList.remove('hidden');
+            select.disabled = false;
+            select.value = p.generic_id || '';
+        } else {
+            wrapper.classList.add('hidden');
+            select.disabled = true;
+            select.value = p.generic_id || '';
+        }
+
+        const fields = [
+            'trade_name','preparation','therapeutic_class','indications',
+            'dosage_admin','use_children','use_pregnancy_lactation',
+            'contraindications','precautions','side_effects',
+            'drug_interactions','high_risk','overdosage','storage',
+            'presentation','how_supplied','commercial_pack',
+            'packaging','official_specification'
+        ];
+
+        fields.forEach(f => {
+            const el = document.getElementById('p_' + f);
+            if (el) el.value = p[f] || '';
+        });
+
         document.getElementById('p_active').checked = (p.is_active == 1);
-        document.getElementById('prodPreview').innerHTML = `<img src="/storage/${p.image_path}?t=${Date.now()}" class="w-full h-full object-cover">`;
+
+        document.getElementById('prodPreview').innerHTML =
+            `<img src="/storage/${p.image_path}?t=${Date.now()}" class="w-full h-full object-cover">`;
+
         document.getElementById('productModal').classList.remove('hidden');
         setTimeout(() => document.getElementById('productModal').classList.add('active'), 10);
+
+        document.querySelector('#prodForm button[type="submit"]').innerText = "Update Product";
     };
 
     pForm.onsubmit = (e) => {

@@ -40,7 +40,7 @@ class PageController extends Controller
                 ->where('is_active', 1))
             ->with('generic')
             ->latest()
-            ->take(10)
+            ->take(6)
             ->get();
 
         $productsMenu = Menu::where('slug', 'products')

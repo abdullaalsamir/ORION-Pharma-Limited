@@ -12,7 +12,7 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 grid-rows-1 overflow-hidden items-stretch">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-hidden items-stretch">
             @foreach($homeProducts as $p)
                 <a href="{{ url('products/' . $p->generic->slug . '/' . Str::slug($p->trade_name)) }}"
                     class="index-card group bg-white rounded-xl overflow-hidden">

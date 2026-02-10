@@ -160,8 +160,10 @@ Route::get('products/{generic}/{product}', [ProductController::class, 'frontendS
 Route::get('sliders/{filename}', [SliderController::class, 'serveSliderImage'])
     ->where('filename', '^[0-9]+\.webp$');
 
-Route::get('products/{path}', [ProductController::class, 'serveProductImage'])
-    ->where('path', '.*\.webp$');
+Route::get(
+    'products/{genericSlug}/{filename}',
+    [ProductController::class, 'serveProductImage']
+)->where('filename', '.*\.webp$');
 
 Route::get('{path}/{filename}', [NewsController::class, 'serveNewsPdf'])
     ->where('path', '.*news-and-announcements')

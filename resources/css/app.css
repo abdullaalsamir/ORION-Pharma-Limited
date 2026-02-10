@@ -226,6 +226,26 @@ footer h1::after {
             text-orion-blue opacity-30;
     }
 
+    .tab-pane ul {
+        list-style-type: disc;
+        padding-left: 1.5rem;
+    }
+
+    .tab-pane ol {
+        list-style-type: decimal;
+        padding-left: 1.5rem;
+    }
+
+    .tab-pane ul br,
+    .tab-pane ol br {
+        display: none;
+    }
+
+    .product-key b,
+    .product-key strong {
+        @apply font-semibold;
+    }
+
     .hover-translate-x {
         transition: transform 0.3s ease;
     }

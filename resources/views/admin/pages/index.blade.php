@@ -63,16 +63,14 @@
                             <button type="button" class="btn-toolbar" data-format="p" title="Paragraph">P</button>
                             <button type="button" class="btn-toolbar" data-format="h1" title="Heading 1">H1</button>
                             <button type="button" class="btn-toolbar" data-format="h2" title="Heading 2">H2</button>
-                            <button type="button" class="btn-toolbar w-10!" data-format="ul"
-                                title="Unordered List">UL</button>
-                            <button type="button" class="btn-toolbar w-10!" data-format="ol"
-                                title="Ordered List">OL</button>
-                            <button type="button" class="btn-toolbar w-10!" data-format="br" title="Line Break">Br</button>
+                            <button type="button" class="btn-toolbar" data-format="ul" title="Unordered List">UL</button>
+                            <button type="button" class="btn-toolbar" data-format="ol" title="Ordered List">OL</button>
+                            <button type="button" class="btn-toolbar" data-format="br" title="Line Break">Br</button>
                         </div>
                     </div>
 
                     <div id="ace-editor"
-                        class="flex-1 border border-slate-200 rounded-2xl overflow-hidden shadow-inner custom-scrollbar">
+                        class="flex-1 border border-slate-200 rounded-2xl overflow-hidden custom-scrollbar">
                     </div>
                 </div>
 

@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 grid-rows-1 overflow-hidden items-stretch">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-hidden items-stretch">
         @foreach($csrItems as $item)
             <a href="{{ url($csrMenu->full_slug . '/' . $item->slug) }}"
                 class="index-card group bg-white rounded-xl overflow-hidden flex flex-col">

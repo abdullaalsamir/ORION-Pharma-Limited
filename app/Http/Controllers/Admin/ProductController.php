@@ -142,7 +142,9 @@ class ProductController extends Controller
     {
         $request->validate(['trade_name' => 'required']);
 
-        $newGenericId = $request->input('generic_id');
+        $newGenericId = $request->filled('generic_id')
+            ? $request->input('generic_id')
+            : $product->generic_id;
         $newTradeName = $request->trade_name;
         $newFileName = \Str::slug($newTradeName) . '.webp';
 
@@ -172,10 +174,16 @@ class ProductController extends Controller
 
             $product->update([
                 'trade_name' => $newTradeName,
-                'generic_id' => $newGenericId ?: null,
+                'generic_id' => $newGenericId,
                 'image_path' => $newPath,
-                'is_active' => $request->has('is_active') ? 1 : 0
-            ] + $request->except(['image', '_method', 'is_active', 'generic_id', 'trade_name']));
+                'is_active' => $request->has('is_active') ? 1 : 0,
+            ] + $request->except([
+                            'image',
+                            '_method',
+                            'is_active',
+                            'generic_id',
+                            'trade_name'
+                        ]));
 
             return response()->json(['success' => true]);
         } catch (Exception $e) {
@@ -265,10 +273,12 @@ class ProductController extends Controller
         imagedestroy($dst);
     }
 
-    public function serveProductImage($path)
+    public function serveProductImage($genericSlug, $filename)
     {
-        $storagePath = storage_path("app/public/products/{$path}");
+        $storagePath = storage_path("app/public/products/{$genericSlug}/{$filename}");
+
         abort_if(!file_exists($storagePath), 404);
+
         return response()->file($storagePath);
     }
 

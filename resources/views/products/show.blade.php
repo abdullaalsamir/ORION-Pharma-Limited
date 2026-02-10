@@ -7,7 +7,7 @@
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
             <a href="{{ url($menu->full_slug) }}" class="hover:text-orion-blue">Products</a>
             <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            <span class="text-orion-blue font-bold">{{ $product->trade_name }}</span>
+            <span class="capitalize line-clamp-1">{{ $product->trade_name }}</span>
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -35,15 +35,17 @@
                                     <div>
                                         <span
                                             class="block text-[10px] uppercase font-bold text-slate-400">Preparation</span>
-                                        <span class="font-bold text-slate-700">{{ $product->preparation ?? 'N/A' }}</span>
+                                        <span class="font-bold text-slate-700">
+                                            {!! nl2br($product->preparation ?? 'N/A') !!}
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <div>
                                         <span class="block text-[10px] uppercase font-bold text-slate-400">Therapeutic
                                             Class</span>
-                                        <span
-                                            class="font-bold text-slate-700">{{ $product->therapeutic_class ?? 'N/A' }}</span>
+                                        <span class="font-bold text-slate-700">
+                                            {!! nl2br($product->therapeutic_class ?? 'N/A') !!}</span>
                                     </div>
                                 </div>
                             </div>
@@ -81,8 +83,8 @@
                                         <div class="relative">
                                             <h4 class="text-orion-blue font-black uppercase text-xs tracking-widest mb-1">{{ $label }}
                                             </h4>
-                                            <div class="text-slate-700 leading-relaxed text-[15px]">
-                                                {{ $product->$key }}
+                                            <div class="product-key prose prose-slate max-w-none">
+                                                {!! nl2br($product->$key) !!}
                                             </div>
                                         </div>
                                     @endif

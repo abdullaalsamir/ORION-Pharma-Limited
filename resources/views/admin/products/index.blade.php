@@ -4,8 +4,10 @@
 @section('content')
     @php
         $fields = [
+            'preparation' => 'Preparation',
+            'therapeutic_class' => 'Therapeutic Class',
             'indications' => 'Indications',
-            'dosage_admin' => 'Dosage & Admin',
+            'dosage_admin' => 'Dosage & Administration',
             'use_children' => 'Use in Children',
             'use_pregnancy_lactation' => 'Pregnancy & Lactation',
             'contraindications' => 'Contraindications',
@@ -127,13 +129,25 @@
         <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 id="prodTitle" class="mb-0!">Add Product</h1>
-                <button onclick="closeModal('productModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
+                <div class="flex items-center">
+                    <div class="flex items-center gap-1.5 mr-3" id="product-editor-toolbar">
+                        <button type="button" class="btn-toolbar" data-format="b" title="Bold">B</button>
+                        <button type="button" class="btn-toolbar" data-format="i" title="Italic">I</button>
+                        <button type="button" class="btn-toolbar" data-format="p" title="Paragraph">P</button>
+                        <button type="button" class="btn-toolbar" data-format="h1" title="Heading 1">H1</button>
+                        <button type="button" class="btn-toolbar" data-format="h2" title="Heading 2">H2</button>
+                        <button type="button" class="btn-toolbar" data-format="ul" title="Unordered List">UL</button>
+                        <button type="button" class="btn-toolbar" data-format="ol" title="Ordered List">OL</button>
+                        <button type="button" class="btn-toolbar" data-format="br" title="Line Break">Br</button>
+                    </div>
+                    <button onclick="closeModal('productModal')" class="btn-icon ml-2">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
             </div>
 
             <form id="prodForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <div id="prodMethod"></div>
-
                 <div class="flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Product Image</label>
                     <input type="file" name="image" id="prodInput" accept="image/*" class="hidden"
@@ -163,7 +177,7 @@
                         <span id="prodNameError"
                             class="text-[10px] text-red-500 font-bold uppercase ml-1 mt-1 hidden"></span>
                     </div>
-                    <div class="flex flex-col gap-1" id="p_generic_id_wrapper">
+                    <div class="flex-col gap-1 hidden" id="p_generic_id_wrapper">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Assign Generic (Optional)</label>
                         <select name="generic_id" id="p_generic_id" class="input-field w-full">
                             <option value="">⁝⁝⁝ No Generic / Archived ⁝⁝⁝</option>
@@ -172,20 +186,12 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Preparation</label>
-                        <input type="text" name="preparation" id="p_preparation" class="input-field w-full">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Therapeutic Class</label>
-                        <input type="text" name="therapeutic_class" id="p_therapeutic_class" class="input-field w-full">
-                    </div>
 
                     @foreach($fields as $key => $label)
                         <div class="flex flex-col gap-1">
                             <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">{{ $label }}</label>
                             <textarea name="{{ $key }}" id="p_{{ $key }}"
-                                class="input-field w-full h-24 py-3 resize-none custom-scrollbar"></textarea>
+                                class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
                         </div>
                     @endforeach
                 </div>
@@ -199,7 +205,7 @@
                             <span id="prodStatusLabel" class="ml-3 font-bold text-slate-600 text-sm">Active</span>
                         </label>
                     </div>
-                    <button type="submit" class="btn-primary h-10">Update Product</button>
+                    <button type="submit" id="prodSubmitBtn" class="btn h-10"></button>
                 </div>
             </form>
         </div>
