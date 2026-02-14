@@ -19,7 +19,7 @@
 
                         <div class="flex items-center gap-2 mb-2 ml-1">
                             <span
-                                class="text-xl font-black uppercase tracking-[0.2em] {{ $loop->index % 2 == 0 ? 'text-red-500' : 'text-green-500' }}">
+                                class="text-xl font-bold uppercase tracking-[0.1em] {{ $loop->index % 2 == 0 ? 'text-red-500' : 'text-green-500' }}">
                                 {{ $year }}
                             </span>
                         </div>
@@ -45,7 +45,7 @@
 
                                 <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-2 self-start">
                                     <span
-                                        class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">{{ $item->title }}</span>
+                                        class="capitalize font-semibold text-slate-700 text-sm truncate tracking-tight mt-1">{{ $item->title }}</span>
                                     <p class="text-[11px] text-slate-400 line-clamp-1">{{ $item->description }}</p>
                                     <div
                                         class="flex items-center gap-1.5 text-[10px] font-bold text-admin-blue tracking-wider mt-2">

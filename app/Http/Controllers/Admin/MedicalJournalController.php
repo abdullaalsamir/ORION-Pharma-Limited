@@ -34,7 +34,7 @@ class MedicalJournalController extends Controller
             $slug = $this->generateUniqueFilename($request->title);
             $filename = $slug . '.pdf';
 
-            $request->file('pdf')->storeAs("journals/{$request->year}", $filename, 'public');
+            $request->file('pdf')->storeAs("medical-journals/{$request->year}", $filename, 'public');
 
             MedicalJournal::create([
                 'title' => $request->title,
@@ -64,22 +64,34 @@ class MedicalJournalController extends Controller
             $newSlug = $this->generateUniqueFilename($request->title, $medicalJournal->id);
             $newFilename = $newSlug . '.pdf';
 
-            if ($request->hasFile('pdf')) {
-                Storage::disk('public')->delete("journals/{$oldYear}/{$oldFilename}");
-                $request->file('pdf')->storeAs("journals/{$request->year}", $newFilename, 'public');
-            } elseif ($oldYear != $request->year || $oldFilename != $newFilename) {
-                if (!Storage::disk('public')->exists("journals/{$request->year}")) {
-                    Storage::disk('public')->makeDirectory("journals/{$request->year}");
-                }
-                Storage::disk('public')->move("journals/{$oldYear}/{$oldFilename}", "journals/{$request->year}/{$newFilename}");
-            }
-
-            $medicalJournal->update([
+            $updateData = [
                 'title' => $request->title,
                 'filename' => $newFilename,
                 'year' => $request->year,
                 'is_active' => $request->input('is_active') == 1 ? 1 : 0
-            ]);
+            ];
+
+            if ($oldYear != $request->year) {
+                $updateData['order'] = (MedicalJournal::where('year', $request->year)->max('order') ?? 0) + 1;
+            }
+
+            if ($request->hasFile('pdf')) {
+                Storage::disk('public')->delete("medical-journals/{$oldYear}/{$oldFilename}");
+                $request->file('pdf')->storeAs("medical-journals/{$request->year}", $newFilename, 'public');
+
+                if ($oldYear != $request->year) {
+                    $this->cleanupFolders($oldYear);
+                }
+            } elseif ($oldYear != $request->year || $oldFilename != $newFilename) {
+                if (!Storage::disk('public')->exists("medical-journals/{$request->year}")) {
+                    Storage::disk('public')->makeDirectory("medical-journals/{$request->year}");
+                }
+                Storage::disk('public')->move("medical-journals/{$oldYear}/{$oldFilename}", "medical-journals/{$request->year}/{$newFilename}");
+
+                $this->cleanupFolders($oldYear);
+            }
+
+            $medicalJournal->update($updateData);
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
@@ -98,11 +110,38 @@ class MedicalJournalController extends Controller
     public function delete(MedicalJournal $medicalJournal)
     {
         try {
-            Storage::disk('public')->delete("journals/{$medicalJournal->year}/{$medicalJournal->filename}");
+            $year = $medicalJournal->year;
+            Storage::disk('public')->delete("medical-journals/{$year}/{$medicalJournal->filename}");
+
             $medicalJournal->delete();
+
+            $this->cleanupFolders($year);
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function cleanupFolders($year)
+    {
+        $yearPath = "medical-journals/{$year}";
+        $rootPath = "medical-journals";
+
+        if (Storage::disk('public')->exists($yearPath)) {
+            $files = Storage::disk('public')->allFiles($yearPath);
+            if (empty($files)) {
+                Storage::disk('public')->deleteDirectory($yearPath);
+            }
+        }
+
+        if (Storage::disk('public')->exists($rootPath)) {
+            $subFolders = Storage::disk('public')->directories($rootPath);
+            $rootFiles = Storage::disk('public')->files($rootPath);
+
+            if (empty($subFolders) && empty($rootFiles)) {
+                Storage::disk('public')->deleteDirectory($rootPath);
+            }
         }
     }
 
@@ -125,7 +164,7 @@ class MedicalJournalController extends Controller
 
     public function servePdf($path, $year, $filename)
     {
-        $storagePath = storage_path("app/public/journals/{$year}/{$filename}");
+        $storagePath = storage_path("app/public/medical-journals/{$year}/{$filename}");
 
         abort_if(!file_exists($storagePath), 404);
 

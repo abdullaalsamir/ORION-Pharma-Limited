@@ -37,7 +37,7 @@ Route::prefix('admin')
         Route::get('/menus', [MenuController::class, 'index'])->name('menus');
         Route::post('/menus', [MenuController::class, 'store'])->name('menus.store');
         Route::put('/menus/{menu}', [MenuController::class, 'update'])->name('menus.update');
-        Route::delete('/menus/{menu}', [MenuController::class, 'destroy'])->name('menus.delete');
+        Route::delete('/menus/{menu}', [MenuController::class, 'delete'])->name('menus.delete');
         Route::post('/menus/update-order', [MenuController::class, 'updateOrder'])->name('menus.update-order');
 
         Route::get('/pages', [MenuController::class, 'pages'])->name('pages');
@@ -48,12 +48,12 @@ Route::prefix('admin')
         Route::get('/banners/get-for-editor/{menu}', [BannerController::class, 'getBannersForEditor']);
         Route::post('/banners/upload/{menu}', [BannerController::class, 'store'])->name('banners.upload');
         Route::match(['post', 'put'], '/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
-        Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.delete');
+        Route::delete('/banners/{banner}', [BannerController::class, 'delete'])->name('banners.delete');
 
         Route::get('/sliders', [SliderController::class, 'index'])->name('sliders.index');
         Route::post('/sliders', [SliderController::class, 'store'])->name('sliders.store');
         Route::put('/sliders/{slider}', [SliderController::class, 'update'])->name('sliders.update');
-        Route::delete('/sliders/{slider}', [SliderController::class, 'destroy'])->name('sliders.delete');
+        Route::delete('/sliders/{slider}', [SliderController::class, 'delete'])->name('sliders.delete');
         Route::post('/sliders/update-order', [SliderController::class, 'updateOrder'])->name('sliders.update-order');
 
         Route::prefix('products-actions')->name('products.')->group(function () {
@@ -94,7 +94,7 @@ Route::prefix('admin')
             Route::post('/update-order', [BoardDirectorController::class, 'updateOrder'])->name('update-order');
         });
 
-        Route::prefix('journal-actions')->name('journals.')->group(function () {
+        Route::prefix('journal-actions')->name('medical-journals.')->group(function () {
             Route::post('/store', [MedicalJournalController::class, 'store'])->name('store');
             Route::put('/{medicalJournal}', [MedicalJournalController::class, 'update'])->name('update');
             Route::delete('/{medicalJournal}', [MedicalJournalController::class, 'delete'])->name('delete');

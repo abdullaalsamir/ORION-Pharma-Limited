@@ -155,7 +155,7 @@ class BannerController extends Controller
         imagedestroy($dst);
     }
 
-    public function destroy(Banner $banner)
+    public function delete(Banner $banner)
     {
         Storage::disk('public')->delete($banner->file_path);
         $banner->delete();

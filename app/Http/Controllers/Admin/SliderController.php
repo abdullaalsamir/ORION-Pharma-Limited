@@ -106,7 +106,7 @@ class SliderController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function destroy(Slider $slider)
+    public function delete(Slider $slider)
     {
         $currentOrder = $slider->order;
 

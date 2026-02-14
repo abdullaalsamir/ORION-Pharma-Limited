@@ -122,7 +122,7 @@
                                 <div class="flex items-center gap-3 shrink-0 px-4">
                                     <a href="{{ $fileUrl }}" target="_blank"
                                         class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-orion-blue hover:bg-orion-blue hover:text-white font-bold text-xs transition-all duration-300 border border-slate-200 hover:border-orion-blue"
-                                        title="View Report">
+                                        title="View Announcement">
                                         <i class="fa-solid fa-eye text-[10px]"></i>
                                         View
                                     </a>

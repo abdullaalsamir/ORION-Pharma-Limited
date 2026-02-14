@@ -30,9 +30,10 @@
                         </div>
 
                         <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-4 self-start">
-                            <span class="font-bold text-slate-700 text-sm truncate tracking-tight mt-1">{{ $item->name }}</span>
                             <span
-                                class="text-admin-blue font-bold text-[11px] truncate tracking-wider">{{ $item->designation }}</span>
+                                class="capitalize font-semibold text-slate-700 text-sm truncate tracking-tight mt-1">{{ $item->name }}</span>
+                            <span
+                                class="text-admin-blue font-semibold text-[11px] truncate tracking-wider">{{ $item->designation }}</span>
                             <p class="text-[11px] text-slate-400 line-clamp-3 mt-1">{{ strip_tags($item->description) }}
                             </p>
                         </div>

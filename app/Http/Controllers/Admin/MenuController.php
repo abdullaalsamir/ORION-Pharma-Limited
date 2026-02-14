@@ -78,7 +78,7 @@ class MenuController extends Controller
         return back()->with('success', 'Menu updated successfully');
     }
 
-    public function destroy(Menu $menu)
+    public function delete(Menu $menu)
     {
         $oldOrder = $menu->order;
         $parentId = $menu->parent_id;

@@ -281,7 +281,7 @@ export function initBannersPage() {
     };
 
     window.deleteBannerImage = (id) => {
-        if (confirm('Delete banner?')) fetch(`/admin/banners/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')));
+        if (confirm('Delete this Banner Image?')) fetch(`/admin/banners/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')));
     };
 }
 
@@ -478,8 +478,8 @@ export function initProductsPage() {
             .catch(() => showInlineError('p_trade_name', 'prodNameError', "Trade name already exists."));
     };
 
-    window.deleteGeneric = (id) => { if (confirm('Delete Generic?')) fetch(`/admin/products-actions/generic-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
-    window.deleteProduct = (id) => { if (confirm('Delete Product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
+    window.deleteGeneric = (id) => { if (confirm('Delete this Generic?')) fetch(`/admin/products-actions/generic-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
+    window.deleteProduct = (id) => { if (confirm('Delete this Product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
 }
 
 function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
@@ -545,7 +545,7 @@ export function initCSRPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteCsr = (id) => { if(confirm('Delete?')) fetch(`/admin/csr-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+    window.deleteCsr = (id) => { if(confirm('Delete this CSR?')) fetch(`/admin/csr-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initNewsPage() {
@@ -588,7 +588,7 @@ export function initNewsPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteNews = (id) => { if(confirm('Delete?')) fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+    window.deleteNews = (id) => { if(confirm('Delete this News?')) fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 window.handleNewsPreview = function (input, previewId, fileNameId) {
@@ -642,21 +642,48 @@ export function initDirectorsPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteDirector = (id) => { if(confirm('Delete?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+    window.deleteDirector = (id) => { if(confirm('Delete this Profile?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initJournalsPage() {
     setupModule('medical-journals', '/admin/journal-actions/store', '/admin/journal-actions', 'curJId');
+    document.querySelectorAll('.journal-sortable-list').forEach(list => {
+        new Sortable(list, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'bg-slate-50',
+            onEnd: () => {
+                let orders = [];
+                list.querySelectorAll('.sortable-item').forEach((el, index) => {
+                    orders.push({ id: el.dataset.id, order: index + 1 });
+                });
+                fetch('/admin/journal-actions/update-order', {
+                    method: 'POST',
+                    headers: { 
+                        ...fetchHeaders(), 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ orders })
+                })
+                .then(handleResponse)
+                .catch(err => console.error("Sort order update failed:", err));
+            }
+        });
+    });
     window.handlePdfSelect = (input, isEdit = false) => {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+            const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/_/g, ' ');
             if (isEdit) {
-                document.getElementById('editPdfStatus').innerText = file.name;
-                document.getElementById('editPdfStatus').classList.add('text-admin-blue');
+                const statusEl = document.getElementById('editPdfStatus');
+                if (statusEl) {
+                    statusEl.innerText = file.name;
+                    statusEl.classList.add('text-admin-blue');
+                }
             } else {
-                document.getElementById('pdfStatusText').innerText = file.name;
+                const statusEl = document.getElementById('pdfStatusText');
                 const titleInput = document.getElementById('titleInput');
+                if (statusEl) statusEl.innerText = file.name;
                 if (titleInput && !titleInput.value) titleInput.value = cleanName;
             }
         }
@@ -673,10 +700,18 @@ export function initJournalsPage() {
         document.getElementById('editTitle').value = item.title;
         document.getElementById('editYear').value = item.year;
         document.getElementById('editActive').checked = item.is_active == 1;
+        
+        const editStatus = document.getElementById('editPdfStatus');
+        if (editStatus) {
+            editStatus.innerText = "Click to replace PDF";
+            editStatus.classList.remove('text-admin-blue');
+        }
+
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.deleteJournal = (id) => { if(confirm('Delete this Medical Journal?')) fetch(`/admin/journal-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initReportModule() {
@@ -703,7 +738,7 @@ export function initReportModule() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteReportItem = (id) => { if(confirm('Delete?')) fetch(`${base}/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+    window.deleteReportItem = (id) => { if(confirm('Delete this Report?')) fetch(`${base}/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initPagesPage() {
@@ -766,7 +801,7 @@ export function initPagesPage() {
 
 export function initComplaintsPage() {
     if (!window.location.pathname.includes('product-complaint')) return;
-    window.deleteComplaint = (id) => { if(confirm('Delete?')) fetch(`/admin/product-complaint-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href, { action: "replace" })); };
+    window.deleteComplaint = (id) => { if(confirm('Delete this Complaint?')) fetch(`/admin/product-complaint-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href, { action: "replace" })); };
 }
 
 export function initFooterPage() {

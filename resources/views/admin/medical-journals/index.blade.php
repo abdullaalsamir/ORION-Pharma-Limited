@@ -16,23 +16,23 @@
 
         <div class="admin-card-body bg-slate-50/20 custom-scrollbar">
             <div class="space-y-4">
-                @forelse($groupedJournals as $year => $journals)
+                @forelse($groupedJournals as $year => $medicalJournals)
                     <div class="journal-sortable-list p-4 rounded-3xl {{ $loop->index % 2 == 0 ? 'bg-red-50/50 border-red-100' : 'bg-green-50/50 border-green-100' }} border space-y-3"
                         data-year="{{ $year }}">
 
                         <div class="flex items-center gap-2 mb-2 ml-1">
                             <span
-                                class="text-xl font-black uppercase tracking-[0.2em] {{ $loop->index % 2 == 0 ? 'text-red-500' : 'text-green-500' }}">
+                                class="text-xl font-bold uppercase tracking-[0.1em] {{ $loop->index % 2 == 0 ? 'text-red-500' : 'text-green-500' }}">
                                 {{ $year }}
                             </span>
                         </div>
 
-                        @foreach($journals as $j)
+                        @foreach($medicalJournals as $mj)
                             <div class="sortable-item group bg-white border border-slate-200 rounded-2xl p-3 flex items-center hover:border-admin-blue transition-all"
-                                data-id="{{ $j->id }}">
+                                data-id="{{ $mj->id }}">
 
                                 <div
-                                    class="drag-handle w-8 flex justify-center {{ count($journals) > 1 ? 'cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue' : 'opacity-0 pointer-events-none' }}">
+                                    class="drag-handle w-8 flex justify-center {{ count($medicalJournals) > 1 ? 'cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue' : 'opacity-0 pointer-events-none' }}">
                                     <i class="fas fa-arrows-up-down-left-right"></i>
                                 </div>
 
@@ -41,27 +41,27 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-2">
-                                    <span class="font-bold text-slate-700 text-sm truncate tracking-tight">
-                                        {{ $j->title }}
+                                    <span class="font-semibold text-slate-700 text-sm truncate tracking-tight">
+                                        {{ $mj->title }}
                                     </span>
                                 </div>
 
                                 <div class="shrink-0 px-4 flex items-center gap-3">
-                                    <a href="{{ url($menu->full_slug . '/' . $j->year . '/' . $j->filename) }}" target="_blank"
+                                    <a href="{{ url($menu->full_slug . '/' . $mj->year . '/' . $mj->filename) }}" target="_blank"
                                         class="badge badge-info hover:bg-sky-100 transition-colors">
                                         <i class="fas fa-eye opacity-70"></i>
                                     </a>
-                                    <span class="badge {{ $j->is_active ? 'badge-success' : 'badge-danger' }}">
-                                        {{ $j->is_active ? 'Active' : 'Inactive' }}
+                                    <span class="badge {{ $mj->is_active ? 'badge-success' : 'badge-danger' }}">
+                                        {{ $mj->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </div>
 
                                 <div class="flex items-center border-l pl-4 border-slate-100 space-x-1">
                                     <button class="btn-icon w-8 p-1.5!"
-                                        onclick="openJournalEditModal({{ json_encode($j) }}, '{{ $menu->full_slug }}')">
+                                        onclick="openJournalEditModal({{ json_encode($mj) }}, '{{ $menu->full_slug }}')">
                                         <i class="fas fa-pencil text-xs"></i>
                                     </button>
-                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteJournal({{ $j->id }})">
+                                    <button class="btn-danger w-8 p-1.5!" onclick="deleteJournal({{ $mj->id }})">
                                         <i class="fas fa-trash-can text-xs"></i>
                                     </button>
                                 </div>
@@ -87,13 +87,13 @@
                         class="fas fa-times text-xl"></i></button>
             </div>
 
-            <form action="{{ route('admin.journals.store') }}" method="POST" enctype="multipart/form-data"
+            <form action="{{ route('admin.medical-journals.store') }}" method="POST" enctype="multipart/form-data"
                 class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
                 <div class="flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 block mb-1">Select PDF File</label>
                     <input type="file" name="pdf" id="pdfInput" accept="application/pdf" required class="hidden"
-                        onchange="handleJournalPdfSelect(this)">
+                        onchange="handlePdfSelect(this)">
                     <div class="aspect-10/2 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue transition-all group"
                         id="pdfPlaceholder" onclick="document.getElementById('pdfInput').click()">
                         <i
@@ -113,7 +113,7 @@
                     <div class="col-span-4 flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Publication Year</label>
                         <select name="year" required class="input-field w-full">
-                            @for($y = date('Y'); $y >= 2000; $y--)
+                            @for($y = date('Y'); $y >= 1985; $y--)
                                 <option value="{{ $y }}">{{ $y }}</option>
                             @endfor
                         </select>
@@ -161,7 +161,7 @@
                     <div class="col-span-4 flex flex-col gap-1">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Year</label>
                         <select name="year" id="editYear" required class="input-field w-full">
-                            @for($y = date('Y'); $y >= 2000; $y--)
+                            @for($y = date('Y'); $y >= 1985; $y--)
                                 <option value="{{ $y }}">{{ $y }}</option>
                             @endfor
                         </select>
