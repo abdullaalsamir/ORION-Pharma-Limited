@@ -25,7 +25,7 @@ class MedicalJournalController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pdf' => 'required|mimes:pdf|max:51200',
+            'pdf' => 'required|mimes:pdf|max:102400',
             'title' => 'required|string',
             'year' => 'required|integer'
         ]);
@@ -53,7 +53,7 @@ class MedicalJournalController extends Controller
     public function update(Request $request, MedicalJournal $medicalJournal)
     {
         $request->validate([
-            'pdf' => 'nullable|mimes:pdf|max:51200',
+            'pdf' => 'nullable|mimes:pdf|max:102400',
             'title' => 'required|string',
             'year' => 'required|integer'
         ]);
@@ -168,10 +168,18 @@ class MedicalJournalController extends Controller
 
         abort_if(!file_exists($storagePath), 404);
 
-        return response()->file($storagePath, [
-            'Content-Type' => 'application/pdf',
-            'Cache-Control' => 'public, max-age=86400',
-        ]);
+        $journal = MedicalJournal::where('year', $year)
+            ->where('filename', $filename)
+            ->firstOrFail();
+
+        return response()->download(
+            $storagePath,
+            $journal->title . '.pdf',
+            [
+                'Content-Type' => 'application/pdf',
+                'Cache-Control' => 'public, max-age=86400',
+            ]
+        );
     }
 
     public function frontendIndex($menu)

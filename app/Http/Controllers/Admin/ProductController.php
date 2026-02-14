@@ -107,7 +107,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'trade_name' => 'required',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200'
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400'
         ]);
 
         if (Product::where('generic_id', $generic->id)->where('trade_name', $request->trade_name)->exists()) {

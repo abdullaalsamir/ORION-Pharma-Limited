@@ -24,7 +24,7 @@ class BoardDirectorController extends Controller
             'name' => 'required|string|max:100',
             'designation' => 'required|string|max:100',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400',
         ]);
 
         try {
@@ -60,7 +60,7 @@ class BoardDirectorController extends Controller
             'name' => 'required|string|max:100',
             'designation' => 'required|string|max:100',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:102400',
             'is_active' => 'required'
         ]);
 

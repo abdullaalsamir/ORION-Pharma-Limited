@@ -645,7 +645,7 @@ export function initDirectorsPage() {
     window.deleteDirector = (id) => { if(confirm('Delete this Profile?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
-export function initJournalsPage() {
+export function initMedicalJournalsPage() {
     setupModule('medical-journals', '/admin/journal-actions/store', '/admin/journal-actions', 'curJId');
     document.querySelectorAll('.journal-sortable-list').forEach(list => {
         new Sortable(list, {

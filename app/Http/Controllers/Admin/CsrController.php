@@ -51,7 +51,7 @@ class CsrController extends Controller
             'title' => 'required|string',
             'description' => 'required|string',
             'csr_date' => 'required|date',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400',
         ]);
 
         try {
@@ -89,7 +89,7 @@ class CsrController extends Controller
             'title' => 'required|string',
             'description' => 'required|string',
             'csr_date' => 'required|date',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:102400',
             'is_active' => 'required'
         ]);
 

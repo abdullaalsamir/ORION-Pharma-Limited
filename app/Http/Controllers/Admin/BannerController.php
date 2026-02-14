@@ -29,7 +29,7 @@ class BannerController extends Controller
     public function store(Request $request, Menu $menu)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:51200'
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400'
         ]);
 
         try {
@@ -61,7 +61,7 @@ class BannerController extends Controller
     public function update(Request $request, Banner $banner)
     {
         $request->validate([
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:51200',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:102400',
             'is_active' => 'required'
         ]);
 

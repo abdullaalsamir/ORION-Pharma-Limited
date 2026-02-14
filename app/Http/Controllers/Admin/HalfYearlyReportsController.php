@@ -28,7 +28,7 @@ class HalfYearlyReportsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pdf' => 'required|mimes:pdf|max:51200',
+            'pdf' => 'required|mimes:pdf|max:102400',
             'title' => 'required|string',
             'publication_date' => 'required|date',
             'description' => 'nullable|string|max:500'
@@ -57,7 +57,7 @@ class HalfYearlyReportsController extends Controller
     public function update(Request $request, HalfYearlyReports $halfYearlyReports)
     {
         $request->validate([
-            'pdf' => 'nullable|mimes:pdf|max:51200',
+            'pdf' => 'nullable|mimes:pdf|max:102400',
             'title' => 'required|string',
             'publication_date' => 'required|date',
             'description' => 'nullable|string|max:500'

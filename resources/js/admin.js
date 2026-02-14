@@ -15,7 +15,7 @@ import {
     initCSRPage,
     initNewsPage,
     initDirectorsPage,
-    initJournalsPage,
+    initMedicalJournalsPage,
     initComplaintsPage,
     initReportModule,
     initFooterPage
@@ -37,7 +37,7 @@ document.addEventListener('turbo:load', () => {
     initCSRPage();
     initNewsPage();
     initDirectorsPage();
-    initJournalsPage();
+    initMedicalJournalsPage();
     initReportModule();
     initComplaintsPage();
     initFooterPage();
