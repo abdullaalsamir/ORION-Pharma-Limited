@@ -29,7 +29,7 @@
         <div id="main-smooth-wrapper" class="smooth-container">
             <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                 @foreach($products as $p)
-                    <a href="{{ url('products/' . $p->generic->slug . '/' . Str::slug($p->trade_name)) }}"
+                    <a href="{{ url('products/' . $p->generic->slug . '/' . $p->slug) }}"
                         class="index-card group bg-white rounded-xl overflow-hidden"
                         data-generic="{{ strtoupper($p->generic->name) }}" data-trade="{{ strtoupper($p->trade_name) }}">
 
@@ -39,10 +39,10 @@
                         </div>
 
                         <div class="p-6 flex flex-col grow">
-                            <span class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mb-1">
+                            <span class="text-xs font-semibold text-orion-blue uppercase tracking-wider block mb-1">
                                 {{ $p->generic->name }}
                             </span>
-                            <h3 class="text-xl font-bold text-slate-900">
+                            <h3 class="text-xl font-bold text-slate-700">
                                 {{ $p->trade_name }}
                             </h3>
                         </div>

@@ -20,31 +20,34 @@
                         </div>
                         <div class="px-8 pt-4 pb-8">
                             <h2
-                                class="text-left uppercase text-xl font-bold text-orion-blue border-b border-slate-200 mb-4 pb-2">
+                                class="text-left! uppercase text-xl font-bold text-orion-blue border-b border-slate-200 mb-4 pb-2">
                                 {{ $product->trade_name }}
                             </h2>
                             <div class="space-y-4">
                                 <div class="flex items-start gap-3">
                                     <div>
-                                        <span class="block text-[10px] uppercase font-bold text-slate-400">Generic
+                                        <span
+                                            class="block text-sm uppercase font-semibold text-slate-400 tracking-wider text-justify">Generic
                                             Name</span>
-                                        <span class="font-bold text-slate-700">{{ $product->generic->name }}</span>
+                                        <span
+                                            class="text-base font-semibold text-slate-700 text-justify">{{ $product->generic->name }}</span>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <div>
                                         <span
-                                            class="block text-[10px] uppercase font-bold text-slate-400">Preparation</span>
-                                        <span class="font-bold text-slate-700">
+                                            class="block text-sm uppercase font-semibold text-slate-400 tracking-wider text-justify mt-2">Preparation</span>
+                                        <span class="text-base text-slate-700 text-justify">
                                             {!! nl2br($product->preparation ?? 'N/A') !!}
                                         </span>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
                                     <div>
-                                        <span class="block text-[10px] uppercase font-bold text-slate-400">Therapeutic
+                                        <span
+                                            class="block text-sm uppercase font-semibold text-slate-400 tracking-wider text-justify mt-2">Therapeutic
                                             Class</span>
-                                        <span class="font-bold text-slate-700">
+                                        <span class="text-base text-slate-700 text-justify">
                                             {!! nl2br($product->therapeutic_class ?? 'N/A') !!}</span>
                                     </div>
                                 </div>
@@ -81,9 +84,9 @@
                                 @foreach($fields as $key => $label)
                                     @if(!empty($product->$key))
                                         <div class="relative">
-                                            <h4 class="text-orion-blue font-black uppercase text-xs tracking-widest mb-1">{{ $label }}
+                                            <h4 class="text-orion-blue font-bold uppercase text-sm tracking-wider mb-1">{{ $label }}
                                             </h4>
-                                            <div class="product-key prose prose-slate max-w-none">
+                                            <div class="product-key prose prose-slate text-justify max-w-none">
                                                 {!! nl2br($product->$key) !!}
                                             </div>
                                         </div>

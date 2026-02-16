@@ -53,7 +53,7 @@ class ProductController extends Controller
         }
 
         $oldSlug = $generic->slug;
-        $newSlug = \Str::slug($request->name);
+        $newSlug = Generic::generateSlug($request->name);
 
         if ($oldSlug !== $newSlug) {
             $oldPath = "products/{$oldSlug}";
@@ -116,19 +116,23 @@ class ProductController extends Controller
 
         try {
             $file = $request->file('image');
-            $fileName = \Str::slug($request->trade_name) . '.webp';
-            $path = "products/{$generic->slug}/{$fileName}";
 
-            if (!Storage::disk('public')->exists("products/{$generic->slug}")) {
-                Storage::disk('public')->makeDirectory("products/{$generic->slug}");
+            $slug = Product::generateUniqueSlug($request->trade_name);
+            $fileName = $slug . '.webp';
+            $dir = "products/{$generic->slug}";
+            $path = "{$dir}/{$fileName}";
+
+            if (!Storage::disk('public')->exists($dir)) {
+                Storage::disk('public')->makeDirectory($dir);
             }
 
             $this->processProductImage($file->getRealPath(), storage_path("app/public/{$path}"));
 
-            Product::create([
+            $product = Product::create([
                 'trade_name' => $request->trade_name,
-                'image_path' => $path,
+                'slug' => $slug,
                 'generic_id' => $generic->id,
+                'image_path' => $path,
                 'is_active' => 1,
             ] + $request->except(['image', '_token']));
 
@@ -146,7 +150,15 @@ class ProductController extends Controller
             ? $request->input('generic_id')
             : $product->generic_id;
         $newTradeName = $request->trade_name;
-        $newFileName = \Str::slug($newTradeName) . '.webp';
+        $product->trade_name = $newTradeName;
+        $product->generic_id = $newGenericId;
+        $product->is_active = $request->has('is_active') ? 1 : 0;
+        $product->save();
+
+        $product->refresh();
+
+        $newFileName = $product->slug . '.webp';
+
 
         if ($newGenericId) {
             $exists = Product::where('generic_id', $newGenericId)->where('trade_name', $newTradeName)->where('id', '!=', $product->id)->exists();
@@ -298,9 +310,10 @@ class ProductController extends Controller
             $menu = Menu::where('slug', 'products')->first();
         }
 
-        $product = Product::whereHas('generic', fn($q) => $q->where('slug', $generic_slug))
-            ->where(\DB::raw('LOWER(REPLACE(trade_name, " ", "-"))'), $product_slug)
-            ->firstOrFail();
+        $product = Product::whereHas(
+            'generic',
+            fn($q) => $q->where('slug', $generic_slug)
+        )->where('slug', $product_slug)->firstOrFail();
 
         return view('products.show', compact('product', 'menu'));
     }
