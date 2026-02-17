@@ -91,7 +91,6 @@ footer h1::after {
 .filter-mode-btn.active {
     background: var(--color-orion-blue);
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 84, 166, 0.2);
 }
 
 .letter-btn {
@@ -357,7 +356,7 @@ footer h1::after {
 input:focus,
 textarea:focus,
 select:focus {
-    border-color: #999 !important;
+    border-color: var(--color-orion-blue) !important;
     outline: none !important;
     box-shadow: none !important;
 }

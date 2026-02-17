@@ -24,10 +24,10 @@
                     </div>
 
                     <div class="p-6 flex flex-col grow">
-                        <span class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mb-1">
+                        <span class="text-xs font-semibold text-orion-blue uppercase tracking-wider block mb-3">
                             {{ $p->generic->name }}
                         </span>
-                        <h3 class="text-lg font-bold text-slate-900 group-hover:text-orion-blue transition-colors">
+                        <h3 class="text-xl font-semibold text-slate-900">
                             {{ $p->trade_name }}
                         </h3>
                     </div>

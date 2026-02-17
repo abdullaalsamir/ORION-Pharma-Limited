@@ -35,17 +35,17 @@
                             </div>
 
                             <div class="p-6 flex flex-col grow">
-                                <span class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mb-3">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">
                                     {{ $pinnedNews->news_date->format('d F, Y') }}
                                 </span>
-                                <h3 class="text-xl font-bold text-slate-900 mb-3 line-clamp-2">
+                                <h3 class="text-xl font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-3 mb-3">
                                     {{ $pinnedNews->title }}
                                 </h3>
-                                <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-6">
+                                <p class="text-slate-500 text-base leading-relaxed line-clamp-3">
                                     {{ $pinnedNews->description }}
                                 </p>
                                     
-                                <div class="mt-auto">
+                                <div class="mt-4">
                                     @if($pinnedNews->file_type === 'image')
                                         <a href="{{ url($newsMenu->full_slug . '/' . $pinnedNews->slug) }}"
                                             class="text-orion-blue font-bold text-sm flex items-center gap-2 group/btn">
@@ -81,18 +81,18 @@
                             <a href="{{ url($newsMenu->full_slug . '/' . $item->slug) }}"
                                 class="group bg-white border border-slate-200 rounded-xl p-3 flex items-center hover:border-orion-blue transition-all">
                                     
-                                <div class="w-40 aspect-video rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                                <div class="w-50 aspect-video rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                                     <img src="{{ $fileUrl }}" class="w-full h-full object-cover">
                                 </div>
 
                                 <div class="flex-1 min-w-0 ml-5 self-start">
-                                    <h4 class="font-bold text-slate-800 group-hover:text-orion-blue transition-colors truncate text-sm mt-1">
+                                    <h4 class="text-lg font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
                                         {{ $item->title }}
                                     </h4>
-                                    <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                                    <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
                                         {{ $item->description }}
                                     </p>
-                                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-orion-blue uppercase tracking-wider mt-2">
+                                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
                                         {{ $item->news_date->format('d F, Y') }}
                                     </div>
                                 </div>
@@ -103,18 +103,18 @@
                             </a>
                         @else
                             <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center">
-                                <div class="w-40 aspect-video rounded-lg overflow-hidden bg-red-50 shrink-0 flex items-center justify-center border border-red-100">
+                                <div class="w-50 aspect-video rounded-lg overflow-hidden bg-red-50 shrink-0 flex items-center justify-center border border-red-100">
                                     <i class="fas fa-file-pdf text-3xl text-red-500"></i>
                                 </div>
 
                                 <div class="flex-1 min-w-0 ml-5 self-start">
-                                    <h4 class="font-bold text-slate-800 text-sm mt-1">
+                                    <h4 class="text-lg font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
                                         {{ $item->title }}
                                     </h4>
-                                    <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                                    <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
                                         {{ $item->description }}
                                     </p>
-                                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-orion-blue uppercase tracking-wider mt-2">
+                                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
                                         {{ $item->news_date->format('d F, Y') }}
                                     </div>
                                 </div>

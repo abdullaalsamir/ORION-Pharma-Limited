@@ -38,10 +38,10 @@
                     </div>
 
                     <div class="p-6 flex flex-col grow">
-                        <span class="text-xs font-semibold text-orion-blue uppercase tracking-wider block mb-1">
+                        <span class="text-xs font-semibold text-orion-blue uppercase tracking-wider block mb-3">
                             {{ $p->generic->name }}
                         </span>
-                        <h3 class="text-xl font-bold text-slate-700">
+                        <h3 class="text-xl font-semibold text-slate-900">
                             {{ $p->trade_name }}
                         </h3>
                     </div>

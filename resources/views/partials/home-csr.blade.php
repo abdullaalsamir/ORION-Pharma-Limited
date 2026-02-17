@@ -22,14 +22,14 @@
                 </div>
 
                 <div class="p-6 flex flex-col grow">
-                    <span class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mb-3">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">
                         {{ $item->csr_date->format('d F, Y') }}
                     </span>
                     <h3
-                        class="text-lg font-bold text-slate-900 mb-3 group-hover:text-orion-blue transition-colors line-clamp-2">
+                        class="text-xl font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-3 mb-3">
                         {{ $item->title }}
                     </h3>
-                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-3">
+                    <p class="text-slate-500 text-base leading-relaxed line-clamp-3">
                         {{ $item->description }}
                     </p>
                 </div>

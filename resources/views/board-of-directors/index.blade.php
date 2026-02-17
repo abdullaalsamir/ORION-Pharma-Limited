@@ -13,7 +13,7 @@
                     </div>
 
                     <div class="px-6 py-4 flex flex-col grow text-left">
-                        <h3 class="text-xl font-bold text-slate-900">
+                        <h3 class="text-xl font-bold text-slate-700">
                             {{ $item->name }}
                         </h3>
                         <p class="text-[10px] font-bold text-orion-blue uppercase tracking-widest block mt-2">

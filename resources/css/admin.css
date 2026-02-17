@@ -9,7 +9,7 @@
 
 @layer base {
   body {
-    @apply font-sans text-base bg-slate-50 text-slate-900 antialiased h-screen overflow-hidden;
+    @apply font-sans text-base bg-slate-50 text-slate-700 antialiased h-screen overflow-hidden;
   }
   h1 {
     @apply text-xl font-bold text-slate-800 tracking-tight;

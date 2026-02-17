@@ -27,10 +27,10 @@
                                 {{ $pinned->news_date->format('d F, Y') }}
                             </span>
                             <h3
-                                class="text-xl font-bold text-slate-800 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-3 mb-3">
+                                class="text-xl font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-3 mb-3">
                                 {{ $pinned->title }}
                             </h3>
-                            <p class="text-slate-600 text-base leading-relaxed line-clamp-3">
+                            <p class="text-slate-500 text-base leading-relaxed line-clamp-3">
                                 {{ html_entity_decode(strip_tags($pinned->description)) }}
                             </p>
                                 
@@ -75,10 +75,10 @@
                             </div>
 
                             <div class="flex-1 min-w-0 ml-5 self-start">
-                                <h4 class="text-base font-bold text-slate-800 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
+                                <h4 class="text-lg font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
                                     {{ $item->title }}
                                 </h4>
-                                <p class="text-slate-600 text-base leading-relaxed line-clamp-1 mt-3">
+                                <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
                                     {{ html_entity_decode(strip_tags($item->description)) }}
                                 </p>
                                 <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
@@ -98,10 +98,10 @@
                             </div>
 
                             <div class="flex-1 min-w-0 ml-5 self-start">
-                                <h4 class="text-base font-bold text-slate-800 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
+                                <h4 class="text-lg font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
                                     {{ $item->title }}
                                 </h4>
-                                <p class="text-slate-600 text-base leading-relaxed line-clamp-1 mt-3">
+                                <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
                                     {{ html_entity_decode(strip_tags($item->description)) }}
                                 </p>
                                 <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">

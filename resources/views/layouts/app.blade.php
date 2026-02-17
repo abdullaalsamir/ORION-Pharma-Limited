@@ -31,7 +31,7 @@
                     </div>
 
                     @if(!empty($menu->content))
-                        <div class="page-content prose max-w-none text-slate-700 leading-relaxed">
+                        <div class="page-content prose max-w-none text-slate-700 text-justify leading-relaxed">
                             {!! $menu->content !!}
                         </div>
                     @endif

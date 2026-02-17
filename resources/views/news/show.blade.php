@@ -31,7 +31,7 @@
             </div>
 
             <div class="mt-8 pt-8 border-t border-slate-200 flex items-center gap-4">
-                <span class="font-bold text-slate-500">Share this news:</span>
+                <span class="font-semibold text-slate-500">Share this news:</span>
                 <div class="flex gap-2">
                     <a href="#"
                         class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500 border border-slate-200">
@@ -48,7 +48,7 @@
         <aside class="lg:col-span-4">
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden sticky top-27.5">
                 <div class="p-6 border-b border-slate-200 bg-slate-50/50">
-                    <span class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                    <span class="text-xl font-bold text-slate-700 flex items-center gap-3">
                         <span class="flex-none w-1 h-5 bg-orion-blue rounded-full"></span>
                         Recent News
                     </span>
@@ -80,11 +80,10 @@
 
                             <div class="ml-4">
                                 <span
-                                    class="text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug -mt-0.75 mb-1">
+                                    class="text-sm font-semibold text-slate-700 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug -mt-0.75 mb-1">
                                     {{ $rel->title }}
                                 </span>
-                                <div
-                                    class="flex items-center gap-2 text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                                <div class="flex items-center gap-2 text-xs text-slate-400 uppercase tracking-wider">
                                     {{ $rel->news_date->format('d F, Y') }}
                                 </div>
                             </div>
