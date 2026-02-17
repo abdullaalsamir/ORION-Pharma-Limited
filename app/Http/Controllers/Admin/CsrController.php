@@ -256,7 +256,7 @@ class CsrController extends Controller
         $items = CsrItem::where('is_active', 1)
             ->orderBy('csr_date', 'desc')
             ->orderBy('order', 'desc')
-            ->get();
+            ->paginate(9);
 
         return view('csr.index', compact('items', 'menu'));
     }

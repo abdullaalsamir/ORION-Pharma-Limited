@@ -311,7 +311,7 @@ class NewsController extends Controller
         $items = NewsItem::where('is_active', 1)
             ->orderBy('news_date', 'desc')
             ->orderBy('order', 'desc')
-            ->get();
+            ->paginate(5);
 
         return view('news.index', compact('items', 'menu', 'pinned'));
     }

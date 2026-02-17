@@ -10,7 +10,7 @@
             <span class="capitalize line-clamp-1">{{ $product->trade_name }}</span>
         </nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4">
                 <div class="sticky top-27.5">
                     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden space-y-6">

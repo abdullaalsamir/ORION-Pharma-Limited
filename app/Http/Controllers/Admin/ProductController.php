@@ -299,7 +299,7 @@ class ProductController extends Controller
         $products = Product::where('is_active', 1)
             ->whereHas('generic', fn($q) => $q->where('is_active', 1))
             ->with('generic')
-            ->get();
+            ->paginate(9);
 
         return view('products.index', compact('products', 'menu'));
     }
