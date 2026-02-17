@@ -101,7 +101,7 @@
         <form action="{{ route('admin.footer.update') }}" method="POST" class="flex-1 flex flex-col overflow-hidden">
             @csrf
             <div id="ql-sortable" class="space-y-2 flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4">
-                @for($i = 0; $i < 7; $i++)
+                @for($i = 0; $i < 8; $i++)
                     @php $current = $footer->quick_links[$i] ?? null; @endphp
                     <div class="flex items-center gap-1 p-2 bg-slate-50 border border-slate-200 rounded-2xl">
                         <div

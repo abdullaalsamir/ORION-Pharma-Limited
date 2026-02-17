@@ -56,7 +56,7 @@ class PageController extends Controller
 
         $homeNews = \App\Models\NewsItem::where('is_active', 1)
             ->latest('news_date')
-            ->take(5)
+            ->take(10)
             ->get();
 
         return view('layouts.app', compact(

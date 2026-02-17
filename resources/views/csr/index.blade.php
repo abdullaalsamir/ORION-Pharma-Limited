@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('title', $menu->name)
+@section('meta_title', $menu->name)
+@section('meta_description', 'Discover the Corporate Social Responsibility (CSR) initiatives and projects of ORION Pharma Limited, making a positive impact on communities.')
+@section('meta_image', asset('images/logo.svg'))
+
 @section('content')
     <div id="main-smooth-wrapper" class="smooth-container">
         <div id="csr-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">

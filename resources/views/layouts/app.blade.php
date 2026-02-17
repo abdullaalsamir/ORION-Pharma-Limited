@@ -4,9 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ORION Pharma Limited</title>
+
+    <title>
+        @hasSection('title')
+            @yield('title') | ORION Pharma Limited
+        @else
+            ORION Pharma Limited
+        @endif
+    </title>
+
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="preload" as="image" href="{{ asset('images/logo.svg') }}">
+
+    <meta name="description" content="ORION Pharma Limited">
+
+    <meta property="og:title" content="@yield('meta_title', 'ORION Pharma Limited')">
+    <meta property="og:description" content="@yield('meta_description', 'ORION Pharma Limited')">
+    <meta property="og:image" content="@yield('meta_image', asset('images/logo.svg'))">
+    <meta property="og:url" content="{{ request()->fullUrl() }}">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('meta_title', 'ORION Pharma Limited')">
+    <meta name="twitter:description" content="@yield('meta_description', 'ORION Pharma Limited')">
+    <meta name="twitter:image" content="@yield('meta_image', asset('images/logo.svg'))">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

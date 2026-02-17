@@ -14,17 +14,17 @@
     $socialLinks = collect($footer->social_links ?? []);
 @endphp
 
-<footer class="bg-orion-blue text-gray-100 pt-8 pb-[10px]">
-    <div class="container mx-auto w-[90%] max-w-[1400px]">
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 mb-8">
+<footer class="bg-orion-blue text-gray-100 pt-8 pb-2.5">
+    <div class="container mx-auto w-[90%] max-w-350">
+        <div class="grid grid-cols-1 lg:grid-cols-20 gap-12 mb-8">
 
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-11">
                 <h1 class="border-b-2 border-white/30 pb-4">Contact Us</h1>
-                <div class="flex flex-col md:flex-row gap-8">
+                <div class="flex flex-col md:flex-row">
                     <div class="flex-1 space-y-5">
 
-                        <div class="space-y-1 opacity-90 min-h-[30px]">
-                            <h1 class="!normal-case tracking-normal mb-2">{{ $footer->company ?? '' }}</h1>
+                        <div class="space-y-1 opacity-90 min-h-7.5">
+                            <h1 class="normal-case! tracking-normal mb-2">{{ $footer->company ?? '' }}</h1>
                         </div>
 
                         <div class="flex items-start gap-4 opacity-90 hover:opacity-100 transition-opacity group">
@@ -60,7 +60,7 @@
                         </div>
                     </div>
 
-                    <div class="flex-1 min-h-[272px] rounded-lg overflow-hidden border border-white/10 opacity-90 mt-1">
+                    <div class="flex-1 min-h-68 rounded-lg overflow-hidden border border-white/10 opacity-90 mt-1">
                         @if($footer->map_url)
                             <iframe src="{{ $footer->map_url }}" width="100%" height="100%" style="border:0;"
                                 allowfullscreen="" loading="lazy"></iframe>
@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-1 lg:pl-8">
+            <div class="lg:col-span-5 lg:pl-8">
                 <h1 class="border-b-2 border-white/30 pb-4">Quick Links</h1>
                 <ul class="space-y-[11.5px]">
                     @foreach($quickLinks as $m)
@@ -84,7 +84,7 @@
                 </ul>
             </div>
 
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-4">
                 <h1 class="border-b-2 border-white/30 pb-4">Follow Us</h1>
                 <p class="text-[15px] mb-6 text-gray-200 opacity-90">{{ $footer->follow_us_desc ?? '' }}</p>
                 <div class="flex flex-wrap gap-4">
@@ -100,7 +100,7 @@
             </div>
         </div>
 
-        <div class="pt-[10px] border-t border-white/30">
+        <div class="pt-2.5 border-t border-white/30">
             <div class="text-center">
                 <p class="text-sm text-gray-300 leading-relaxed">
                     Copyright &copy; {{ date('Y') }}

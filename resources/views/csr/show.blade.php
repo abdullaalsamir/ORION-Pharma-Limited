@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('title', $item->title)
+@section('meta_title', $item->title)
+@section('meta_description', Str::limit(strip_tags($item->description), 150))
+@section('meta_image', url($menu->full_slug . '/' . basename($item->file_path)))
+
 @section('content')
     <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
         <nav class="flex items-center gap-2 text-sm font-medium text-slate-500">
@@ -30,17 +35,45 @@
                 {!! nl2br(e($item->description)) !!}
             </div>
 
+            @php
+                $shareUrl = urlencode(request()->fullUrl());
+                $shareTitle = urlencode($item->title);
+            @endphp
+
             <div class="mt-8 pt-8 border-t border-slate-200 flex items-center gap-4">
                 <span class="font-semibold text-slate-500">Share this impact:</span>
                 <div class="flex gap-2">
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500 border border-slate-200">
+
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white hover:border-orion-blue transition-all text-slate-500 border border-slate-200">
                         <i class="fa-brands fa-facebook-f"></i>
                     </a>
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white transition-all text-slate-500 border border-slate-200">
+
+                    <a href="https://twitter.com/intent/tweet?url={{ $shareUrl }}&text={{ $shareTitle }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white hover:border-orion-blue transition-all text-slate-500 border border-slate-200">
+                        <i class="fa-brands fa-x-twitter"></i>
+                    </a>
+
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ $shareUrl }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white hover:border-orion-blue transition-all text-slate-500 border border-slate-200">
                         <i class="fa-brands fa-linkedin-in"></i>
                     </a>
+
+                    <a href="https://t.me/share/url?url={{ $shareUrl }}&text={{ $shareTitle }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white hover:border-orion-blue transition-all text-slate-500 border border-slate-200">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+
+                    <a href="https://api.whatsapp.com/send?text={{ $shareTitle }}%20{{ $shareUrl }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-orion-blue hover:text-white hover:border-orion-blue transition-all text-slate-500 border border-slate-200">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+
                 </div>
             </div>
         </article>
@@ -57,7 +90,7 @@
                 <div class="divide-y divide-slate-200">
                     @foreach($related as $rel)
                         <a href="{{ url($menu->full_slug . '/' . $rel->slug) }}"
-                            class="group flex p-5 hover:bg-slate-50 transition-colors">
+                            class="group flex p-5 hover:bg-blue-50 transition-colors">
                             <div class="w-20 h-14 rounded-md overflow-hidden shrink-0 shimmer relative border border-slate-200">
                                 <img src="{{ url($menu->full_slug . '/' . basename($rel->image_path)) }}"
                                     class="product-image w-full h-full object-cover transition-transform duration-500">
@@ -75,7 +108,7 @@
                     @endforeach
                 </div>
 
-                <div class="p-4 bg-slate-50/50">
+                <div class="p-4 bg-slate-50/50 border-t border-slate-200">
                     <a href="{{ url($menu->full_slug) }}"
                         class="flex items-center justify-center gap-2 w-full py-3 bg-white text-orion-blue text-xs font-bold uppercase tracking-wider rounded-xl border border-slate-200 hover:border-orion-blue hover:bg-orion-blue hover:text-white transition-all duration-300">
                         View All Stories

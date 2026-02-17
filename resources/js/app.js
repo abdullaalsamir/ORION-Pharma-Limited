@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const allSections = document.querySelectorAll('section.mt-16');
     let newsSection = null;
-    
+
     allSections.forEach(sec => {
         const h2 = sec.querySelector('h2');
         if (h2 && h2.textContent.trim() === 'News & Announcements') {
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newsRightCol = newsSection.querySelector('.lg\\:col-span-8');
         const newsTrack = newsRightCol ? newsRightCol.querySelector('.space-y-3') : null;
 
-        if (!newsTrack || newsTrack.children.length === 0) return;
+        if (!newsTrack) return;
 
         const items = Array.from(newsTrack.children);
         const totalItems = items.length;
@@ -243,36 +243,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (totalItems <= VISIBLE_COUNT) return;
 
-        const injectStyles = () => {
-            newsRightCol.style.position = 'relative';
-            newsRightCol.style.overflow = 'hidden';
-            
-            const firstItem = items[0];
-            const itemHeight = firstItem.offsetHeight;
-            const gap = 12;
-            const viewportHeight = (itemHeight * VISIBLE_COUNT) + (gap * (VISIBLE_COUNT - 1));
-            
-            newsRightCol.style.height = `${viewportHeight}px`;
+        newsRightCol.style.position = 'relative';
+        newsRightCol.style.overflow = 'hidden';
 
-            newsTrack.style.position = 'absolute';
-            newsTrack.style.top = '0';
-            newsTrack.style.left = '0';
-            newsTrack.style.width = '100%';
-            newsTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-            newsTrack.style.margin = '0';
+        newsTrack.style.position = 'absolute';
+        newsTrack.style.top = '0';
+        newsTrack.style.left = '0';
+        newsTrack.style.width = '100%';
+        newsTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        newsTrack.style.margin = '0';
 
-            items.forEach(item => {
-                item.style.marginRight = '20px';
-            });
+        items.forEach(item => {
+            item.style.marginRight = '15px';
+        });
 
-            return { itemHeight, gap, viewportHeight };
-        };
+        let itemHeight = items[0].offsetHeight;
+        const gap = 12;
+        let viewportHeight = (itemHeight * VISIBLE_COUNT) + (gap * (VISIBLE_COUNT - 1));
 
-        const dimensions = injectStyles();
-        const STEP_HEIGHT = dimensions.itemHeight + dimensions.gap;
+        newsRightCol.style.height = `${viewportHeight}px`;
+
+        const MAX_INDEX = totalItems - VISIBLE_COUNT;
 
         const scrollbar = document.createElement('div');
-        scrollbar.className = 'news-scrollbar-injected';
         Object.assign(scrollbar.style, {
             position: 'absolute',
             top: '0',
@@ -291,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
             width: '100%',
             backgroundColor: '#0054a6',
             borderRadius: '3px',
-            transition: 'top 0.6s ease-out'
+            transition: 'top 0.6s ease'
         });
 
         scrollbar.appendChild(thumb);
@@ -300,46 +293,46 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentIndex = 0;
         let autoTimer = null;
 
-        const updateScrollbarThumb = () => {
-            const thumbHeight = dimensions.viewportHeight / totalItems;
+        const updateThumb = () => {
+            const thumbHeight = (VISIBLE_COUNT / totalItems) * viewportHeight;
+            const scrollRatio = currentIndex / MAX_INDEX;
+
             thumb.style.height = `${thumbHeight}px`;
-            thumb.style.top = `${(currentIndex * thumbHeight)}px`;
+            thumb.style.top = `${scrollRatio * (viewportHeight - thumbHeight)}px`;
         };
 
         const goToIndex = (index) => {
-            if (index >= totalItems) {
-                currentIndex = 0;
-            } else if (index < 0) {
+            if (index > MAX_INDEX) {
                 currentIndex = 0;
             } else {
                 currentIndex = index;
             }
 
-            newsTrack.style.transform = `translateY(-${STEP_HEIGHT * currentIndex}px)`;
-            updateScrollbarThumb();
+            newsTrack.style.transform = `translateY(-${(itemHeight + gap) * currentIndex}px)`;
+            updateThumb();
         };
 
         const startAuto = () => {
             stopAuto();
             autoTimer = setInterval(() => {
                 goToIndex(currentIndex + 1);
-            }, 3000);
+            }, 5000);
         };
 
         const stopAuto = () => {
             if (autoTimer) clearInterval(autoTimer);
         };
 
-        updateScrollbarThumb();
+        updateThumb();
         startAuto();
 
         newsRightCol.addEventListener('mouseenter', stopAuto);
         newsRightCol.addEventListener('mouseleave', startAuto);
 
         window.addEventListener('resize', () => {
-            const d = injectStyles();
-            dimensions.itemHeight = d.itemHeight;
-            dimensions.viewportHeight = d.viewportHeight;
+            itemHeight = items[0].offsetHeight;
+            viewportHeight = (itemHeight * VISIBLE_COUNT) + (gap * (VISIBLE_COUNT - 1));
+            newsRightCol.style.height = `${viewportHeight}px`;
             goToIndex(currentIndex);
         });
 

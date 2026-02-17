@@ -21,11 +21,11 @@
 
             <div class="text-content">
                 <h3
-                    class="flex-none! text-left! !before:content-none !after:content-none my-0! text-3xl font-bold text-orion-blue leading-tight mb-2">
+                    class="flex-none! text-left! !before:content-none !after:content-none my-0! text-2xl font-bold text-orion-blue leading-tight">
                     {{ $item->name }}
                 </h3>
 
-                <p class="text-lg font-bold text-slate-500 uppercase tracking-widest mb-8">
+                <p class="text-base font-bold text-slate-500 uppercase tracking-wider mt-1 mb-8">
                     {{ $item->designation }}
                 </p>
 
