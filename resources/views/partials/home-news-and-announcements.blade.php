@@ -90,7 +90,7 @@
                                         {{ $item->title }}
                                     </h4>
                                     <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
-                                        {{ $item->description }}
+                                        {{ html_entity_decode(strip_tags($item->description)) }}
                                     </p>
                                     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
                                         {{ $item->news_date->format('d F, Y') }}
@@ -112,7 +112,7 @@
                                         {{ $item->title }}
                                     </h4>
                                     <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
-                                        {{ $item->description }}
+                                        {{ html_entity_decode(strip_tags($item->description)) }}
                                     </p>
                                     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
                                         {{ $item->news_date->format('d F, Y') }}
