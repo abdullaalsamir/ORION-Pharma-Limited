@@ -245,6 +245,24 @@ footer h1::after {
         @apply font-semibold;
     }
 
+    .corporate-info-table {
+        @apply w-full table-fixed border-separate border-spacing-0;
+    }
+
+    .corporate-info-table tbody tr:nth-child(even) {
+        @apply bg-slate-50;
+    }
+
+    .corporate-info-td-label {
+        @apply w-[35%] px-6 py-4 border-b border-slate-100 align-top
+               font-bold text-orion-blue uppercase text-xs tracking-wide break-words;
+    }
+
+    .corporate-info-td-value {
+        @apply px-6 py-4 border-b border-slate-100 align-top
+               text-sm text-slate-600 leading-relaxed;
+    }
+
     .hover-translate-x {
         transition: transform 0.3s ease;
     }
