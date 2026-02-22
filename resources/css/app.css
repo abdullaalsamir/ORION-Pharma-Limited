@@ -254,13 +254,13 @@ footer h1::after {
     }
 
     .corporate-info-td-label {
-        @apply w-[35%] px-6 py-4 border-b border-slate-100 align-top
-               font-bold text-orion-blue uppercase text-xs tracking-wide break-words;
+        @apply w-[50%] px-6 py-4 border-b border-slate-100 align-top
+               font-semibold text-orion-blue uppercase text-sm tracking-wide break-words;
     }
 
     .corporate-info-td-value {
         @apply px-6 py-4 border-b border-slate-100 align-top
-               text-sm text-slate-600 leading-relaxed;
+               text-base text-slate-600 leading-relaxed;
     }
 
     .hover-translate-x {

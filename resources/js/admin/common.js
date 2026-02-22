@@ -506,6 +506,7 @@ function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
 
 export function initScholarshipPage() {
     setupModule('scholarship', '/admin/scholarship-actions/store', '/admin/scholarship-actions', 'curScholarId');
+    
     window.openScholarAddModal = () => {
         document.querySelector('#addModal form').reset();
         document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera"></i>`;
@@ -513,9 +514,12 @@ export function initScholarshipPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+    
     window.openScholarEditModal = (item, slug) => {
         window.curScholarId = item.id;
         document.getElementById('editName').value = item.name;
+        document.getElementById('editSession').value = item.session ? item.session.replace('Session: ', '') : '';
+        document.getElementById('editRoll').value = item.roll_no ? item.roll_no.replace('Roll No: ', '') : '';
         document.getElementById('editCollege').value = item.medical_college;
         document.getElementById('editActive').checked = item.is_active == 1;
         document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
@@ -523,6 +527,8 @@ export function initScholarshipPage() {
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+
+    window.deleteScholarship = (id) => { if (confirm('Delete this recipient?')) { fetch(`/admin/scholarship-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }) .then(handleResponse) .then(() => Turbo.visit(window.location.href)); } };
 }
 
 export function initCSRPage() {

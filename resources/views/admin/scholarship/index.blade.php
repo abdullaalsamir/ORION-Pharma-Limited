@@ -78,12 +78,10 @@
                                                 onclick="openScholarEditModal({{ json_encode($item) }}, '{{ $menu->full_slug }}')">
                                                 <i class="fas fa-pencil text-xs"></i>
                                             </button>
-                                            <form action="{{ route('admin.scholarship.delete', $item) }}" method="POST"
-                                                onsubmit="return confirm('Delete record?')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn-danger w-8 p-1.5!"><i
-                                                        class="fas fa-trash-can text-xs"></i></button>
-                                            </form>
+                                            <button type="button" onclick="deleteScholarship({{ $item->id }})"
+                                                class="btn-danger w-8 p-1.5!">
+                                                <i class="fas fa-trash-can text-xs"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </td>
