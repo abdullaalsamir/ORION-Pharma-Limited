@@ -543,8 +543,8 @@ export function initScholarshipPage() {
     window.openScholarEditModal = (item, slug) => {
         window.curScholarId = item.id;
         document.getElementById('editName').value = item.name;
+        document.getElementById('editDegree').value = item.degree;
         document.getElementById('editSession').value = item.session ? item.session.replace('Session: ', '') : '';
-        document.getElementById('editRoll').value = item.roll_no ? item.roll_no.replace('Roll No: ', '') : '';
         document.getElementById('editCollege').value = item.medical_college;
         document.getElementById('editActive').checked = item.is_active == 1;
         document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;

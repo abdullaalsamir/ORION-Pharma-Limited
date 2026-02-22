@@ -55,6 +55,7 @@ class ScholarshipController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
+            'degree' => 'required|string',
             'medical_college' => 'required|string',
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400'
         ]);
@@ -73,8 +74,8 @@ class ScholarshipController extends Controller
 
             Scholarship::create([
                 'name' => $request->name,
+                'degree' => $request->degree,
                 'session' => $this->formatPrefix($request->input('session'), 'Session'),
-                'roll_no' => $this->formatPrefix($request->input('roll_no'), 'Roll No'),
                 'medical_college' => $request->medical_college,
                 'image_path' => $path,
                 'order' => (Scholarship::max('order') ?? 0) + 1,
@@ -97,8 +98,8 @@ class ScholarshipController extends Controller
 
             $data = [
                 'name' => $request->name,
+                'degree' => $request->degree,
                 'session' => $this->formatPrefix($request->input('session'), 'Session'),
-                'roll_no' => $this->formatPrefix($request->input('roll_no'), 'Roll No'),
                 'medical_college' => $request->medical_college,
                 'is_active' => $request->is_active,
                 'image_path' => $newPath

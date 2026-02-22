@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Scholarship extends Model
 {
-    protected $fillable = ['name', 'session', 'roll_no', 'medical_college', 'image_path', 'order', 'is_active'];
+    protected $fillable = ['name', 'degree', 'session', 'medical_college', 'image_path', 'order', 'is_active'];
 }

@@ -20,7 +20,7 @@
                         <th class="w-12 p-4 border-r border-slate-100"></th>
                         <th
                             class="w-72 p-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100">
-                            Name, Session & Roll</th>
+                            Name, Degree & Session</th>
                         <th
                             class="p-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100">
                             Medical College</th>
@@ -43,18 +43,17 @@
                                 <td class="w-12 p-4 text-center border-r border-slate-100">
                                     <div
                                         class="drag-handle cursor-grab active:cursor-grabbing text-slate-300 hover:text-admin-blue transition-colors">
-                                        <i class="fas fa-grip-vertical"></i>
+                                        <i class="fas fa-arrows-up-down-left-right"></i>
                                     </div>
                                 </td>
                                 <td class="w-72 p-4 border-r border-slate-100">
                                     <div class="flex flex-col">
                                         <span
                                             class="font-bold text-slate-700 text-sm leading-tight mb-1">{{ $item->name }}</span>
+                                        <span class="text-[10px] text-slate-400 font-medium">{{ $item->degree }}</span>
                                         <div class="flex flex-col gap-0.5">
                                             @if($item->session)<span
                                             class="text-[10px] text-slate-400 font-medium">{{ $item->session }}</span>@endif
-                                            @if($item->roll_no)<span
-                                            class="text-[10px] text-slate-400 font-medium">{{ $item->roll_no }}</span>@endif
                                         </div>
                                     </div>
                                 </td>
@@ -131,12 +130,14 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Degree</label>
+                                <input type="text" name="degree" required class="input-field w-full"
+                                    placeholder="e.g. MBBS">
+                            </div>
+
+                            <div class="flex flex-col gap-1">
                                 <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Session</label>
                                 <input type="text" name="session" class="input-field w-full" placeholder="e.g. 2023-24">
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Roll No</label>
-                                <input type="text" name="roll_no" class="input-field w-full" placeholder="e.g. 12345">
                             </div>
                         </div>
 
@@ -192,12 +193,13 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Degree</label>
+                                <input type="text" name="degree" id="editDegree" required class="input-field w-full">
+                            </div>
+
+                            <div class="flex flex-col gap-1">
                                 <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Session</label>
                                 <input type="text" name="session" id="editSession" class="input-field w-full">
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Roll No</label>
-                                <input type="text" name="roll_no" id="editRoll" class="input-field w-full">
                             </div>
                         </div>
 

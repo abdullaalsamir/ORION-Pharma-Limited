@@ -12,7 +12,7 @@
                         </th>
                         <th
                             class="px-6 py-4 text-base font-bold text-orion-blue uppercase tracking-wider border-r border-slate-300 w-80">
-                            Name
+                            Name, Degree & Session
                         </th>
                         <th
                             class="px-6 py-4 text-base font-bold text-orion-blue uppercase tracking-wider border-r border-slate-300">
@@ -36,16 +36,14 @@
                                     {{ $item->name }}
                                 </div>
                                 <div class="mt-2 space-y-1">
+                                    <div class="text-base text-slate-500 flex items-center gap-1">
+                                        <span class="text-slate-400">Degree:</span>
+                                        {{ $item->degree }}
+                                    </div>
                                     @if($item->session)
                                         <div class="text-base text-slate-500 flex items-center gap-1">
                                             <span class="text-slate-400">Session:</span>
                                             {{ str_replace('Session: ', '', $item->session) }}
-                                        </div>
-                                    @endif
-                                    @if($item->roll_no)
-                                        <div class="text-base text-slate-500 flex items-center gap-1">
-                                            <span class="text-slate-400">Roll No:</span>
-                                            {{ str_replace('Roll No: ', '', $item->roll_no) }}
                                         </div>
                                     @endif
                                 </div>
