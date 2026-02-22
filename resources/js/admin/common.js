@@ -507,6 +507,31 @@ function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
 export function initScholarshipPage() {
     setupModule('scholarship', '/admin/scholarship-actions/store', '/admin/scholarship-actions', 'curScholarId');
     
+    const list = document.getElementById('scholar-sortable-list');
+    if (list) {
+        new Sortable(list, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'bg-slate-50',
+            onEnd: () => {
+                let orders = [];
+                list.querySelectorAll('.sortable-item').forEach((el, index) => {
+                    orders.push({ id: el.dataset.id, order: index + 1 });
+                });
+                fetch('/admin/scholarship-actions/update-order', {
+                    method: 'POST',
+                    headers: { 
+                        ...fetchHeaders(), 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ orders })
+                })
+                .then(handleResponse)
+                .catch(err => console.error("Sort order update failed:", err));
+            }
+        });
+    }
+
     window.openScholarAddModal = () => {
         document.querySelector('#addModal form').reset();
         document.getElementById('addPreview').innerHTML = `<i class="fas fa-camera"></i>`;
