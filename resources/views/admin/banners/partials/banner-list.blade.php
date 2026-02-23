@@ -1,7 +1,7 @@
 <div class="admin-card-header">
     <div class="flex flex-col">
         <h1>{{ $menu->name }}</h1>
-        <p class="text-xs text-slate-400">Manage 48:9 ratio banners for this page</p>
+        <p class="text-xs text-slate-400">Manage banners for this page</p>
     </div>
 
     <button onclick="openBannerUploadModal()" class="btn-success h-10!">
@@ -14,7 +14,7 @@
         @forelse($banners as $banner)
             <div
                 class="relative group rounded-2xl border border-slate-200 bg-white p-1 hover:border-admin-blue transition-all">
-                <div class="aspect-48/9 rounded-xl overflow-hidden bg-slate-100 relative">
+                <div class="rounded-xl overflow-hidden bg-slate-100 relative">
                     <img src="{{ url($menu->full_slug . '/' . $banner->file_name) }}?v={{ time() }}"
                         class="w-full h-full object-cover transition-all duration-500 {{ !$banner->is_active ? 'opacity-40 grayscale' : '' }}"
                         alt="banner">

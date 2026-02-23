@@ -47,23 +47,41 @@
     </div>
 
     <div id="uploadModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-5xl w-full">
+        <div class="modal-content max-w-lg w-full h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-8 pb-3 border-b border-slate-100">
                 <h1 class="mb-0!">Upload Banner</h1>
                 <button onclick="closeModal('uploadModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
             </div>
 
-            <form id="uploadForm" class="flex flex-col gap-6">
+            <form id="uploadForm" class="flex-1 overflow-y-auto flex flex-col gap-6 pr-2 custom-scrollbar">
                 @csrf
                 <input type="file" name="image" id="uploadInput" accept="image/*" class="hidden"
                     onchange="handlePreview(this, 'uploadPreviewContainer')">
 
-                <div class="aspect-48/9 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue hover:bg-slate-100 transition-all group relative"
-                    id="uploadPreviewContainer" onclick="document.getElementById('uploadInput').click()">
-                    <i
-                        class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i>
-                    <span class="text-slate-400 text-[10px] uppercase tracking-widest">Click to select 48:9
-                        image</span>
+                <div
+                    class="aspect-video w-full bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 overflow-hidden">
+                    <div id="uploadPreviewContainer" style="aspect-ratio: 48/9;"
+                        class="w-full border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue hover:bg-slate-100/50 transition-all group relative"
+                        onclick="document.getElementById('uploadInput').click()">
+                        <i
+                            class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i>
+                        <span id="uploadPlaceholderText"
+                            class="text-slate-400 text-[10px] uppercase tracking-widest text-center px-2">Click to select
+                            48:9 image</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 mt-2 px-2">
+                    <div class="flex justify-between text-xs font-bold text-slate-400 px-1">
+                        <span class="cursor-pointer"
+                            onclick="document.getElementById('ratioSlider').value=0; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">48:9</span>
+                        <span class="cursor-pointer"
+                            onclick="document.getElementById('ratioSlider').value=1; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">23:9</span>
+                        <span class="cursor-pointer"
+                            onclick="document.getElementById('ratioSlider').value=2; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">16:9</span>
+                    </div>
+                    <input type="range" id="ratioSlider" name="ratio" min="0" max="2" value="0" step="1"
+                        class="w-full cursor-pointer accent-admin-blue">
                 </div>
 
                 <div class="flex justify-end pt-2">
@@ -74,25 +92,17 @@
     </div>
 
     <div id="editModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-5xl w-full">
+        <div class="modal-content max-w-lg w-full">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
-                <h1 class="mb-0!">Edit Banner</h1>
+                <h1 class="mb-0!">Edit Banner Status</h1>
                 <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
             </div>
 
-            <form id="editForm" class="flex flex-col gap-6">
+            <form id="editForm" class="flex-1 overflow-y-auto flex flex-col gap-6 pr-2 custom-scrollbar">
                 @csrf @method('PUT')
 
-                <input type="file" name="image" id="editInput" accept="image/*" class="hidden"
-                    onchange="handlePreview(this, 'editPreviewContainer')">
-
-                <div class="relative group cursor-pointer" onclick="document.getElementById('editInput').click()">
-                    <div class="aspect-48/9 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden"
-                        id="editPreviewContainer"></div>
-                    <div
-                        class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-2xl">
-                        <span class="text-white font-bold text-xs uppercase tracking-widest">Click to replace image</span>
-                    </div>
+                <div class="aspect-video bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center"
+                    id="editPreviewContainer">
                 </div>
 
                 <div class="flex items-center justify-between mt-2">

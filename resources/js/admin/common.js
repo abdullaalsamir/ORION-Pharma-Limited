@@ -252,14 +252,33 @@ export function initBannersPage() {
     window.openBannerUploadModal = () => {
         if (!window.currentMenuId) { alert("Please select a page first"); return; }
         document.getElementById('uploadForm').reset();
+        
+        const previewContainer = document.getElementById('uploadPreviewContainer');
+        previewContainer.style.aspectRatio = '48/9';
+        previewContainer.innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i><span id="uploadPlaceholderText" class="text-slate-400 text-[10px] uppercase tracking-widest text-center px-2">Click to select 48:9 image</span>`;
+        document.getElementById('ratioSlider').value = 0;
+        
         const modal = document.getElementById('uploadModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
 
+    const ratioSlider = document.getElementById('ratioSlider');
+    if (ratioSlider) {
+        ratioSlider.addEventListener('input', function() {
+            const container = document.getElementById('uploadPreviewContainer');
+            const text = document.getElementById('uploadPlaceholderText');
+            const ratios = ['48/9', '23/9', '16/9'];
+            const ratioText = ['48:9', '23:9', '16:9'];
+            
+            container.style.aspectRatio = ratios[this.value];
+            if (text) text.innerText = `Click to select ${ratioText[this.value]} image`;
+        });
+    }
+
     window.openBannerEditModal = (id, name, fullSlug, isActive) => {
         window.currentBannerId = id;
-        document.getElementById('editPreviewContainer').innerHTML = `<img src="/${fullSlug}/${name}?t=${Date.now()}" class="w-full h-full object-cover">`;
+        document.getElementById('editPreviewContainer').innerHTML = `<img src="/${fullSlug}/${name}?t=${Date.now()}" class="w-full h-full object-contain">`;
         document.getElementById('editActiveToggle').checked = (isActive == 1);
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
@@ -810,7 +829,7 @@ export function initPagesPage() {
                     strip.innerHTML = images.length ? '' : 'No Banners';
                     images.forEach(img => {
                         const div = document.createElement('div');
-                        div.className = "shrink-0 w-full h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-admin-blue cursor-pointer bg-white shadow-sm";
+                        div.className = "shrink-0 w-full h-auto rounded-xl overflow-hidden border-1 border-transparent hover:border-admin-blue cursor-pointer transition-all duration-300";
                         div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
                         div.onclick = () => { editor.insert(`<div class="banner">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`); editor.focus(); };
                         strip.appendChild(div);

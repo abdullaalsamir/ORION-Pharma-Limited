@@ -29,7 +29,8 @@ class BannerController extends Controller
     public function store(Request $request, Menu $menu)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400'
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400',
+            'ratio' => 'required|integer|min:0|max:2'
         ]);
 
         try {
@@ -43,7 +44,10 @@ class BannerController extends Controller
 
             $fullPath = storage_path("app/public/{$relativeDir}/{$fileName}");
 
-            $this->processBanner($file->getRealPath(), $fullPath);
+            $ratios = [48 / 9, 23 / 9, 16 / 9];
+            $targetRatio = $ratios[$request->ratio];
+
+            $this->processBanner($file->getRealPath(), $fullPath, $targetRatio);
 
             Banner::create([
                 'menu_id' => $menu->id,
@@ -61,18 +65,11 @@ class BannerController extends Controller
     public function update(Request $request, Banner $banner)
     {
         $request->validate([
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:102400',
             'is_active' => 'required'
         ]);
 
         try {
             $banner->is_active = $request->is_active;
-
-            if ($request->hasFile('image')) {
-                $fullPath = storage_path("app/public/{$banner->file_path}");
-                $this->processBanner($request->file('image')->getRealPath(), $fullPath);
-            }
-
             $banner->save();
             return response()->json(['success' => true]);
         } catch (Exception $e) {
@@ -80,7 +77,7 @@ class BannerController extends Controller
         }
     }
 
-    private function processBanner($sourcePath, $destinationPath)
+    private function processBanner($sourcePath, $destinationPath, $targetRatio)
     {
         ini_set('memory_limit', '1024M');
 
@@ -119,7 +116,6 @@ class BannerController extends Controller
         imagealphablending($src, true);
         imagesavealpha($src, true);
 
-        $targetRatio = 16 / 9;
         $currentRatio = $width / $height;
 
         if ($currentRatio > $targetRatio) {
