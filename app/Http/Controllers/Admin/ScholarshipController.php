@@ -217,7 +217,10 @@ class ScholarshipController extends Controller
 
     public function frontendIndex($menu)
     {
-        $items = Scholarship::where('is_active', 1)->orderBy('order', 'asc')->get();
+        $items = Scholarship::where('is_active', 1)
+            ->orderBy('order', 'desc')
+            ->paginate(10);
+
         return view('scholarship.index', compact('items', 'menu'));
     }
 

@@ -28,7 +28,7 @@
                         <tr class="transition-colors duration-200 tr-slide-in" style="animation-delay: {{ $index * 0.05 }}s">
 
                             <td class="px-6 py-4 text-center text-slate-400 border-r border-slate-300 align-top">
-                                {{ $index + 1 }}
+                                {{ $items->firstItem() + $index }}
                             </td>
 
                             <td class="px-6 py-4 border-r border-slate-300 align-top">
@@ -77,5 +77,8 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    <div>
+        {{ $items->links() }}
     </div>
 @endsection
