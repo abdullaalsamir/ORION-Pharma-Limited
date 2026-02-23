@@ -256,8 +256,16 @@ export function initBannersPage() {
         const previewContainer = document.getElementById('uploadPreviewContainer');
         previewContainer.style.aspectRatio = '48/9';
         previewContainer.innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2 group-hover:text-admin-blue transition-colors"></i><span id="uploadPlaceholderText" class="text-slate-400 text-[10px] uppercase tracking-widest text-center px-2">Click to select 48:9 image</span>`;
+        
         document.getElementById('ratioSlider').value = 0;
         
+        const mwInput = document.getElementById('maxWidthInput');
+        if(mwInput) {
+            mwInput.value = 2000;
+            mwInput.classList.remove('border-red-500');
+            document.getElementById('maxWidthError').classList.add('hidden');
+        }
+
         const modal = document.getElementById('uploadModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
@@ -287,6 +295,20 @@ export function initBannersPage() {
 
     document.getElementById('uploadForm').onsubmit = function(e) {
         e.preventDefault();
+        
+        const mwInput = document.getElementById('maxWidthInput');
+        const mwError = document.getElementById('maxWidthError');
+        const mwValue = parseInt(mwInput.value, 10);
+
+        if (isNaN(mwValue) || mwValue < 500 || mwValue > 2000) {
+            mwInput.classList.add('border-red-500');
+            mwError.classList.remove('hidden');
+            return;
+        } else {
+            mwInput.classList.remove('border-red-500');
+            mwError.classList.add('hidden');
+        }
+
         fetch(`/admin/banners/upload/${window.currentMenuId}`, { method: 'POST', body: new FormData(this), headers: fetchHeaders() })
         .then(handleResponse).then(() => { closeModal('uploadModal'); loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')); });
     };

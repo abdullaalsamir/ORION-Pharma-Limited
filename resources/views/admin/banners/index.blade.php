@@ -47,8 +47,8 @@
     </div>
 
     <div id="uploadModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-lg w-full h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center mb-8 pb-3 border-b border-slate-100">
+        <div class="modal-content max-w-xl w-full">
+            <div class="flex justify-between items-center mb-8 pb-3 border-b border-slate-200">
                 <h1 class="mb-0!">Upload Banner</h1>
                 <button onclick="closeModal('uploadModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
             </div>
@@ -58,8 +58,7 @@
                 <input type="file" name="image" id="uploadInput" accept="image/*" class="hidden"
                     onchange="handlePreview(this, 'uploadPreviewContainer')">
 
-                <div
-                    class="aspect-video w-full bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 overflow-hidden">
+                <div class="aspect-video w-full bg-slate-50 rounded-2xl flex items-center justify-center">
                     <div id="uploadPreviewContainer" style="aspect-ratio: 48/9;"
                         class="w-full border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-admin-blue hover:bg-slate-100/50 transition-all group relative"
                         onclick="document.getElementById('uploadInput').click()">
@@ -71,17 +70,29 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2 mt-2 px-2">
-                    <div class="flex justify-between text-xs font-bold text-slate-400 px-1">
-                        <span class="cursor-pointer"
-                            onclick="document.getElementById('ratioSlider').value=0; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">48:9</span>
-                        <span class="cursor-pointer"
-                            onclick="document.getElementById('ratioSlider').value=1; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">23:9</span>
-                        <span class="cursor-pointer"
-                            onclick="document.getElementById('ratioSlider').value=2; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">16:9</span>
+                <div class="flex gap-6">
+                    <div class="flex-1 flex flex-col gap-2">
+                        <div class="flex justify-between text-[11px] font-bold text-slate-400">
+                            <span class="text-[11px] cursor-pointer hover:text-admin-blue transition-colors"
+                                onclick="document.getElementById('ratioSlider').value=0; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">48:9</span>
+                            <span class="text-[11px] cursor-pointer hover:text-admin-blue transition-colors"
+                                onclick="document.getElementById('ratioSlider').value=1; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">23:9</span>
+                            <span class="text-[11px] cursor-pointer hover:text-admin-blue transition-colors"
+                                onclick="document.getElementById('ratioSlider').value=2; document.getElementById('ratioSlider').dispatchEvent(new Event('input'))">16:9</span>
+                        </div>
+                        <input type="range" id="ratioSlider" name="ratio" min="0" max="2" value="0" step="1"
+                            class="w-full cursor-pointer accent-admin-blue mt-3">
                     </div>
-                    <input type="range" id="ratioSlider" name="ratio" min="0" max="2" value="0" step="1"
-                        class="w-full cursor-pointer accent-admin-blue">
+
+                    <div class="w-20 flex flex-col gap-2">
+                        <label class="text-[11px] font-bold text-slate-400 text-center uppercase tracking-wider">Max
+                            Width</label>
+                        <input type="text" id="maxWidthInput" name="max_width" value="2000"
+                            class="input-field text-center text-slate-700"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <span id="maxWidthError" class="text-[10px] text-red-500 text-center hidden font-bold -mt-1">Range:
+                            500-2000</span>
+                    </div>
                 </div>
 
                 <div class="flex justify-end pt-2">
@@ -92,8 +103,8 @@
     </div>
 
     <div id="editModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-lg w-full">
-            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+        <div class="modal-content max-w-xl w-full">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-200">
                 <h1 class="mb-0!">Edit Banner Status</h1>
                 <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
             </div>

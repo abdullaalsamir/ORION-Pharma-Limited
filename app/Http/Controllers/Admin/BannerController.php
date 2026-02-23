@@ -30,7 +30,8 @@ class BannerController extends Controller
     {
         $request->validate([
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:102400',
-            'ratio' => 'required|integer|min:0|max:2'
+            'ratio' => 'required|integer|min:0|max:2',
+            'max_width' => 'required|integer|min:500|max:2000'
         ]);
 
         try {
@@ -47,7 +48,7 @@ class BannerController extends Controller
             $ratios = [48 / 9, 23 / 9, 16 / 9];
             $targetRatio = $ratios[$request->ratio];
 
-            $this->processBanner($file->getRealPath(), $fullPath, $targetRatio);
+            $this->processBanner($file->getRealPath(), $fullPath, $targetRatio, $request->max_width);
 
             Banner::create([
                 'menu_id' => $menu->id,
@@ -77,7 +78,7 @@ class BannerController extends Controller
         }
     }
 
-    private function processBanner($sourcePath, $destinationPath, $targetRatio)
+    private function processBanner($sourcePath, $destinationPath, $targetRatio, $maxWidth)
     {
         ini_set('memory_limit', '1024M');
 
@@ -131,8 +132,9 @@ class BannerController extends Controller
         }
 
         $finalWidth = $cropWidth;
-        if ($finalWidth > 2000) {
-            $finalWidth = 2000;
+
+        if ($finalWidth > $maxWidth) {
+            $finalWidth = $maxWidth;
         }
         $finalHeight = $finalWidth / $targetRatio;
 
