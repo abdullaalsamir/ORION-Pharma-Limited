@@ -379,6 +379,18 @@ select:focus {
     box-shadow: none !important;
 }
 
+@keyframes mapDraw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.global-footsteps-map path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: mapDraw 3s ease forwards;
+}
+
 @media (max-width: 768px) {
     .swiper-button-next, .swiper-button-prev {
         display: none !important;

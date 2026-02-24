@@ -110,8 +110,27 @@
                         </div>
                         <select name="ql_menu_id[]" class="input-field h-11! flex-1 ql-select">
                             <option value="">⁝⁝⁝ None ⁝⁝⁝</option>
-                            @foreach($menus as $menu)
-                                <option value="{{ $menu->id }}" {{ ($current && $current['menu_id'] == $menu->id) ? 'selected' : '' }}>{{ $menu->name }}</option>
+
+                            @foreach($nestedMenus as $m)
+                                @php $mIsCat = $m->children->count() > 0; @endphp
+                                <option value="{{ $m->id }}" {{ $mIsCat ? 'disabled' : '' }}
+                                    class="{{ $mIsCat ? 'text-red-800 font-semibold' : '' }}" {{ ($current && $current['menu_id'] == $m->id) ? 'selected' : '' }}>
+                                    {{ $m->name }}
+                                </option>
+
+                                @foreach($m->children as $c)
+                                    @php $cIsCat = $c->children->count() > 0; @endphp
+                                    <option value="{{ $c->id }}" {{ $cIsCat ? 'disabled' : '' }}
+                                        class="{{ $cIsCat ? 'text-red-800 font-semibold' : 'text-slate-500' }}" {{ ($current && $current['menu_id'] == $c->id) ? 'selected' : '' }}>
+                                        — {{ $c->name }}
+                                    </option>
+
+                                    @foreach($c->children as $sc)
+                                        <option value="{{ $sc->id }}" class="text-slate-500" {{ ($current && $current['menu_id'] == $sc->id) ? 'selected' : '' }}>
+                                            &nbsp;&nbsp;&nbsp; — {{ $sc->name }}
+                                        </option>
+                                    @endforeach
+                                @endforeach
                             @endforeach
                         </select>
                     </div>

@@ -92,7 +92,8 @@
                         @if(!empty($social['url']))
                             <a href="{{ $social['url'] }}" target="_blank"
                                 class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-orion-blue transition-all group shadow-sm hover:shadow-lg">
-                                <i class="fa-brands {{ $social['icon'] }} text-[15px]"></i>
+                                <i
+                                    class="{{ $social['icon'] === 'fa-globe' ? 'fas' : 'fab' }} {{ $social['icon'] }} text-[15px]"></i>
                             </a>
                         @endif
                     @endforeach

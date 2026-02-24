@@ -2,6 +2,20 @@
 
 @section('title', 'Footer Management')
 
+@php
+    $nestedMenus = \App\Models\Menu::with(['children' => function($q) {
+            $q->orderBy('order');
+        }, 'children.children' => function($q) {
+            $q->orderBy('order');
+        }])
+        ->whereNull('parent_id')
+        ->where('slug', '!=', 'home')
+        ->orderBy('order')
+        ->get();
+
+    $allActiveMenus = \App\Models\Menu::where('is_active', 1)->get();
+@endphp
+
 @section('content')
     <div class="admin-card">
         <div class="admin-card-header">
@@ -72,8 +86,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
-                    <div
-                        class="px-5 py-2 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                    <div class="px-5 py-2 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                         <h1 class="text-lg!">Map Location</h1>
                         <button onclick="openFooterModal('mapModal')" class="btn-icon">
                             <i class="fas fa-pencil text-xs"></i>
@@ -81,8 +94,7 @@
                     </div>
 
                     <div class="p-4 flex-1">
-                        <div
-                            class="w-full h-full min-h-75 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative">
+                        <div class="w-full h-full min-h-75 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative">
                             @if ($footer->map_url)
                                 <iframe src="{{ $footer->map_url }}" class="w-full h-full" style="border:0;"></iframe>
                             @else
@@ -95,8 +107,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
-                    <div
-                        class="px-5 py-2 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                    <div class="px-5 py-2 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                         <h1 class="text-lg!">Quick Links Slots</h1>
                         <button onclick="openFooterModal('qlModal')" class="btn-icon">
                             <i class="fas fa-pencil text-xs"></i>
@@ -108,14 +119,11 @@
                             @php
                                 $link = $footer->quick_links[$i] ?? null;
                                 $m = ($link && !empty($link['menu_id']))
-                                    ? $menus->firstWhere('id', $link['menu_id'])
+                                    ? $allActiveMenus->firstWhere('id', $link['menu_id'])
                                     : null;
                             @endphp
 
-                            <div
-                                class="flex items-center justify-between p-3.5 rounded-2xl border
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {{ $m ? 'border-emerald-100 bg-emerald-50/40' : 'border-slate-100 bg-slate-50/50' }}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    transition-all">
+                            <div class="flex items-center justify-between p-3.5 rounded-2xl border {{ $m ? 'border-emerald-100 bg-emerald-50/40' : 'border-slate-100 bg-slate-50/50' }} transition-all">
                                 <div class="flex items-center gap-4">
                                     <span class="text-[10px] font-black text-slate-300">{{ $i + 1 }}</span>
                                     <span class="text-xs font-bold {{ $m ? 'text-emerald-700' : 'text-slate-300' }}">
@@ -149,17 +157,14 @@
                             @foreach ($footer->social_links ?? [] as $social)
                                 <div class="flex items-center gap-4 p-3 rounded-2xl border border-slate-100 bg-white">
                                     <div class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                        <i
-                                            class="{{ $social['icon'] === 'fa-globe' ? 'fas' : 'fab' }} {{ $social['icon'] }} text-xs"></i>
+                                        <i class="{{ $social['icon'] === 'fa-globe' ? 'fas' : 'fab' }} {{ $social['icon'] }} text-xs"></i>
                                     </div>
 
                                     <div class="flex-1 min-w-0">
                                         <div class="text-[9px] font-black text-slate-300 uppercase tracking-tighter">
                                             {{ $social['platform'] }}
                                         </div>
-                                        <div
-                                            class="text-[11px] font-bold truncate 
-                                                                                                                                                                                                                                                                                                                                                                            {{ $social['url'] ? 'text-admin-blue' : 'text-red-200' }}">
+                                        <div class="text-[11px] font-bold truncate {{ $social['url'] ? 'text-admin-blue' : 'text-red-200' }}">
                                             {{ $social['url'] ?: 'No link set' }}
                                         </div>
                                     </div>
