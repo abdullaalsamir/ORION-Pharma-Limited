@@ -118,15 +118,23 @@
                         @for ($i = 0; $i < 8; $i++)
                             @php
                                 $link = $footer->quick_links[$i] ?? null;
-                                $m = ($link && !empty($link['menu_id']))
-                                    ? $allActiveMenus->firstWhere('id', $link['menu_id'])
-                                    : null;
+                                $m = null;
+                                $isSitemap = false;
+                                
+                                if ($link && !empty($link['menu_id'])) {
+                                    if ($link['menu_id'] === 'sitemap') {
+                                        $m = (object)['name' => 'Sitemap'];
+                                        $isSitemap = true;
+                                    } else {
+                                        $m = $allActiveMenus->firstWhere('id', $link['menu_id']);
+                                    }
+                                }
                             @endphp
 
                             <div class="flex items-center justify-between p-3.5 rounded-2xl border {{ $m ? 'border-emerald-100 bg-emerald-50/40' : 'border-slate-100 bg-slate-50/50' }} transition-all">
                                 <div class="flex items-center gap-4">
                                     <span class="text-[10px] font-black text-slate-300">{{ $i + 1 }}</span>
-                                    <span class="text-xs font-bold {{ $m ? 'text-emerald-700' : 'text-slate-300' }}">
+                                    <span class="text-xs font-bold {{ $m ? ($isSitemap ? 'text-orion-blue' : 'text-emerald-700') : 'text-slate-300' }}">
                                         {{ $m ? $m->name : '' }}
                                     </span>
                                 </div>

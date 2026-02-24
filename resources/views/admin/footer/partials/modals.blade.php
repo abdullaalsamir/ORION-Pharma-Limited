@@ -126,12 +126,16 @@
                                     </option>
 
                                     @foreach($c->children as $sc)
-                                        <option value="{{ $sc->id }}" class="text-slate-500" {{ ($current && $current['menu_id'] == $sc->id) ? 'selected' : '' }}>
+                                        <option value="{{ $sc->id }}" class="text-slate-400" {{ ($current && $current['menu_id'] == $sc->id) ? 'selected' : '' }}>
                                             &nbsp;&nbsp;&nbsp; — {{ $sc->name }}
                                         </option>
                                     @endforeach
                                 @endforeach
                             @endforeach
+
+                            <option value="sitemap" class="text-orion-blue font-semibold" {{ ($current && $current['menu_id'] === 'sitemap') ? 'selected' : '' }}>
+                                ⁝⁝⁝ Sitemap ⁝⁝⁝
+                            </option>
                         </select>
                     </div>
                 @endfor

@@ -201,5 +201,7 @@ Route::get('{path}/{filename}', [PageController::class, 'image'])
 Route::post('/product-complaint/submit', [ProductComplaintController::class, 'store'])
     ->name('complaint.submit');
 
+Route::get('/sitemap', [PageController::class, 'sitemap'])->name('sitemap');
+
 Route::get('{slug}', [PageController::class, 'page'])
     ->where('slug', '.*');

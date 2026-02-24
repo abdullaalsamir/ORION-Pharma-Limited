@@ -2,12 +2,20 @@
     $footer = \App\Models\Footer::find(1) ?? new \App\Models\Footer();
 
     $quickLinks = collect($footer->quick_links ?? [])
-        ->map(
-            fn($item) =>
-            !empty($item['menu_id'])
-            ? \App\Models\Menu::find($item['menu_id'])
-            : null
-        )
+        ->map(function ($item) {
+            if (empty($item['menu_id'])) {
+                return null;
+            }
+
+            if ($item['menu_id'] === 'sitemap') {
+                return (object) [
+                    'name' => 'Sitemap',
+                    'full_slug' => 'sitemap'
+                ];
+            }
+
+            return \App\Models\Menu::find($item['menu_id']);
+        })
         ->filter()
         ->values();
 

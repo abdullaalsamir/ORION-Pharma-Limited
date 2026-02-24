@@ -208,4 +208,28 @@ class PageController extends Controller
 
         return (new BannerController)->serveBannerImage($menu, $filename);
     }
+
+    public function sitemap()
+    {
+        $menus = Menu::with([
+            'children' => function ($q) {
+                $q->where('is_active', 1)->orderBy('order');
+            },
+            'children.children' => function ($q) {
+                $q->where('is_active', 1)->orderBy('order');
+            }
+        ])
+            ->whereNull('parent_id')
+            ->where('is_active', 1)
+            ->where('slug', '!=', 'home')
+            ->orderBy('order')
+            ->get();
+
+        $menu = (object) [
+            'name' => 'Sitemap',
+            'content' => null
+        ];
+
+        return view('partials.sitemap', compact('menus', 'menu'));
+    }
 }
