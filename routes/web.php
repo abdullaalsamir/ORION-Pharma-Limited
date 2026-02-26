@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\QuarterlyReportsController;
 use App\Http\Controllers\Admin\AnnualReportsController;
 use App\Http\Controllers\Admin\CorporateGovernanceController;
 use App\Http\Controllers\Admin\ProductComplaintController;
+use App\Http\Controllers\Admin\CareerController;
 use App\Http\Controllers\Admin\FooterController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -140,6 +141,14 @@ Route::prefix('admin')
             Route::delete('/{complaint}', [ProductComplaintController::class, 'delete'])->name('delete');
         });
 
+        Route::prefix('career')->name('career.')->group(function () {
+            Route::get('/', [CareerController::class, 'index'])->name('index');
+            Route::post('/store', [CareerController::class, 'store'])->name('store');
+            Route::put('/{career}', [CareerController::class, 'update'])->name('update');
+            Route::delete('/{career}', [CareerController::class, 'delete'])->name('delete');
+            Route::post('/update-order', [CareerController::class, 'updateOrder'])->name('update-order');
+        });
+
         Route::get('/footer', [FooterController::class, 'index'])->name('footer');
         Route::post('/footer/update', [FooterController::class, 'update'])->name('footer.update');
 
@@ -164,6 +173,10 @@ Route::get(
     'products/{genericSlug}/{filename}',
     [ProductController::class, 'serveProductImage']
 )->where('filename', '.*\.webp$');
+
+Route::get('/career/{filename}', [CareerController::class, 'serveCareerImage'])
+    ->where('filename', '.*\.webp$')
+    ->name('career.image');
 
 Route::get('{path}/{filename}', [NewsController::class, 'serveNewsPdf'])
     ->where('path', '.*news-and-announcements')
@@ -200,6 +213,10 @@ Route::get('{path}/{filename}', [PageController::class, 'image'])
 
 Route::post('/product-complaint/submit', [ProductComplaintController::class, 'store'])
     ->name('complaint.submit');
+
+Route::get('/career', [CareerController::class, 'careerIndex'])->name('career.index');
+Route::get('/career/{slug}', [CareerController::class, 'careerShow'])->name('career.show');
+Route::post('/career/{slug}/apply', [CareerController::class, 'submitApplication'])->name('career.apply');
 
 Route::get('/sitemap', [PageController::class, 'sitemap'])->name('sitemap');
 

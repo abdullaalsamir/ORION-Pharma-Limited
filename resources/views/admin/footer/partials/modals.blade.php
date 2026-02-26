@@ -133,6 +133,10 @@
                                 @endforeach
                             @endforeach
 
+                            <option value="career" class="text-orion-blue font-bold" {{ ($current && $current['menu_id'] === 'career') ? 'selected' : '' }}>
+                                ⁝⁝⁝ Career ⁝⁝⁝
+                            </option>
+
                             <option value="sitemap" class="text-orion-blue font-semibold" {{ ($current && $current['menu_id'] === 'sitemap') ? 'selected' : '' }}>
                                 ⁝⁝⁝ Sitemap ⁝⁝⁝
                             </option>

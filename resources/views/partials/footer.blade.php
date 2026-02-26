@@ -7,11 +7,12 @@
                 return null;
             }
 
+            if ($item['menu_id'] === 'career') {
+                return (object) ['name' => 'Career', 'full_slug' => 'career'];
+            }
+
             if ($item['menu_id'] === 'sitemap') {
-                return (object) [
-                    'name' => 'Sitemap',
-                    'full_slug' => 'sitemap'
-                ];
+                return (object) ['name' => 'Sitemap', 'full_slug' => 'sitemap'];
             }
 
             return \App\Models\Menu::find($item['menu_id']);

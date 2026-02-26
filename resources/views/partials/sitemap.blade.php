@@ -18,7 +18,7 @@
                         </div>
                     @else
                         <a href="{{ url('/' . $item->full_slug) }}"
-                            class="text-lg text-orion-blue font-semibold hover:text-orion-blue transition-transform duration-200 hover:translate-x-1">
+                            class="inline-block text-lg text-orion-blue font-semibold hover:text-orion-blue transition-transform duration-200 hover:translate-x-1">
                             {{ $item->name }}
                         </a>
                     @endif
@@ -40,7 +40,7 @@
                                         </span>
                                     @else
                                         <a href="{{ url('/' . $child->full_slug) }}"
-                                            class="block pl-11 py-1 text-base font-semibold text-slate-500 hover:text-orion-blue transition-transform duration-200 hover:translate-x-1">
+                                            class="inline-block pl-11 py-1 text-base font-semibold text-slate-500 hover:text-orion-blue transition-transform duration-200 hover:translate-x-1">
                                             {{ $child->name }}
                                         </a>
                                     @endif
@@ -57,7 +57,7 @@
                                                     <div class="absolute left-11 top-1/2 -translate-y-1/2 w-4 h-px bg-orion-blue/50"></div>
 
                                                     <a href="{{ url('/' . $subchild->full_slug) }}"
-                                                        class="block pl-17 py-1 text-base font-semibold text-slate-400 hover:text-orion-blue transition-transform duration-200 hover:translate-x-1">
+                                                        class="inline-block pl-17 py-1 text-base font-semibold text-slate-400 hover:text-orion-blue transition-transform duration-200 hover:translate-x-1">
                                                         {{ $subchild->name }}
                                                     </a>
                                                 </div>
