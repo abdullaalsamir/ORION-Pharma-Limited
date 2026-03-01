@@ -48,13 +48,15 @@ class BannerController extends Controller
             $ratios = [48 / 9, 23 / 9, 16 / 9];
             $targetRatio = $ratios[$request->ratio];
 
-            $this->processBanner($file->getRealPath(), $fullPath, $targetRatio, $request->max_width);
+            list($finalWidth, $finalHeight) = $this->processBanner($file->getRealPath(), $fullPath, $targetRatio, $request->max_width);
 
             Banner::create([
                 'menu_id' => $menu->id,
                 'file_name' => $fileName,
                 'file_path' => "{$relativeDir}/{$fileName}",
-                'is_active' => 1
+                'is_active' => 1,
+                'image_width' => (int) $finalWidth,
+                'image_height' => (int) $finalHeight
             ]);
 
             return response()->json(['success' => true]);
@@ -151,6 +153,8 @@ class BannerController extends Controller
 
         imagedestroy($src);
         imagedestroy($dst);
+
+        return [$finalWidth, $finalHeight];
     }
 
     public function delete(Banner $banner)
@@ -168,7 +172,9 @@ class BannerController extends Controller
         return response()->json($banners->map(function ($banner) use ($fullSlug) {
             return [
                 'url' => '/' . ltrim($fullSlug, '/') . '/' . $banner->file_name,
-                'name' => $banner->file_name
+                'name' => $banner->file_name,
+                'width' => $banner->image_width,
+                'height' => $banner->image_height
             ];
         }));
     }

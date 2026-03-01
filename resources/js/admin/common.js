@@ -846,14 +846,27 @@ export function initPagesPage() {
                 e.preventDefault();
                 curPageId = btn.dataset.id;
                 document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
-                fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() }).then(handleResponse).then(images => {
+                
+                fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() })
+                .then(handleResponse)
+                .then(images => {
                     const strip = document.getElementById('imageStrip');
                     strip.innerHTML = images.length ? '' : 'No Banners';
                     images.forEach(img => {
                         const div = document.createElement('div');
                         div.className = "shrink-0 w-full h-auto rounded-xl overflow-hidden border-1 border-transparent hover:border-admin-blue cursor-pointer transition-all duration-300";
                         div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
-                        div.onclick = () => { editor.insert(`<div class="banner">\n  <img src="${img.url}" alt="${btn.dataset.name}">\n</div>\n`); editor.focus(); };
+                        div.onclick = () => { 
+                            const widthAttr = img.width ? ` width="${img.width}"` : '';
+                            const heightAttr = img.height ? ` height="${img.height}"` : '';
+                            
+                            const aspectStyle = (img.width && img.height) ? ` style="aspect-ratio: ${img.width} / ${img.height};"` : '';
+                            
+                            const htmlString = `<div class="banner rounded-xl shimmer">\n  <img src="${img.url}"${widthAttr}${heightAttr}${aspectStyle} alt="${btn.dataset.name}" class="w-full h-auto block rounded-xl object-cover" onload="this.parentElement.classList.remove('shimmer')">\n</div>\n`;
+                            
+                            editor.insert(htmlString); 
+                            editor.focus(); 
+                        };
                         strip.appendChild(div);
                     });
                 });

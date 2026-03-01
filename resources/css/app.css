@@ -189,10 +189,6 @@ footer h1::after {
         transform: translateX(0%) !important;
     }
 
-    .banner img {
-        @apply w-full rounded-2xl mb-8;
-    }
-
     .stats-container {
         @apply mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3;
     }

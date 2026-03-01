@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Banner extends Model
 {
-    protected $fillable = ['menu_id', 'file_path', 'file_name', 'is_active'];
+    protected $fillable = ['menu_id', 'file_path', 'file_name', 'image_width', 'image_height', 'is_active'];
 
     public function menu()
     {

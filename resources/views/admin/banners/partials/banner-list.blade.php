@@ -13,50 +13,47 @@
     <div class="grid grid-cols-1 gap-4">
         @forelse($banners as $banner)
             @php
-                $storagePath = storage_path('app/public/' . $banner->file_path);
+                $actualWidth = $banner->image_width ?? 'N/A';
+                $actualHeight = $banner->image_height ?? 'N/A';
                 $ratioStr = 'N/A';
-                $actualWidth = 'N/A';
-                
-                if (file_exists($storagePath)) {
-                    $size = @getimagesize($storagePath);
-                    if ($size) {
-                        $actualWidth = $size[0];
-                        $actualHeight = $size[1];
-                        
-                        $calcRatio = $actualWidth / $actualHeight;
-                        
-                        if (abs($calcRatio - (48/9)) < 0.1) {
-                            $ratioStr = '48:9';
-                        } elseif (abs($calcRatio - (23/9)) < 0.1) {
-                            $ratioStr = '23:9';
-                        } elseif (abs($calcRatio - (16/9)) < 0.1) {
-                            $ratioStr = '16:9';
-                        } else {
-                            $ratioStr = round($calcRatio, 2) . ':1';
-                        }
+
+                if (is_numeric($actualWidth) && is_numeric($actualHeight) && $actualHeight > 0) {
+                    $calcRatio = $actualWidth / $actualHeight;
+
+                    if (abs($calcRatio - (48 / 9)) < 0.1) {
+                        $ratioStr = '48:9';
+                    } elseif (abs($calcRatio - (23 / 9)) < 0.1) {
+                        $ratioStr = '23:9';
+                    } elseif (abs($calcRatio - (16 / 9)) < 0.1) {
+                        $ratioStr = '16:9';
+                    } else {
+                        $ratioStr = round($calcRatio, 2) . ':1';
                     }
                 }
             @endphp
-            
+
             <div
                 class="relative group rounded-2xl border border-slate-200 bg-white p-1 hover:border-admin-blue transition-all">
-                <div class="rounded-xl overflow-hidden bg-slate-100 relative">
+                <div class="rounded-xl overflow-hidden bg-slate-100 relative shimmer">
                     <img src="{{ url($menu->full_slug . '/' . $banner->file_name) }}?v={{ time() }}"
+                        width="{{ is_numeric($actualWidth) ? $actualWidth : '' }}"
+                        height="{{ is_numeric($actualHeight) ? $actualHeight : '' }}"
                         class="w-full h-full object-cover transition-all duration-500 {{ !$banner->is_active ? 'opacity-40 grayscale' : '' }}"
-                        alt="banner">
+                        alt="banner" onload="this.parentElement.classList.remove('shimmer')">
 
                     @if(!$banner->is_active)
                         <div class="absolute inset-0 flex items-center justify-center z-10">
-                            <span
-                                class="badge badge-danger bg-red-600! text-white! border-none!">Inactive</span>
+                            <span class="badge badge-danger bg-red-600! text-white! border-none!">Inactive</span>
                         </div>
                     @endif
 
                     <div class="absolute bottom-3 left-3 flex flex-col items-start gap-1 z-20">
-                        <span class="bg-slate-900/50 backdrop-blur text-white text-[11px] px-2 py-1 rounded-md tracking-wider">
+                        <span
+                            class="bg-slate-900/50 backdrop-blur text-white text-[11px] px-2 py-1 rounded-md tracking-wider">
                             Ratio: {{ $ratioStr }}
                         </span>
-                        <span class="bg-slate-900/50 backdrop-blur text-white text-[11px] px-2 py-1 rounded-md tracking-wider">
+                        <span
+                            class="bg-slate-900/50 backdrop-blur text-white text-[11px] px-2 py-1 rounded-md tracking-wider">
                             Max Width: {{ $actualWidth }}{{ $actualWidth !== 'N/A' ? 'px' : '' }}
                         </span>
                     </div>
