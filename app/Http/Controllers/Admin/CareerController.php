@@ -103,9 +103,15 @@ class CareerController extends Controller
 
         if ($request->has('pdf_images')) {
             $imagePaths = [];
+            $totalPages = count($request->pdf_images);
 
             foreach ($request->pdf_images as $index => $base64Data) {
-                $filename = $slugTitle . '-' . ($index + 1) . '.webp';
+                if ($totalPages === 1) {
+                    $filename = $slugTitle . '.webp';
+                } else {
+                    $filename = $slugTitle . '-' . ($index + 1) . '.webp';
+                }
+
                 $destPath = storage_path('app/public/career/image/' . $filename);
 
                 if (!file_exists(dirname($destPath))) {

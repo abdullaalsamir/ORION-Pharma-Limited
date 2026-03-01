@@ -16,8 +16,9 @@ import {
     initNewsPage,
     initDirectorsPage,
     initMedicalJournalsPage,
-    initComplaintsPage,
     initReportModule,
+    initCareerPage,
+    initComplaintsPage,
     initFooterPage
 } from './admin/common';
 
@@ -39,6 +40,7 @@ document.addEventListener('turbo:load', () => {
     initDirectorsPage();
     initMedicalJournalsPage();
     initReportModule();
+    initCareerPage();
     initComplaintsPage();
     initFooterPage();
 });

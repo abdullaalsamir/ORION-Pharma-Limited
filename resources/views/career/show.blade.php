@@ -175,7 +175,7 @@
                 Upload your CV (PDF format only).
             </p>
 
-            <form id="applyForm" onsubmit="submitApplication(event)">
+            <form id="applyForm" onsubmit="submitApplication(event, '{{ route('career.apply', $job->slug) }}')">
                 @csrf
                 <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center bg-slate-50 hover:bg-slate-100 hover:border-orion-blue transition-colors cursor-pointer mb-6"
                     onclick="document.getElementById('cvInput').click()">
@@ -214,98 +214,10 @@
                 Your CV has been successfully uploaded.
             </p>
 
-            <button onclick="closeSuccessModal()"
+            <button onclick="closeCareerSuccessModal()"
                 class="w-full h-12 rounded-xl bg-red-50 text-red-500 font-bold border border-red-200 hover:bg-red-100 transition-colors flex items-center justify-center cursor-pointer">
                 Close
             </button>
         </div>
     </div>
-
-    <script>
-        function openApplyModal() {
-            const modal = document.getElementById('applyModal');
-            const content = document.getElementById('applyModalContent');
-
-            document.body.style.overflow = 'hidden';
-
-            modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-
-            requestAnimationFrame(() => {
-                content.classList.remove('translate-y-8', 'opacity-0');
-            });
-        }
-
-        function closeApplyModal() {
-            const modal = document.getElementById('applyModal');
-            const content = document.getElementById('applyModalContent');
-
-            content.classList.add('translate-y-8', 'opacity-0');
-            modal.classList.add('opacity-0');
-
-            setTimeout(() => {
-                modal.classList.add('hidden', 'pointer-events-none');
-                document.body.style.overflow = '';
-            }, 300);
-        }
-
-        function closeSuccessModal() {
-            const modal = document.getElementById('successModal');
-            const content = document.getElementById('successModalContent');
-
-            content.classList.add('translate-y-8', 'opacity-0');
-            modal.classList.add('opacity-0');
-
-            setTimeout(() => {
-                modal.classList.add('hidden', 'pointer-events-none');
-                document.body.style.overflow = '';
-            }, 300);
-        }
-
-        async function submitApplication(e) {
-            e.preventDefault();
-
-            const btn = document.getElementById('submitBtn');
-            const file = document.getElementById('cvInput').files[0];
-
-            if (!file) return alert('Please select a PDF file');
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
-
-            const formData = new FormData();
-            formData.append('_token', '{{ csrf_token() }}');
-            formData.append('cv', file);
-
-            try {
-                const res = await fetch("{{ route('career.apply', $job->slug) }}", {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (res.ok) {
-                    closeApplyModal();
-
-                    requestAnimationFrame(() => {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                        const modal = document.getElementById('successModal');
-                        const content = document.getElementById('successModalContent');
-
-                        document.body.style.overflow = 'hidden';
-
-                        modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-                        content.classList.remove('translate-y-8', 'opacity-0');
-                    });
-                } else {
-                    const data = await res.json();
-                    alert(data.message || 'Upload failed.');
-                }
-            } catch (err) {
-                alert('A network error occurred.');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Upload';
-            }
-        }
-    </script>
 @endsection

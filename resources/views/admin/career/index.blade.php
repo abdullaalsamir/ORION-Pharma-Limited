@@ -145,91 +145,11 @@
         </div>
     @endforeach
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    <script type="module">
+        import * as pdfjsLib from '{{ asset("js/pdfjs-5.4.624-dist/build/pdf.mjs") }}';
 
-        function openModal(id) {
-            const m = document.getElementById(id); m.classList.remove('hidden'); setTimeout(() => m.classList.add('active'), 10);
-        }
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '{{ asset("js/pdfjs-5.4.624-dist/build/pdf.worker.mjs") }}';
 
-        function openCareerEditModal(job) {
-            document.getElementById('editForm').action = `/admin/career/${job.id}`;
-            document.getElementById('editTitle').value = job.title;
-            document.getElementById('editLocation').value = job.location || '';
-            document.getElementById('editFrom').value = job.on_from ? job.on_from.split('T')[0] : '';
-            document.getElementById('editTo').value = job.on_to ? job.on_to.split('T')[0] : '';
-            document.getElementById('editJobType').value = job.job_type;
-            document.getElementById('editApplyType').value = job.apply_type;
-            document.getElementById('editDesc').value = job.description;
-
-            const act = document.getElementById('editActive');
-            act.checked = job.is_active;
-            document.getElementById('careerStatusLabel').innerText = job.is_active ? 'Active' : 'Inactive';
-            act.onchange = () => document.getElementById('careerStatusLabel').innerText = act.checked ? 'Active' : 'Inactive';
-
-            openModal('editModal');
-        }
-
-        async function processFileSelection(input, mode) {
-            const file = input.files[0];
-            const container = document.getElementById(`${mode}PdfInputs`);
-            const overlay = document.getElementById(`${mode}Overlay`);
-            const btn = document.getElementById(`${mode}SubmitBtn`);
-
-            container.innerHTML = '';
-
-            if (!file || file.type !== 'application/pdf') return;
-
-            overlay.style.display = 'flex';
-            btn.disabled = true;
-
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 3 });
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    const base64 = canvas.toDataURL('image/webp', 0.7);
-
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'pdf_images[]';
-                    hiddenInput.value = base64;
-                    container.appendChild(hiddenInput);
-                }
-            } catch (error) {
-                console.error("Error processing PDF:", error);
-                alert("Failed to process PDF file.");
-                input.value = '';
-            } finally {
-                overlay.style.display = 'none';
-                btn.disabled = false;
-            }
-        }
-
-        const list = document.getElementById('career-list');
-        if (list) {
-            new Sortable(list, {
-                animation: 150, handle: '.drag-handle',
-                onEnd: function () {
-                    const items = Array.from(list.children).map((el, i) => ({ id: el.dataset.id, order: i }));
-                    fetch('{{ route('admin.career.update-order') }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ items })
-                    });
-                }
-            });
-        }
+        window.pdfjsLib = pdfjsLib;
     </script>
 @endsection

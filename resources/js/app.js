@@ -371,3 +371,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }, 200);
 });
+
+window.openApplyModal = function() {
+    const modal = document.getElementById('applyModal');
+    const content = document.getElementById('applyModalContent');
+
+    document.body.style.overflow = 'hidden';
+
+    if (modal) modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+
+    requestAnimationFrame(() => {
+        if (content) content.classList.remove('translate-y-8', 'opacity-0');
+    });
+};
+
+window.closeApplyModal = function() {
+    const modal = document.getElementById('applyModal');
+    const content = document.getElementById('applyModalContent');
+
+    if (content) content.classList.add('translate-y-8', 'opacity-0');
+    if (modal) modal.classList.add('opacity-0');
+
+    setTimeout(() => {
+        if (modal) modal.classList.add('hidden', 'pointer-events-none');
+        document.body.style.overflow = '';
+    }, 300);
+};
+
+window.closeCareerSuccessModal = function() {
+    const modal = document.getElementById('successModal');
+    const content = document.getElementById('successModalContent');
+
+    if (content) content.classList.add('translate-y-8', 'opacity-0');
+    if (modal) modal.classList.add('opacity-0');
+
+    setTimeout(() => {
+        if (modal) modal.classList.add('hidden', 'pointer-events-none');
+        document.body.style.overflow = '';
+    }, 300);
+};
+
+window.submitApplication = async function(e, url) {
+    e.preventDefault();
+
+    const form = e.target;
+    const btn = document.getElementById('submitBtn');
+    const fileInput = document.getElementById('cvInput');
+    const file = fileInput ? fileInput.files[0] : null;
+
+    if (!file) return alert('Please select a PDF file');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
+
+    const formData = new FormData(form);
+    
+    if (!formData.has('cv')) {
+        formData.append('cv', file);
+    }
+
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+
+        if (res.ok) {
+            window.closeApplyModal();
+
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                const modal = document.getElementById('successModal');
+                const content = document.getElementById('successModalContent');
+
+                document.body.style.overflow = 'hidden';
+
+                if (modal) modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                if (content) content.classList.remove('translate-y-8', 'opacity-0');
+                
+                form.reset();
+                const fileNameEl = document.getElementById('fileName');
+                if(fileNameEl) fileNameEl.innerText = 'Click to select PDF file';
+            });
+        } else {
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const data = await res.json();
+                let errorMessage = data.message || 'Upload failed.';
+                if (data.errors && data.errors.cv) {
+                    errorMessage = data.errors.cv[0];
+                }
+                alert(errorMessage);
+            } else {
+                console.error('Server returned non-JSON:', await res.text());
+                alert('System error: The server returned an invalid response.');
+            }
+        }
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        alert('A network error occurred. Please check your connection.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Upload';
+    }
+};
