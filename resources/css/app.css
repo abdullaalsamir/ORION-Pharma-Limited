@@ -50,15 +50,15 @@ footer h1::after {
 }
 
 @keyframes shimmer {
-    0% { background-position: -468px 0; }
-    100% { background-position: 468px 0; }
+    0% { background-position: 150% 0; }
+    100% { background-position: -150% 0; }
 }
 
 .shimmer {
-    background: #f6f7f8;
-    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background: #f8fafc;
+    background-image: linear-gradient(to right, #f8fafc 0%, #f1f5f9 20%, #f8fafc 40%, #f8fafc 100%);
     background-repeat: no-repeat;
-    background-size: 800px 100%;
+    background-size: 150% 100%;
     animation: shimmer 1.5s infinite linear;
 }
 
