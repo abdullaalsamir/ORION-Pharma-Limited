@@ -85,16 +85,17 @@
                                 </span>
 
                                 <span class="px-4 py-2 rounded-full bg-slate-50 text-slate-500">
-                                    {{ $job->apply_type === 'Online' ? 'Apply Online' : 'Apply Offline' }}
+                                    <span class="flex items-center gap-2">
+                                        @if($job->apply_type === 'Online')
+                                            Apply Online
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                        @else
+                                            Apply Offline
+                                        @endif
+                                    </span>
                                 </span>
 
                             </div>
-
-                            @if(!blank($job->description))
-                                <p class="mt-4 text-slate-600 leading-relaxed line-clamp-2">
-                                    {{ $job->description }}
-                                </p>
-                            @endif
 
                         </div>
 

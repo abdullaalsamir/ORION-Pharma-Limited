@@ -176,3 +176,44 @@
 #root-menu-list > .tree-item::after {
   display: none !important;
 }
+
+.tox .tox-editor-header {
+    box-shadow: none !important;
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary {
+    box-shadow: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.tox:not(.tox-tinymce-inline) .tox-editor-header {
+  padding: 0 !important;
+}
+
+.tox .tox-tbtn:hover {
+    cursor: pointer !important;
+}
+
+.tox-tinymce {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+}
+
+.tox .tox-edit-area::before {
+    border: 1px solid #0054a6 !important;
+    border-radius: 0 0 10px 10px !important;
+}
+
+.tox .tox-statusbar {
+    display: none !important;
+}
+
+.tox .tox-dialog.tox-dialog--width-lg {
+    height: 85vh !important;
+}
+
+.tox .tox-dialog.tox-dialog--width-lg .tox-dialog__body-content {
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+}

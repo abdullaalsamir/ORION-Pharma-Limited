@@ -8,7 +8,7 @@
                 <h1>Career Management</h1>
                 <p class="text-xs text-slate-400">Manage job openings and career opportunities</p>
             </div>
-            <button onclick="openModal('addModal')" class="btn-success h-10!">
+            <button onclick="openCareerAddModal()" class="btn-success h-10!">
                 <i class="fas fa-plus"></i> Add Job
             </button>
         </div>
@@ -28,7 +28,7 @@
                                 class="font-bold text-slate-700 text-sm truncate uppercase tracking-tight">{{ $job->title }}</span>
                             <div class="flex gap-4 text-[11px] text-slate-500 font-medium">
                                 <span><i class="fas fa-location-dot text-slate-300 mr-1"></i>
-                                    {{ $job->location ?: 'Anywhere' }}</span>
+                                    {{ $job->location }}</span>
                                 <span class="text-orion-blue"><i class="fas fa-briefcase mr-1"></i> {{ $job->job_type }}</span>
                                 <span class="text-slate-400"><i class="fas fa-globe mr-1"></i> {{ $job->apply_type }}
                                     Apply</span>
@@ -54,7 +54,7 @@
 
     @foreach(['add', 'edit'] as $mode)
         <div id="{{ $mode }}Modal" class="modal-overlay hidden">
-            <div class="modal-content max-w-2xl! h-[85vh]! flex flex-col relative">
+            <div class="modal-content max-w-3xl! h-[85vh]! flex flex-col relative">
 
                 <div id="{{ $mode }}Overlay"
                     class="absolute inset-0 bg-white/80 z-50 flex-col items-center justify-center hidden rounded-2xl">
@@ -75,13 +75,12 @@
 
                     <div class="relative w-full">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Job Title</label>
-                        <input type="text" name="title" id="{{ $mode }}Title" maxlength="200" required
-                            class="input-field w-full">
+                        <input type="text" name="title" id="{{ $mode }}Title" required class="input-field w-full">
                     </div>
 
                     <div class="relative w-full">
                         <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Location</label>
-                        <input type="text" name="location" id="{{ $mode }}Location" maxlength="200" class="input-field w-full">
+                        <input type="text" name="location" id="{{ $mode }}Location" required class="input-field w-full">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -145,6 +144,7 @@
         </div>
     @endforeach
 
+    <script src="{{ asset('js/tinymce/js/tinymce/tinymce.min.js') }}"></script>
     <script type="module">
         import * as pdfjsLib from '{{ asset("js/pdfjs/build/pdf.mjs") }}';
 

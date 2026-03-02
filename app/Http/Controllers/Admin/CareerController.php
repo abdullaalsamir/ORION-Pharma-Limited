@@ -66,7 +66,7 @@ class CareerController extends Controller
     {
         return $request->validate([
             'title' => 'required|string',
-            'location' => 'nullable|string',
+            'location' => 'required|string',
             'on_from' => 'nullable|date',
             'on_to' => 'nullable|date',
             'job_type' => 'required|in:Internship,Part-Time,Full-Time',

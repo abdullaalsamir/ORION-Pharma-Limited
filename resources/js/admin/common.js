@@ -65,6 +65,28 @@ export function initGlobalHelpers() {
         if (input) input.classList.remove('border-red-500', 'bg-red-50');
         if (error) error.classList.add('hidden');
     };
+
+    window.initEditor = (selector) => {
+        if (typeof tinymce === 'undefined') return;
+        tinymce.remove(selector);
+        tinymce.init({
+            selector: selector,
+            menubar: false,
+            height: 300,
+            plugins: ['lists', 'link', 'code'],
+            toolbar: `undo redo bold italic underline strikethrough subscript superscript removeformat alignleft aligncenter alignright alignjustify bullist numlist link code`,
+            statusbar: false,
+            promotion: false,
+            branding: false,
+            license_key: 'gpl',
+            forced_root_block: 'div',
+            setup: function (editor) {
+                editor.on('change', function () {
+                    editor.save();
+                });
+            }
+        });
+    };
 }
 
 export function initLayoutUI() {
@@ -887,6 +909,8 @@ export function initPagesPage() {
 export function initCareerPage() {
     if (!window.location.pathname.includes('/admin/career')) return;
 
+    initEditor('#addDesc, #editDesc');
+
     window.openModal = (id) => {
         const m = document.getElementById(id);
         if (m) {
@@ -895,39 +919,52 @@ export function initCareerPage() {
         }
     };
 
+    window.openCareerAddModal = () => {
+        const form = document.getElementById('addForm');
+        if (form) form.reset();
+        
+        const pdfInputs = document.getElementById('addPdfInputs');
+        if (pdfInputs) pdfInputs.innerHTML = '';
+
+        if (typeof tinymce !== 'undefined' && tinymce.get('addDesc')) {
+            tinymce.get('addDesc').setContent('');
+        }
+        
+        window.openModal('addModal');
+    };
+
     window.openCareerEditModal = (job) => {
         const form = document.getElementById('editForm');
         if (form) form.action = `/admin/career/${job.id}`;
         
-        const title = document.getElementById('editTitle');
-        if (title) title.value = job.title;
+        document.getElementById('editTitle').value = job.title;
+        document.getElementById('editLocation').value = job.location || '';
+        document.getElementById('editFrom').value = job.on_from ? job.on_from.split('T')[0] : '';
+        document.getElementById('editTo').value = job.on_to ? job.on_to.split('T')[0] : '';
+        document.getElementById('editJobType').value = job.job_type;
+        document.getElementById('editApplyType').value = job.apply_type;
         
-        const location = document.getElementById('editLocation');
-        if (location) location.value = job.location || '';
-        
-        const from = document.getElementById('editFrom');
-        if (from) from.value = job.on_from ? job.on_from.split('T')[0] : '';
-        
-        const to = document.getElementById('editTo');
-        if (to) to.value = job.on_to ? job.on_to.split('T')[0] : '';
-        
-        const jobType = document.getElementById('editJobType');
-        if (jobType) jobType.value = job.job_type;
-        
-        const applyType = document.getElementById('editApplyType');
-        if (applyType) applyType.value = job.apply_type;
-        
-        const desc = document.getElementById('editDesc');
-        if (desc) desc.value = job.description || '';
+        const descTextarea = document.getElementById('editDesc');
+        const content = job.description || '';
+        if (descTextarea) descTextarea.value = content;
+
+        if (typeof tinymce !== 'undefined') {
+            const editor = tinymce.get('editDesc');
+            if (editor) {
+                editor.setContent(content);
+            } else {
+                initEditor('#editDesc');
+                setTimeout(() => {
+                    if(tinymce.get('editDesc')) tinymce.get('editDesc').setContent(content);
+                }, 100);
+            }
+        }
 
         const act = document.getElementById('editActive');
         if (act) {
-            act.checked = job.is_active;
+            act.checked = job.is_active == 1;
             const statusLabel = document.getElementById('careerStatusLabel');
-            if (statusLabel) statusLabel.innerText = job.is_active ? 'Active' : 'Inactive';
-            act.onchange = () => {
-                if (statusLabel) statusLabel.innerText = act.checked ? 'Active' : 'Inactive';
-            };
+            if (statusLabel) statusLabel.innerText = act.checked ? 'Active' : 'Inactive';
         }
 
         window.openModal('editModal');

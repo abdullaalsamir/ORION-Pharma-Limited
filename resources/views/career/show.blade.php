@@ -19,11 +19,12 @@
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
 
                 <div class="px-8 py-6 border-b border-slate-200">
+
                     <div class="text-2xl font-bold text-orion-blue leading-tight capitalize mb-4">
                         {{ $job->title }}
                     </div>
 
-                    <div class="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+                    <div class="flex flex-wrap gap-3 text-sm font-semibold mb-3">
 
                         @if($job->on_from && $job->on_to)
                             <span class="px-4 py-2 rounded-full bg-slate-50">
@@ -45,22 +46,32 @@
                             </span>
                         @endif
 
-                        @if($job->location)
-                            <span class="px-4 py-2 rounded-full bg-slate-50 text-slate-500">
-                                <i class="fas fa-location-dot mr-1 text-orion-blue"></i>
-                                {{ $job->location }}
-                            </span>
-                        @endif
-
                         <span class="px-4 py-2 rounded-full bg-slate-50 text-slate-500">
                             {{ $job->job_type }}
                         </span>
 
                         <span class="px-4 py-2 rounded-full bg-slate-50 text-slate-500">
-                            {{ $job->apply_type === 'Online' ? 'Apply Online' : 'Apply Offline' }}
+                            <span class="flex items-center gap-2">
+                                @if($job->apply_type === 'Online')
+                                    Apply Online
+                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                @else
+                                    Apply Offline
+                                @endif
+                            </span>
                         </span>
 
                     </div>
+
+                    @if($job->location)
+                        <div class="text-sm font-semibold">
+                            <span class="px-4 py-2 rounded-full bg-slate-50 text-slate-500 inline-flex items-center">
+                                <i class="fas fa-location-dot mr-2 text-orion-blue"></i>
+                                {{ $job->location }}
+                            </span>
+                        </div>
+                    @endif
+
                 </div>
 
                 @if($job->converted_images)
@@ -82,9 +93,9 @@
                 @endif
 
                 @if(!blank($job->description))
-                    <div class="px-10">
-                        <div class="prose max-w-none text-slate-700 leading-relaxed pb-8">
-                            {{ $job->description }}
+                    <div class="px-10 py-8 border-t border-slate-200">
+                        <div class="prose max-w-none text-slate-700 leading-relaxed">
+                            {!! $job->description !!}
                         </div>
                     </div>
                 @endif
@@ -130,14 +141,16 @@
                             class="group block p-5 hover:bg-blue-50 transition-colors">
 
                             <span
-                                class="text-sm font-semibold text-slate-700 line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug">
+                                class="text-base font-semibold text-slate-700 capitalize line-clamp-2 group-hover:text-orion-blue transition-colors leading-snug">
                                 {{ $latest->title }}
                             </span>
 
-                            <div class="mt-2 text-xs text-slate-400 uppercase tracking-wider">
-                                {{ $latest->job_type }}
+                            <div class="mt-2 text-sm text-slate-400 tracking-wider">
+                                {{ $latest->job_type }} ||
+                                {{ $job->apply_type === 'Online' ? 'Apply Online' : 'Apply Offline' }}
+
                                 @if($latest->location)
-                                    • {{ $latest->location }}
+                                    || {{ $latest->location }}
                                 @endif
                             </div>
                         </a>
