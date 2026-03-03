@@ -143,12 +143,4 @@
             </div>
         </div>
     @endforeach
-
-    <script type="module">
-        import * as pdfjsLib from '{{ asset("js/pdfjs/build/pdf.mjs") }}';
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '{{ asset("js/pdfjs/build/pdf.worker.mjs") }}';
-
-        window.pdfjsLib = pdfjsLib;
-    </script>
 @endsection

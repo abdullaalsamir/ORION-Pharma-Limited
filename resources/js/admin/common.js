@@ -12,6 +12,11 @@ import 'tinymce/plugins/link';
 import 'tinymce/plugins/code';
 window.tinymce = tinymce;
 
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker?url';
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+window.pdfjsLib = pdfjsLib;
+
 async function handleResponse(res) {
     const contentType = res.headers.get("content-type");
     if (contentType && contentType.indexOf("application/json") !== -1) {
