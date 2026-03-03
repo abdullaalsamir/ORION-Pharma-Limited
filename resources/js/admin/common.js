@@ -66,9 +66,17 @@ export function initGlobalHelpers() {
         if (error) error.classList.add('hidden');
     };
 
-    window.initEditor = (selector) => {
+   window.initEditor = (selector) => {
         if (typeof tinymce === 'undefined') return;
-        tinymce.remove(selector);
+
+        const element = document.querySelector(selector);
+        if (!element) return;
+
+        const existing = tinymce.get(element.id);
+        if (existing) {
+            existing.remove();
+        }
+
         tinymce.init({
             selector: selector,
             menubar: false,
@@ -80,8 +88,23 @@ export function initGlobalHelpers() {
             branding: false,
             license_key: 'gpl',
             forced_root_block: 'div',
+
             setup: function (editor) {
-                editor.on('change', function () {
+
+                function applyLinkClass() {
+                    const links = editor.dom.select('a');
+                    links.forEach(link => {
+                        editor.dom.addClass(link, 'text-orion-blue');
+                        editor.dom.addClass(link, 'no-underline');
+                    });
+                }
+
+                editor.on('init', function () {
+                    applyLinkClass();
+                });
+
+                editor.on('change input NodeChange', function () {
+                    applyLinkClass();
                     editor.save();
                 });
             }
@@ -909,7 +932,8 @@ export function initPagesPage() {
 export function initCareerPage() {
     if (!window.location.pathname.includes('/admin/career')) return;
 
-    initEditor('#addDesc, #editDesc');
+    initEditor('#addDesc');
+    initEditor('#editDesc');
 
     window.openModal = (id) => {
         const m = document.getElementById(id);
