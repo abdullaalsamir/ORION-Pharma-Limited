@@ -144,7 +144,6 @@
         </div>
     @endforeach
 
-    <script src="{{ asset('js/tinymce/js/tinymce/tinymce.min.js') }}"></script>
     <script type="module">
         import * as pdfjsLib from '{{ asset("js/pdfjs/build/pdf.mjs") }}';
 

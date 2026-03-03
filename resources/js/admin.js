@@ -1,6 +1,6 @@
 import './bootstrap';
 import * as Turbo from "@hotwired/turbo";
-import '@fortawesome/fontawesome-free/css/all.min.css';
+
 import {
     initGlobalHelpers,
     initLayoutUI,
