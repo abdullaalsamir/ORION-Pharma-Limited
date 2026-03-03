@@ -29,7 +29,7 @@
             </p>
 
             <div class="prose prose-slate max-w-none text-slate-700 leading-relaxed text-justify">
-                {!! nl2br($item->description) !!}
+                {!! $item->description !!}
             </div>
         </div>
 

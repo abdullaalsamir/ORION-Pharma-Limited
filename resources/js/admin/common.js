@@ -78,7 +78,7 @@ export function initGlobalHelpers() {
         if (error) error.classList.add('hidden');
     };
 
-   window.initEditor = (selector) => {
+    window.initEditor = (selector, options = {}) => {
         if (typeof tinymce === 'undefined') return;
 
         const element = document.querySelector(selector);
@@ -100,6 +100,25 @@ export function initGlobalHelpers() {
             branding: false,
             license_key: 'gpl',
             forced_root_block: 'div',
+
+            content_style: `
+            html, body {
+                overflow-y: auto !important;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(0,0,0,0.1) transparent;
+            }
+            html::-webkit-scrollbar, body::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb {
+                background-color: rgba(0,0,0,0.1);
+                border-radius: 9999px;
+            }
+            html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0,0,0,0.1);
+            }
+            `,
 
             setup: function (editor) {
 
@@ -754,24 +773,70 @@ window.togglePinText = (el, labelId) => {
 };
 
 export function initDirectorsPage() {
+    if (!window.location.pathname.includes('/admin/board-of-directors')) return;
+
+    initEditor('#addDesc');
+    initEditor('#editDesc');
+
     setupModule('board-of-directors', '/admin/director-actions/store', '/admin/director-actions', 'curDirId');
+
     window.openDirectorAddModal = () => {
-        document.querySelector('#addModal form').reset();
+        const form = document.querySelector('#addModal form');
+        if (form) form.reset();
+
+        if (typeof tinymce !== 'undefined' && tinymce.get('addDesc')) {
+            tinymce.get('addDesc').setContent('');
+        }
+
         const modal = document.getElementById('addModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+
     window.openDirectorEditModal = (item, slug) => {
         window.curDirId = item.id;
+
         document.getElementById('editName').value = item.name;
         document.getElementById('editDesignation').value = item.designation;
         document.getElementById('editActive').checked = item.is_active == 1;
-        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
+
+        document.getElementById('editPreview').innerHTML =
+            `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" 
+             class="w-full h-full object-cover">`;
+
+        const content = item.description || '';
+        const descTextarea = document.getElementById('editDesc');
+        if (descTextarea) descTextarea.value = content;
+
+        if (typeof tinymce !== 'undefined') {
+            const editor = tinymce.get('editDesc');
+            if (editor) {
+                editor.setContent(content);
+            } else {
+                initEditor('#editDesc');
+                setTimeout(() => {
+                    if (tinymce.get('editDesc')) {
+                        tinymce.get('editDesc').setContent(content);
+                    }
+                }, 100);
+            }
+        }
+
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
-    window.deleteDirector = (id) => { if(confirm('Delete this Profile?')) fetch(`/admin/director-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
+
+    window.deleteDirector = (id) => {
+        if (confirm('Delete this Profile?')) {
+            fetch(`/admin/director-actions/${id}`, {
+                method: 'DELETE',
+                headers: fetchHeaders()
+            })
+            .then(handleResponse)
+            .then(() => Turbo.visit(window.location.href));
+        }
+    };
 }
 
 export function initMedicalJournalsPage() {

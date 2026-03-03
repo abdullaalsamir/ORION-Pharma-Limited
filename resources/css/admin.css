@@ -78,7 +78,7 @@
     @apply opacity-100 visible;
   }
   .modal-content {
-    @apply bg-white w-full max-w-lg rounded-3xl shadow-2xl p-8 transform translate-y-8 transition-all duration-300;
+    @apply bg-white w-full max-w-lg rounded-2xl shadow-2xl p-8 transform translate-y-8 transition-all duration-300;
   }
   .modal-overlay.active .modal-content {
     @apply translate-y-0;
@@ -114,7 +114,7 @@
     @apply h-7 w-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 hover:border-admin-blue hover:text-admin-blue hover:bg-slate-50 transition-all cursor-pointer active:scale-90;
   }
 
-   .custom-scrollbar {
+  .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
   }
