@@ -101,7 +101,7 @@ class MenuController extends Controller
 
         $menu->delete();
 
-        return back()->with('success', 'Menu deleted and hierarchy reorganized.');
+        return response()->json(['success' => true, 'message' => 'Menu deleted and hierarchy reorganized.']);
     }
 
     public function updateOrder(Request $request)

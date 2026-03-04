@@ -40,12 +40,9 @@
                     <i class="fas fa-pencil text-xs"></i>
                 </button>
 
-                <form action="{{ route('admin.menus.delete', $menu) }}" method="POST"
-                    onsubmit="return confirm('Delete this menu?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn-danger w-8 p-1.5!"><i
-                            class="fas fa-trash-can text-xs"></i></button>
-                </form>
+                <button type="button" class="btn-danger w-8 p-1.5!" onclick="deleteMenu({{ $menu->id }})">
+                    <i class="fas fa-trash-can text-xs"></i>
+                </button>
             </div>
         </div>
     </div>

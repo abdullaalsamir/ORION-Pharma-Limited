@@ -39,12 +39,9 @@
                             <button class="btn-icon w-8 p-1.5!" onclick="openCareerEditModal({{ json_encode($job) }})">
                                 <i class="fas fa-pencil text-xs"></i>
                             </button>
-                            <form action="{{ route('admin.career.delete', $job) }}" method="POST"
-                                onsubmit="return confirm('Delete this job post?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn-danger w-8 p-1.5!"><i
-                                        class="fas fa-trash-can text-xs"></i></button>
-                            </form>
+                            <button class="btn-danger w-8 p-1.5!" onclick="deleteCareer({{ $job->id }})">
+                                <i class="fas fa-trash-can text-xs"></i>
+                            </button>
                         </div>
                     </div>
                 @endforeach

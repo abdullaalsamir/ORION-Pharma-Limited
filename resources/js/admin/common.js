@@ -45,6 +45,28 @@ const fetchHeaders = () => ({
     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
 });
 
+function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
+    if (!window.location.pathname.includes(pathPart)) return;
+    const addF = document.querySelector('#addModal form');
+    const editF = document.getElementById('editForm');
+
+    if (addF) addF.onsubmit = (e) => {
+        e.preventDefault();
+        fetch(storeUrl, { method: 'POST', body: new FormData(addF), headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
+
+    if (editF) editF.onsubmit = (e) => {
+        e.preventDefault();
+        const fd = new FormData(editF);
+        fd.append('_method', 'PUT');
+        if(document.getElementById('editPin')) fd.append('is_pin', document.getElementById('editPin').checked ? 1 : 0);
+        fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        fetch(`${updateUrlPrefix}/${window[currentIdKey]}`, { method: 'POST', body: fd, headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
+}
+
 export function initGlobalHelpers() {
     window.closeModal = (id) => {
         const modal = document.getElementById(id);
@@ -268,63 +290,103 @@ export function initMenuPage() {
         };
     });
 
+    window.deleteMenu = (id) => {
+        if (confirm('Delete this menu?')) {
+            fetch(`/admin/menus/${id}`, {
+                method: 'DELETE',
+                headers: fetchHeaders()
+            })
+            .then(handleResponse)
+            .then(() => Turbo.visit(window.location.href));
+        }
+    };
+
     if(editParent) editParent.onchange = () => checkParentStatus(editParent.options[editParent.selectedIndex].dataset.active);
     if(editActive) editActive.onchange = () => lbl.innerText = editActive.checked ? 'Active' : 'Inactive';
 }
 
-export function initSlidersPage() {
-    const list = document.getElementById('slider-list');
-    const addF = document.querySelector('#addModal form');
-    const editF = document.getElementById('editForm');
-    if (!list || !window.location.pathname.includes('/admin/sliders')) return;
-
-    window.openSliderAddModal = () => {
-        addF.reset();
-        document.getElementById('addPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>`;
-        const modal = document.getElementById('addModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
+export function initPagesPage() {
+    const modal = document.getElementById('pageModal');
+    if (!modal || !window.location.pathname.includes('/admin/pages')) return;
+    const editor = ace.edit("ace-editor");
+    editor.session.setMode("ace/mode/html");
+    editor.setTheme("ace/theme/github");
+    const applyFormatting = (type) => {
+        const selectedText = editor.getSelectedText();
+        const toggleTag = (text, tagName) => {
+            const start = `<${tagName}>`, end = `</${tagName}>`;
+            return (text.startsWith(start) && text.endsWith(end)) ? text.substring(start.length, text.length - end.length) : `${start}${text}${end}`;
+        };
+        switch (type) {
+            case 'b': editor.insert(toggleTag(selectedText, 'b')); break;
+            case 'i': editor.insert(toggleTag(selectedText, 'i')); break;
+            case 'p': editor.insert(toggleTag(selectedText, 'p')); break;
+            case 'h1': editor.insert(toggleTag(selectedText, 'h1')); break;
+            case 'h2': editor.insert(toggleTag(selectedText, 'h2')); break;
+            case 'br': editor.insert(`<br>\n`); break;
+            case 'ul':
+            case 'ol':
+                const items = selectedText
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .map(line => {
+                        line = line.replace(/^[-*•]\s+/, '');
+                        line = line.replace(/^\d+\.\s+/, '');
+                        return `  <li>${line}</li>`;
+                    })
+                    .join('\n');
+                editor.insert(`<${type}>\n${items}\n</${type}>`);
+                break;
+            case 'a':
+                const linkHtml = `<a href="https://google.com" target="_blank" rel="noopener noreferrer" class="text-orion-blue no-underline">Google</a>\n`;
+                editor.insert(linkHtml);
+                break;
+        }
+        editor.focus();
     };
-
-    window.openSliderEditModal = (slider) => {
-        window.currentSliderId = slider.id;
-        document.getElementById('editH1').value = slider.header_1;
-        document.getElementById('editH2').value = slider.header_2;
-        document.getElementById('editDesc').value = slider.description;
-        document.getElementById('editActive').checked = slider.is_active == 1;
-        document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}?t=${Date.now()}" class="w-full h-full object-cover">`;
-        
-        ['editH1', 'editH2', 'editDesc'].forEach(id => {
-            const el = document.getElementById(id);
-            const counterId = id.replace('edit', 'editC').replace('H1', '1').replace('H2', '2').replace('Desc', 'D');
-            updateCount(el, counterId, el?.getAttribute('maxlength'));
-        });
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    addF.onsubmit = (e) => {
-        e.preventDefault();
-        fetch('/admin/sliders', { method: 'POST', body: new FormData(addF), headers: fetchHeaders() })
+    document.querySelectorAll('#editor-toolbar button').forEach(btn => btn.onclick = () => applyFormatting(btn.dataset.format));
+    let curPageId = null;
+    document.querySelectorAll('.edit-page').forEach(btn => {
+        btn.onclick = (e) => {
+            e.preventDefault();
+            curPageId = btn.dataset.id;
+            document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
+         
+            fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() })
+            .then(handleResponse)
+            .then(images => {
+                const strip = document.getElementById('imageStrip');
+                strip.innerHTML = images.length ? '' : 'No Banners';
+                images.forEach(img => {
+                    const div = document.createElement('div');
+                    div.className = "shrink-0 w-full h-auto rounded-xl overflow-hidden border-1 border-transparent hover:border-admin-blue cursor-pointer transition-all duration-300";
+                    div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
+                    div.onclick = () => { 
+                        const widthAttr = img.width ? ` width="${img.width}"` : '';
+                        const heightAttr = img.height ? ` height="${img.height}"` : '';
+                         
+                        const aspectStyle = (img.width && img.height) ? ` style="aspect-ratio: ${img.width} / ${img.height};"` : '';
+                         
+                        const htmlString = `<div class="banner rounded-xl shimmer">\n  <img src="${img.url}"${widthAttr}${heightAttr}${aspectStyle} alt="${btn.dataset.name}" class="w-full h-auto block rounded-xl object-cover" onload="this.parentElement.classList.remove('shimmer')">\n</div>\n`;
+                         
+                        editor.insert(htmlString); 
+                        editor.focus(); 
+                    };
+                    strip.appendChild(div);
+                });
+            });
+            const dec = document.createElement('textarea'); dec.innerHTML = btn.dataset.content || '';
+            editor.setValue(dec.value, -1);
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.add('active'); editor.resize(); }, 10);
+        };
+    });
+    const save = document.getElementById('savePage');
+    if (save) save.onclick = () => {
+        fetch(`/admin/pages/${curPageId}`, { method: 'PUT', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ content: editor.getValue() }) })
         .then(handleResponse).then(() => Turbo.visit(window.location.href));
     };
-
-    editF.onsubmit = (e) => {
-        e.preventDefault();
-        const fd = new FormData(editF);
-        fd.append('_method', 'PUT');
-        fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        fetch(`/admin/sliders/${window.currentSliderId}`, { method: 'POST', body: fd, headers: fetchHeaders() })
-        .then(handleResponse).then(() => Turbo.visit(window.location.href));
-    };
-
-    new Sortable(list, { animation: 150, handle: '.drag-handle', onEnd: () => {
-        let orders = [];
-        document.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
-        fetch('/admin/sliders/update-order', { method: 'POST', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ orders }) }).then(handleResponse);
-    }});
 }
 
 export function initBannersPage() {
@@ -412,6 +474,72 @@ export function initBannersPage() {
     window.deleteBannerImage = (id) => {
         if (confirm('Delete this Banner Image?')) fetch(`/admin/banners/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => loadBanners(window.currentMenuId, document.querySelector('.leaf-menu-item.active')));
     };
+}
+
+export function initSlidersPage() {
+    const list = document.getElementById('slider-list');
+    const addF = document.querySelector('#addModal form');
+    const editF = document.getElementById('editForm');
+    if (!list || !window.location.pathname.includes('/admin/sliders')) return;
+
+    window.openSliderAddModal = () => {
+        addF.reset();
+        document.getElementById('addPreview').innerHTML = `<i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>`;
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openSliderEditModal = (slider) => {
+        window.currentSliderId = slider.id;
+        document.getElementById('editH1').value = slider.header_1;
+        document.getElementById('editH2').value = slider.header_2;
+        document.getElementById('editDesc').value = slider.description;
+        document.getElementById('editActive').checked = slider.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/storage/${slider.image_path}?t=${Date.now()}" class="w-full h-full object-cover">`;
+        
+        ['editH1', 'editH2', 'editDesc'].forEach(id => {
+            const el = document.getElementById(id);
+            const counterId = id.replace('edit', 'editC').replace('H1', '1').replace('H2', '2').replace('Desc', 'D');
+            updateCount(el, counterId, el?.getAttribute('maxlength'));
+        });
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.deleteSlider = (id) => {
+        if (confirm('Delete this slider?')) {
+            fetch(`/admin/sliders/${id}`, { 
+                method: 'DELETE', 
+                headers: fetchHeaders() 
+            })
+            .then(handleResponse)
+            .then(() => Turbo.visit(window.location.href));
+        }
+    };
+
+    addF.onsubmit = (e) => {
+        e.preventDefault();
+        fetch('/admin/sliders', { method: 'POST', body: new FormData(addF), headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
+
+    editF.onsubmit = (e) => {
+        e.preventDefault();
+        const fd = new FormData(editF);
+        fd.append('_method', 'PUT');
+        fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
+        fetch(`/admin/sliders/${window.currentSliderId}`, { method: 'POST', body: fd, headers: fetchHeaders() })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
+
+    new Sortable(list, { animation: 150, handle: '.drag-handle', onEnd: () => {
+        let orders = [];
+        document.querySelectorAll('.sortable-item').forEach((el, index) => orders.push({ id: el.dataset.id, order: index + 1 }));
+        fetch('/admin/sliders/update-order', { method: 'POST', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ orders }) }).then(handleResponse);
+    }});
 }
 
 export function initProductsPage() {
@@ -611,26 +739,27 @@ export function initProductsPage() {
     window.deleteProduct = (id) => { if (confirm('Delete this Product?')) fetch(`/admin/products-actions/product-delete/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => window.location.reload()); };
 }
 
-function setupModule(pathPart, storeUrl, updateUrlPrefix, currentIdKey) {
-    if (!window.location.pathname.includes(pathPart)) return;
-    const addF = document.querySelector('#addModal form');
-    const editF = document.getElementById('editForm');
-
-    if (addF) addF.onsubmit = (e) => {
-        e.preventDefault();
-        fetch(storeUrl, { method: 'POST', body: new FormData(addF), headers: fetchHeaders() })
-        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+export function initCSRPage() {
+    setupModule('csr-list', '/admin/csr-actions/store', '/admin/csr-actions', 'curCsrId');
+    window.openCsrAddModal = () => {
+        const form = document.querySelector('#addModal form');
+        form.reset();
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
     };
-
-    if (editF) editF.onsubmit = (e) => {
-        e.preventDefault();
-        const fd = new FormData(editF);
-        fd.append('_method', 'PUT');
-        if(document.getElementById('editPin')) fd.append('is_pin', document.getElementById('editPin').checked ? 1 : 0);
-        fd.append('is_active', document.getElementById('editActive').checked ? 1 : 0);
-        fetch(`${updateUrlPrefix}/${window[currentIdKey]}`, { method: 'POST', body: fd, headers: fetchHeaders() })
-        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    window.openCsrEditModal = (item, slug) => {
+        window.curCsrId = item.id;
+        document.getElementById('editTitle').value = item.title;
+        document.getElementById('editDate').value = item.csr_date.split('T')[0];
+        document.getElementById('editDesc').value = item.description;
+        document.getElementById('editActive').checked = item.is_active == 1;
+        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.deleteCsr = (id) => { if(confirm('Delete this CSR?')) fetch(`/admin/csr-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
 export function initScholarshipPage() {
@@ -683,172 +812,6 @@ export function initScholarshipPage() {
     };
 
     window.deleteScholarship = (id) => { if (confirm('Delete this recipient?')) { fetch(`/admin/scholarship-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }) .then(handleResponse) .then(() => Turbo.visit(window.location.href)); } };
-}
-
-export function initCSRPage() {
-    setupModule('csr-list', '/admin/csr-actions/store', '/admin/csr-actions', 'curCsrId');
-    window.openCsrAddModal = () => {
-        const form = document.querySelector('#addModal form');
-        form.reset();
-        const modal = document.getElementById('addModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-    window.openCsrEditModal = (item, slug) => {
-        window.curCsrId = item.id;
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.csr_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description;
-        document.getElementById('editActive').checked = item.is_active == 1;
-        document.getElementById('editPreview').innerHTML = `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-    window.deleteCsr = (id) => { if(confirm('Delete this CSR?')) fetch(`/admin/csr-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
-}
-
-export function initNewsPage() {
-    setupModule('news-and-announcements', '/admin/news-actions/store', '/admin/news-actions', 'curNewsId');
-    window.openNewsAddModal = () => {
-        const form = document.querySelector('#addModal form');
-        form.reset();
-
-        const pin = form.querySelector('input[name="is_pin"][type="checkbox"]');
-        const label = document.getElementById('addPinLabel');
-
-        if (pin) {
-            pin.checked = true;
-            togglePinText(pin, 'addPinLabel');
-        }
-
-        const modal = document.getElementById('addModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-    window.openNewsEditModal = (item, slug) => {
-        window.curNewsId = item.id;
-        document.getElementById('editTitle').value = item.title;
-        document.getElementById('editDate').value = item.news_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description;
-        document.getElementById('editActive').checked = item.is_active == 1;
-        if(document.getElementById('editPin')) {
-            document.getElementById('editPin').checked = item.is_pin == 1;
-            togglePinText(document.getElementById('editPin'), 'editPinLabel');
-        }
-        const preview = document.getElementById('editPreview');
-        preview.classList.remove('p-6');
-        if (item.file_type === 'pdf') {
-            preview.classList.add('p-6');
-            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase">PDF Notice</span></div>`;
-        } else {
-            preview.innerHTML = `<img src="/${slug}/${item.file_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
-        }
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-    window.deleteNews = (id) => { if(confirm('Delete this News?')) fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
-}
-
-window.handleNewsPreview = function (input, previewId, fileNameId) {
-    const preview = document.getElementById(previewId);
-    const fileNameEl = document.getElementById(fileNameId);
-    if (!input.files || !input.files[0]) return;
-    const file = input.files[0];
-    
-    const form = input.closest('form');
-    const titleInp = form.querySelector('input[name="title"]');
-    if (titleInp && !titleInp.value) {
-        titleInp.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-        const counterId = titleInp.getAttribute('oninput')?.match(/'([^']+)'/)?.[1];
-        if(counterId) updateCount(titleInp, counterId, titleInp.getAttribute('maxlength'));
-    }
-
-    if (fileNameEl) { fileNameEl.textContent = file.name; fileNameEl.classList.remove('hidden'); }
-    preview.innerHTML = ''; preview.classList.remove('p-6');
-    if (file.type === 'application/pdf') {
-        preview.classList.add('p-6');
-        preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase font-sans">PDF Notice</span></div>`;
-    } else {
-        const reader = new FileReader();
-        reader.onload = (e) => preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-        reader.readAsDataURL(file);
-    }
-};
-
-window.togglePinText = (el, labelId) => {
-    const label = document.getElementById(labelId);
-    if (!label) return;
-    label.innerText = el.checked ? "Pin Yes" : "Pin No";
-    label.classList.toggle('text-admin-blue', el.checked);
-};
-
-export function initDirectorsPage() {
-    if (!window.location.pathname.includes('/admin/board-of-directors')) return;
-
-    initEditor('#addDesc');
-    initEditor('#editDesc');
-
-    setupModule('board-of-directors', '/admin/director-actions/store', '/admin/director-actions', 'curDirId');
-
-    window.openDirectorAddModal = () => {
-        const form = document.querySelector('#addModal form');
-        if (form) form.reset();
-
-        if (typeof tinymce !== 'undefined' && tinymce.get('addDesc')) {
-            tinymce.get('addDesc').setContent('');
-        }
-
-        const modal = document.getElementById('addModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.openDirectorEditModal = (item, slug) => {
-        window.curDirId = item.id;
-
-        document.getElementById('editName').value = item.name;
-        document.getElementById('editDesignation').value = item.designation;
-        document.getElementById('editActive').checked = item.is_active == 1;
-
-        document.getElementById('editPreview').innerHTML =
-            `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" 
-             class="w-full h-full object-cover">`;
-
-        const content = item.description || '';
-        const descTextarea = document.getElementById('editDesc');
-        if (descTextarea) descTextarea.value = content;
-
-        if (typeof tinymce !== 'undefined') {
-            const editor = tinymce.get('editDesc');
-            if (editor) {
-                editor.setContent(content);
-            } else {
-                initEditor('#editDesc');
-                setTimeout(() => {
-                    if (tinymce.get('editDesc')) {
-                        tinymce.get('editDesc').setContent(content);
-                    }
-                }, 100);
-            }
-        }
-
-        const modal = document.getElementById('editModal');
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-    };
-
-    window.deleteDirector = (id) => {
-        if (confirm('Delete this Profile?')) {
-            fetch(`/admin/director-actions/${id}`, {
-                method: 'DELETE',
-                headers: fetchHeaders()
-            })
-            .then(handleResponse)
-            .then(() => Turbo.visit(window.location.href));
-        }
-    };
 }
 
 export function initMedicalJournalsPage() {
@@ -920,6 +883,73 @@ export function initMedicalJournalsPage() {
     window.deleteJournal = (id) => { if(confirm('Delete this Medical Journal?')) fetch(`/admin/journal-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
+export function initDirectorsPage() {
+    if (!window.location.pathname.includes('/admin/board-of-directors')) return;
+
+    initEditor('#addDesc');
+    initEditor('#editDesc');
+
+    setupModule('board-of-directors', '/admin/director-actions/store', '/admin/director-actions', 'curDirId');
+
+    window.openDirectorAddModal = () => {
+        const form = document.querySelector('#addModal form');
+        if (form) form.reset();
+
+        if (typeof tinymce !== 'undefined' && tinymce.get('addDesc')) {
+            tinymce.get('addDesc').setContent('');
+        }
+
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.openDirectorEditModal = (item, slug) => {
+        window.curDirId = item.id;
+
+        document.getElementById('editName').value = item.name;
+        document.getElementById('editDesignation').value = item.designation;
+        document.getElementById('editActive').checked = item.is_active == 1;
+
+        document.getElementById('editPreview').innerHTML =
+            `<img src="/${slug}/${item.image_path.split('/').pop()}?t=${Date.now()}" 
+             class="w-full h-full object-cover">`;
+
+        const content = item.description || '';
+        const descTextarea = document.getElementById('editDesc');
+        if (descTextarea) descTextarea.value = content;
+
+        if (typeof tinymce !== 'undefined') {
+            const editor = tinymce.get('editDesc');
+            if (editor) {
+                editor.setContent(content);
+            } else {
+                initEditor('#editDesc');
+                setTimeout(() => {
+                    if (tinymce.get('editDesc')) {
+                        tinymce.get('editDesc').setContent(content);
+                    }
+                }, 100);
+            }
+        }
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+
+    window.deleteDirector = (id) => {
+        if (confirm('Delete this Profile?')) {
+            fetch(`/admin/director-actions/${id}`, {
+                method: 'DELETE',
+                headers: fetchHeaders()
+            })
+            .then(handleResponse)
+            .then(() => Turbo.visit(window.location.href));
+        }
+    };
+}
+
 export function initReportModule() {
     const map = { 'annual-reports': '/admin/annual-reports-actions', 'quarterly-reports': '/admin/quarterly-reports-actions', 'half-yearly-reports': '/admin/half-yearly-reports-actions', 'price-sensitive-information': '/admin/price-sensitive-information-actions', 'corporate-governance': '/admin/corporate-governance-actions' };
     const seg = window.location.pathname.split('/')[2];
@@ -947,88 +977,91 @@ export function initReportModule() {
     window.deleteReportItem = (id) => { if(confirm('Delete this Report?')) fetch(`${base}/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href)); };
 }
 
-export function initPagesPage() {
-    const modal = document.getElementById('pageModal');
-    if (!modal || !window.location.pathname.includes('/admin/pages')) return;
-    const editor = ace.edit("ace-editor");
-    editor.session.setMode("ace/mode/html");
-    editor.setTheme("ace/theme/github");
-    const applyFormatting = (type) => {
-        const selectedText = editor.getSelectedText();
-        const toggleTag = (text, tagName) => {
-            const start = `<${tagName}>`, end = `</${tagName}>`;
-            return (text.startsWith(start) && text.endsWith(end)) ? text.substring(start.length, text.length - end.length) : `${start}${text}${end}`;
-        };
-        switch (type) {
-            case 'b': editor.insert(toggleTag(selectedText, 'b')); break;
-            case 'i': editor.insert(toggleTag(selectedText, 'i')); break;
-            case 'p': editor.insert(toggleTag(selectedText, 'p')); break;
-            case 'h1': editor.insert(toggleTag(selectedText, 'h1')); break;
-            case 'h2': editor.insert(toggleTag(selectedText, 'h2')); break;
-            case 'br': editor.insert(`<br>\n`); break;
-            case 'ul':
-            case 'ol':
-                const items = selectedText
-                    .split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line.length > 0)
-                    .map(line => {
-                        line = line.replace(/^[-*•]\s+/, '');
-                        line = line.replace(/^\d+\.\s+/, '');
-                        return `  <li>${line}</li>`;
-                    })
-                    .join('\n');
-                editor.insert(`<${type}>\n${items}\n</${type}>`);
-                break;
-            case 'a':
-                const linkHtml = `<a href="https://google.com" target="_blank" rel="noopener noreferrer" class="text-orion-blue no-underline">Google</a>\n`;
-                editor.insert(linkHtml);
-                break;
+export function initNewsPage() {
+    if (!window.location.pathname.includes('news-and-announcements')) return;
+
+    setupModule('news-and-announcements', '/admin/news-actions/store', '/admin/news-actions', 'curNewsId');
+    
+    window.openNewsAddModal = () => {
+        const form = document.querySelector('#addModal form');
+        form.reset();
+
+        const pin = form.querySelector('input[name="is_pin"][type="checkbox"]');
+        const label = document.getElementById('addPinLabel');
+
+        if (pin) {
+            pin.checked = true;
+            window.togglePinText(pin, 'addPinLabel');
         }
-        editor.focus();
+
+        const modal = document.getElementById('addModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
     };
-    document.querySelectorAll('#editor-toolbar button').forEach(btn => btn.onclick = () => applyFormatting(btn.dataset.format));
-    let curPageId = null;
-    document.querySelectorAll('.edit-page').forEach(btn => {
-        btn.onclick = (e) => {
-            e.preventDefault();
-            curPageId = btn.dataset.id;
-            document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
-         
-            fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() })
-            .then(handleResponse)
-            .then(images => {
-                const strip = document.getElementById('imageStrip');
-                strip.innerHTML = images.length ? '' : 'No Banners';
-                images.forEach(img => {
-                    const div = document.createElement('div');
-                    div.className = "shrink-0 w-full h-auto rounded-xl overflow-hidden border-1 border-transparent hover:border-admin-blue cursor-pointer transition-all duration-300";
-                    div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
-                    div.onclick = () => { 
-                        const widthAttr = img.width ? ` width="${img.width}"` : '';
-                        const heightAttr = img.height ? ` height="${img.height}"` : '';
-                         
-                        const aspectStyle = (img.width && img.height) ? ` style="aspect-ratio: ${img.width} / ${img.height};"` : '';
-                         
-                        const htmlString = `<div class="banner rounded-xl shimmer">\n  <img src="${img.url}"${widthAttr}${heightAttr}${aspectStyle} alt="${btn.dataset.name}" class="w-full h-auto block rounded-xl object-cover" onload="this.parentElement.classList.remove('shimmer')">\n</div>\n`;
-                         
-                        editor.insert(htmlString); 
-                        editor.focus(); 
-                    };
-                    strip.appendChild(div);
-                });
-            });
-            const dec = document.createElement('textarea'); dec.innerHTML = btn.dataset.content || '';
-            editor.setValue(dec.value, -1);
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.add('active'); editor.resize(); }, 10);
-        };
-    });
-    const save = document.getElementById('savePage');
-    if (save) save.onclick = () => {
-        fetch(`/admin/pages/${curPageId}`, { method: 'PUT', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ content: editor.getValue() }) })
-        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    
+    window.openNewsEditModal = (item, slug) => {
+        window.curNewsId = item.id;
+        document.getElementById('editTitle').value = item.title;
+        document.getElementById('editDate').value = item.news_date.split('T')[0];
+        document.getElementById('editDesc').value = item.description;
+        document.getElementById('editActive').checked = item.is_active == 1;
+        
+        if(document.getElementById('editPin')) {
+            document.getElementById('editPin').checked = item.is_pin == 1;
+            window.togglePinText(document.getElementById('editPin'), 'editPinLabel');
+        }
+        
+        const preview = document.getElementById('editPreview');
+        preview.classList.remove('p-6');
+        if (item.file_type === 'pdf') {
+            preview.classList.add('p-6');
+            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase">PDF Notice</span></div>`;
+        } else {
+            preview.innerHTML = `<img src="/${slug}/${item.file_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
+        }
+        
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
     };
+    window.handleNewsPreview = function (input, previewId, fileNameId) {
+        const preview = document.getElementById(previewId);
+        const fileNameEl = document.getElementById(fileNameId);
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        
+        const form = input.closest('form');
+        const titleInp = form.querySelector('input[name="title"]');
+        if (titleInp && !titleInp.value) {
+            titleInp.value = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+            const counterId = titleInp.getAttribute('oninput')?.match(/'([^']+)'/)?.[1];
+            if(counterId) updateCount(titleInp, counterId, titleInp.getAttribute('maxlength'));
+        }
+
+        if (fileNameEl) { fileNameEl.textContent = file.name; fileNameEl.classList.remove('hidden'); }
+        preview.innerHTML = ''; preview.classList.remove('p-6');
+        if (file.type === 'application/pdf') {
+            preview.classList.add('p-6');
+            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase font-sans">PDF Notice</span></div>`;
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            reader.readAsDataURL(file);
+        }
+    };
+
+    window.togglePinText = (el, labelId) => {
+        const label = document.getElementById(labelId);
+        if (!label) return;
+        label.innerText = el.checked ? "Pin Yes" : "Pin No";
+        label.classList.toggle('text-admin-blue', el.checked);
+    };
+    window.deleteNews = (id) => { if(confirm('Delete this News?')) { fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }) .then(handleResponse) .then(() => Turbo.visit(window.location.href)); } };
+}
+
+export function initComplaintsPage() {
+    if (!window.location.pathname.includes('product-complaint')) return;
+    window.deleteComplaint = (id) => { if(confirm('Delete this Complaint?')) fetch(`/admin/product-complaint-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href, { action: "replace" })); };
 }
 
 export function initCareerPage() {
@@ -1161,11 +1194,17 @@ export function initCareerPage() {
             }
         });
     }
-}
 
-export function initComplaintsPage() {
-    if (!window.location.pathname.includes('product-complaint')) return;
-    window.deleteComplaint = (id) => { if(confirm('Delete this Complaint?')) fetch(`/admin/product-complaint-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }).then(handleResponse).then(() => Turbo.visit(window.location.href, { action: "replace" })); };
+    window.deleteCareer = (id) => {
+        if (confirm('Delete this job post?')) {
+            fetch(`/admin/career/${id}`, {
+                method: 'DELETE',
+                headers: fetchHeaders()
+            })
+            .then(handleResponse)
+            .then(() => Turbo.visit(window.location.href));
+        }
+    };
 }
 
 export function initFooterPage() {

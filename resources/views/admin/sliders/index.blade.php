@@ -56,12 +56,9 @@
                             <button class="btn-icon w-8 p-1.5!" onclick="openSliderEditModal({{ json_encode($slider) }})">
                                 <i class="fas fa-pencil text-xs"></i>
                             </button>
-                            <form action="{{ route('admin.sliders.delete', $slider) }}" method="POST"
-                                onsubmit="return confirm('Delete slider?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn-danger w-8 p-1.5!"><i
-                                        class="fas fa-trash-can text-xs"></i></button>
-                            </form>
+                            <button class="btn-danger w-8 p-1.5!" onclick="deleteSlider({{ $slider->id }})">
+                                <i class="fas fa-trash-can text-xs"></i>
+                            </button>
                         </div>
                     </div>
                 @endforeach

@@ -44,14 +44,17 @@ class CareerController extends Controller
 
     public function delete(Career $career)
     {
-        if ($career->file_path)
+        if ($career->file_path) {
             Storage::disk('public')->delete($career->file_path);
+        }
         if ($career->converted_images) {
-            foreach ($career->converted_images as $img)
+            foreach ($career->converted_images as $img) {
                 Storage::disk('public')->delete($img);
+            }
         }
         $career->delete();
-        return back()->with('success', 'Job deleted successfully');
+
+        return response()->json(['success' => true, 'message' => 'Job deleted successfully']);
     }
 
     public function updateOrder(Request $request)

@@ -118,7 +118,7 @@ class SliderController extends Controller
 
         Slider::where('order', '>', $currentOrder)->decrement('order');
 
-        return back()->with('success', 'Slider deleted and sequence reorganized');
+        return response()->json(['success' => true, 'message' => 'Slider deleted successfully']);
     }
 
     private function processSliderImage($sourcePath, $destinationPath)
