@@ -1,5 +1,12 @@
 import Sortable from 'sortablejs';
 
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-html';
+import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/ext-searchbox';
+import aceWorkerUrl from 'ace-builds/src-noconflict/worker-html?url';
+ace.config.setModuleUrl('ace/mode/html_worker', aceWorkerUrl);
+
 import tinymce from 'tinymce';
 import 'tinymce/icons/default/icons.min.js';
 import 'tinymce/themes/silver/theme.min.js';
@@ -943,72 +950,85 @@ export function initReportModule() {
 export function initPagesPage() {
     const modal = document.getElementById('pageModal');
     if (!modal || !window.location.pathname.includes('/admin/pages')) return;
-    if (typeof ace !== 'undefined') {
-        const editor = ace.edit("ace-editor");
-        const applyFormatting = (type) => {
-            const selectedText = editor.getSelectedText();
-            const toggleTag = (text, tagName) => {
-                const start = `<${tagName}>`, end = `</${tagName}>`;
-                return (text.startsWith(start) && text.endsWith(end)) ? text.substring(start.length, text.length - end.length) : `${start}${text}${end}`;
-            };
-            switch (type) {
-                case 'b': editor.insert(toggleTag(selectedText, 'b')); break;
-                case 'i': editor.insert(toggleTag(selectedText, 'i')); break;
-                case 'p': editor.insert(toggleTag(selectedText, 'p')); break;
-                case 'h1': editor.insert(toggleTag(selectedText, 'h1')); break;
-                case 'h2': editor.insert(toggleTag(selectedText, 'h2')); break;
-                case 'br': editor.insert(`<br>\n`); break;
-                case 'ul':
-                case 'ol':
-                    const items = selectedText.split('\n').map(line => `  <li>${line}</li>`).join('\n');
-                    editor.insert(`<${type}>\n${items}\n</${type}>`);
-                    break;
-            }
-            editor.focus();
+    const editor = ace.edit("ace-editor");
+    editor.session.setMode("ace/mode/html");
+    editor.setTheme("ace/theme/github");
+    const applyFormatting = (type) => {
+        const selectedText = editor.getSelectedText();
+        const toggleTag = (text, tagName) => {
+            const start = `<${tagName}>`, end = `</${tagName}>`;
+            return (text.startsWith(start) && text.endsWith(end)) ? text.substring(start.length, text.length - end.length) : `${start}${text}${end}`;
         };
-        document.querySelectorAll('#editor-toolbar button').forEach(btn => btn.onclick = () => applyFormatting(btn.dataset.format));
-        let curPageId = null;
-        document.querySelectorAll('.edit-page').forEach(btn => {
-            btn.onclick = (e) => {
-                e.preventDefault();
-                curPageId = btn.dataset.id;
-                document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
-                
-                fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() })
-                .then(handleResponse)
-                .then(images => {
-                    const strip = document.getElementById('imageStrip');
-                    strip.innerHTML = images.length ? '' : 'No Banners';
-                    images.forEach(img => {
-                        const div = document.createElement('div');
-                        div.className = "shrink-0 w-full h-auto rounded-xl overflow-hidden border-1 border-transparent hover:border-admin-blue cursor-pointer transition-all duration-300";
-                        div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
-                        div.onclick = () => { 
-                            const widthAttr = img.width ? ` width="${img.width}"` : '';
-                            const heightAttr = img.height ? ` height="${img.height}"` : '';
-                            
-                            const aspectStyle = (img.width && img.height) ? ` style="aspect-ratio: ${img.width} / ${img.height};"` : '';
-                            
-                            const htmlString = `<div class="banner rounded-xl shimmer">\n  <img src="${img.url}"${widthAttr}${heightAttr}${aspectStyle} alt="${btn.dataset.name}" class="w-full h-auto block rounded-xl object-cover" onload="this.parentElement.classList.remove('shimmer')">\n</div>\n`;
-                            
-                            editor.insert(htmlString); 
-                            editor.focus(); 
-                        };
-                        strip.appendChild(div);
-                    });
+        switch (type) {
+            case 'b': editor.insert(toggleTag(selectedText, 'b')); break;
+            case 'i': editor.insert(toggleTag(selectedText, 'i')); break;
+            case 'p': editor.insert(toggleTag(selectedText, 'p')); break;
+            case 'h1': editor.insert(toggleTag(selectedText, 'h1')); break;
+            case 'h2': editor.insert(toggleTag(selectedText, 'h2')); break;
+            case 'br': editor.insert(`<br>\n`); break;
+            case 'ul':
+            case 'ol':
+                const items = selectedText
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .map(line => {
+                        line = line.replace(/^[-*•]\s+/, '');
+                        line = line.replace(/^\d+\.\s+/, '');
+                        return `  <li>${line}</li>`;
+                    })
+                    .join('\n');
+                editor.insert(`<${type}>\n${items}\n</${type}>`);
+                break;
+            case 'a':
+                const linkHtml = `<a href="https://google.com" target="_blank" rel="noopener noreferrer" class="text-orion-blue no-underline">Google</a>\n`;
+                editor.insert(linkHtml);
+                break;
+        }
+        editor.focus();
+    };
+    document.querySelectorAll('#editor-toolbar button').forEach(btn => btn.onclick = () => applyFormatting(btn.dataset.format));
+    let curPageId = null;
+    document.querySelectorAll('.edit-page').forEach(btn => {
+        btn.onclick = (e) => {
+            e.preventDefault();
+            curPageId = btn.dataset.id;
+            document.getElementById('modalTitle').innerText = `Edit: ${btn.dataset.name}`;
+         
+            fetch(`/admin/banners/get-for-editor/${curPageId}`, { headers: fetchHeaders() })
+            .then(handleResponse)
+            .then(images => {
+                const strip = document.getElementById('imageStrip');
+                strip.innerHTML = images.length ? '' : 'No Banners';
+                images.forEach(img => {
+                    const div = document.createElement('div');
+                    div.className = "shrink-0 w-full h-auto rounded-xl overflow-hidden border-1 border-transparent hover:border-admin-blue cursor-pointer transition-all duration-300";
+                    div.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
+                    div.onclick = () => { 
+                        const widthAttr = img.width ? ` width="${img.width}"` : '';
+                        const heightAttr = img.height ? ` height="${img.height}"` : '';
+                         
+                        const aspectStyle = (img.width && img.height) ? ` style="aspect-ratio: ${img.width} / ${img.height};"` : '';
+                         
+                        const htmlString = `<div class="banner rounded-xl shimmer">\n  <img src="${img.url}"${widthAttr}${heightAttr}${aspectStyle} alt="${btn.dataset.name}" class="w-full h-auto block rounded-xl object-cover" onload="this.parentElement.classList.remove('shimmer')">\n</div>\n`;
+                         
+                        editor.insert(htmlString); 
+                        editor.focus(); 
+                    };
+                    strip.appendChild(div);
                 });
-                const dec = document.createElement('textarea'); dec.innerHTML = btn.dataset.content || '';
-                editor.setValue(dec.value, -1);
-                modal.classList.remove('hidden');
-                setTimeout(() => { modal.classList.add('active'); editor.resize(); }, 10);
-            };
-        });
-        const save = document.getElementById('savePage');
-        if (save) save.onclick = () => {
-            fetch(`/admin/pages/${curPageId}`, { method: 'PUT', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ content: editor.getValue() }) })
-            .then(handleResponse).then(() => Turbo.visit(window.location.href));
+            });
+            const dec = document.createElement('textarea'); dec.innerHTML = btn.dataset.content || '';
+            editor.setValue(dec.value, -1);
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.add('active'); editor.resize(); }, 10);
         };
-    }
+    });
+    const save = document.getElementById('savePage');
+    if (save) save.onclick = () => {
+        fetch(`/admin/pages/${curPageId}`, { method: 'PUT', headers: { ...fetchHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ content: editor.getValue() }) })
+        .then(handleResponse).then(() => Turbo.visit(window.location.href));
+    };
 }
 
 export function initCareerPage() {

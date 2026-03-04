@@ -30,7 +30,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') | ORION</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <script src="{{ asset('js/ace/src-min-noconflict/ace.js') }}" type="text/javascript" charset="utf-8"></script>
     @vite(['resources/css/admin.css', 'resources/js/admin.js'])
 </head>
 

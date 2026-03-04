@@ -66,6 +66,7 @@
                             <button type="button" class="btn-toolbar" data-format="ul" title="Unordered List">UL</button>
                             <button type="button" class="btn-toolbar" data-format="ol" title="Ordered List">OL</button>
                             <button type="button" class="btn-toolbar" data-format="br" title="Line Break">Br</button>
+                            <button type="button" class="btn-toolbar" data-format="a" title="Insert Link">&lt;&gt;</button>
                         </div>
                     </div>
 
