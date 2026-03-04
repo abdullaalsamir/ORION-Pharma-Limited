@@ -1,5 +1,3 @@
-import './bootstrap';
-
 import Swiper from 'swiper';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import 'swiper/css';
