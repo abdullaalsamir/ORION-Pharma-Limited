@@ -389,9 +389,9 @@ select:focus {
 }
 
 .global-footsteps-map path {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: mapDraw 3s ease forwards;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+    animation: mapDraw 5s ease forwards;
 }
 
 @media (max-width: 768px) {
