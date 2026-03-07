@@ -37,9 +37,9 @@
                                         {{ $item->title }}
                                     </span>
 
-                                    <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">
-                                        {{ $item->description }}
-                                    </p>
+                                    <div class="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                                        {!! $item->description !!}
+                                    </div>
 
                                     <div
                                         class="flex items-center gap-1.5 text-[10px] font-bold text-admin-blue uppercase tracking-wider mt-2">
@@ -78,7 +78,7 @@
     </div>
 
     <div id="addModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-2xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Add CSR Item</h1>
                 <button type="button" onclick="closeModal('addModal')" class="btn-icon"><i
@@ -128,7 +128,7 @@
     </div>
 
     <div id="editModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-2xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Edit CSR Item</h1>
                 <button onclick="closeModal('editModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>

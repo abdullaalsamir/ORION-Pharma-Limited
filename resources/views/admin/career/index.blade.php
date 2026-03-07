@@ -51,7 +51,7 @@
 
     @foreach(['add', 'edit'] as $mode)
         <div id="{{ $mode }}Modal" class="modal-overlay hidden">
-            <div class="modal-content max-w-3xl! h-[85vh]! flex flex-col relative">
+            <div class="modal-content max-w-3xl! h-[90vh]! flex flex-col relative">
 
                 <div id="{{ $mode }}Overlay"
                     class="absolute inset-0 bg-white/80 z-50 flex-col items-center justify-center hidden rounded-2xl">

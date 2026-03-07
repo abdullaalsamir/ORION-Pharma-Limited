@@ -95,7 +95,7 @@
     </div>
 
     <div id="addModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Add News Item</h1>
                 <button type="button" onclick="closeModal('addModal')" class="btn-icon">
@@ -166,7 +166,7 @@
     </div>
 
     <div id="editModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Edit News Item</h1>
                 <button onclick="closeModal('editModal')" class="btn-icon">

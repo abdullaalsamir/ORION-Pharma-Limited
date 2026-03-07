@@ -126,7 +126,7 @@
     </div>
 
     <div id="productModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 id="prodTitle" class="mb-0!">Add Product</h1>
                 <div class="flex items-center">

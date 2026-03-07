@@ -26,7 +26,7 @@
                             {{ $item->title }}
                         </h3>
                         <p class="text-slate-500 text-base leading-relaxed line-clamp-3">
-                            {{ $item->description }}
+                            {!! $item->description !!}
                         </p>
                     </div>
                 </a>

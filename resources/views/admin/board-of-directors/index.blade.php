@@ -66,7 +66,7 @@
     </div>
 
     <div id="addModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-5xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-5xl! h-[90vh]! flex flex-col">
 
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Add New Director</h1>
@@ -124,7 +124,7 @@
     </div>
 
     <div id="editModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-5xl! h-[85vh]! flex flex-col">
+        <div class="modal-content max-w-5xl! h-[90vh]! flex flex-col">
 
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Edit Director Profile</h1>

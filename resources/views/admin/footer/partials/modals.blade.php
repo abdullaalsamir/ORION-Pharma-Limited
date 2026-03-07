@@ -1,5 +1,5 @@
 <div id="contactModal" class="modal-overlay hidden">
-    <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+    <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
         <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
             <h1 class="mb-0!">Edit Contact Info</h1>
             <button type="button" onclick="closeModal('contactModal')" class="btn-icon"><i
@@ -65,7 +65,7 @@
 </div>
 
 <div id="mapModal" class="modal-overlay hidden">
-    <div class="modal-content max-w-2xl! h-[85vh]! flex flex-col">
+    <div class="modal-content max-w-2xl! h-[90vh]! flex flex-col">
         <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
             <h1 class="mb-0!">Map Configuration</h1>
             <button onclick="closeModal('mapModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
@@ -93,7 +93,7 @@
 </div>
 
 <div id="qlModal" class="modal-overlay hidden">
-    <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+    <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
         <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
             <h1 class="mb-0!">Quick Links Slots</h1>
             <button onclick="closeModal('qlModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>
@@ -152,7 +152,7 @@
 </div>
 
 <div id="followModal" class="modal-overlay hidden">
-    <div class="modal-content max-w-xl! h-[85vh]! flex flex-col">
+    <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
         <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
             <h1 class="mb-0!">Branding & Social</h1>
             <button onclick="closeModal('followModal')" class="btn-icon"><i class="fas fa-times text-xl"></i></button>

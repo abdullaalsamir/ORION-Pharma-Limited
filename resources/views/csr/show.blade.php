@@ -32,7 +32,7 @@
             </div>
 
             <div class="prose prose-lg max-w-none text-slate-700 leading-relaxed text-justify">
-                {!! nl2br(e($item->description)) !!}
+                {!! $item->description !!}
             </div>
 
             @php

@@ -218,3 +218,9 @@
     max-height: 80vh !important;
     overflow-y: auto !important;
 }
+
+.tox .tox-tbtn {
+  width: 28px !important;
+  height: 26px !important;
+  padding: 2px !important;
+}
