@@ -87,7 +87,7 @@
                                             <h4 class="text-orion-blue font-bold uppercase text-sm tracking-wider mb-1">{{ $label }}
                                             </h4>
                                             <div class="product-key prose prose-slate text-justify max-w-none">
-                                                {!! nl2br($product->$key) !!}
+                                                {!! $product->$key !!}
                                             </div>
                                         </div>
                                     @endif

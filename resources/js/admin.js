@@ -133,6 +133,7 @@ export function initGlobalHelpers() {
             height: 300,
             plugins: ['lists', 'link', 'code'],
             toolbar: `undo redo bold semibold italic underline strikethrough subscript superscript alignleft aligncenter alignright alignjustify bullist numlist link code`,
+            toolbar_mode: 'wrap',
             statusbar: false,
             promotion: false,
             branding: false,
@@ -575,61 +576,16 @@ export function initProductsPage() {
     const pForm = document.getElementById('prodForm');
     if (!gForm || !pForm || !window.location.pathname.includes('/admin/products')) return;
 
-    const toolbar = document.getElementById('product-editor-toolbar');
-    let activeTextarea = null;
+    const tinyFields = [
+        'indications', 'dosage_admin', 'use_children',
+        'use_pregnancy_lactation', 'contraindications', 'precautions',
+        'side_effects', 'drug_interactions', 'high_risk',
+        'overdosage', 'storage', 'presentation',
+        'how_supplied', 'commercial_pack', 'packaging',
+        'official_specification'
+    ];
 
-    if (toolbar) {
-        document.querySelectorAll('#prodForm textarea').forEach(ta => {
-            ta.addEventListener('focus', () => {
-                activeTextarea = ta;
-            });
-        });
-
-        const applyFormatting = (type) => {
-            if (!activeTextarea) return;
-
-            const textarea = activeTextarea;
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const selectedText = textarea.value.substring(start, end);
-
-            const toggleTag = (text, tagName) => {
-                const open = `<${tagName}>`;
-                const close = `</${tagName}>`;
-                return (text.startsWith(open) && text.endsWith(close))
-                    ? text.slice(open.length, -close.length)
-                    : `${open}${text}${close}`;
-            };
-
-            let insertText = '';
-
-            switch (type) {
-                case 'b': insertText = toggleTag(selectedText, 'b'); break;
-                case 'i': insertText = toggleTag(selectedText, 'i'); break;
-                case 'p': insertText = toggleTag(selectedText, 'p'); break;
-                case 'h1': insertText = toggleTag(selectedText, 'h1'); break;
-                case 'h2': insertText = toggleTag(selectedText, 'h2'); break;
-                case 'br': insertText = `<br>\n`; break;
-
-                case 'ul':
-                case 'ol':
-                    const items = selectedText
-                        .split('\n')
-                        .map(line => `  <li>${line}</li>`)
-                        .join('\n');
-                    insertText = `<${type}>\n${items}\n</${type}>`;
-                    break;
-            }
-
-            textarea.setRangeText(insertText, start, end, 'end');
-            textarea.focus();
-        };
-
-        toolbar.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('mousedown', e => e.preventDefault());
-            btn.onclick = () => applyFormatting(btn.dataset.format);
-        });
-    }
+    tinyFields.forEach(f => initEditor(`#p_${f}`));
 
     window.loadProducts = (id, el) => {
         document.querySelectorAll('.generic-list-item').forEach(item => {
@@ -685,8 +641,14 @@ export function initProductsPage() {
         pForm.reset();
         window.currentEditProductId = null;
 
-        document.getElementById('p_generic_id_wrapper').classList.add('hidden');
+        tinyFields.forEach(f => {
+            const elId = `p_${f}`;
+            if (typeof tinymce !== 'undefined' && tinymce.get(elId)) {
+                tinymce.get(elId).setContent('');
+            }
+        });
 
+        document.getElementById('p_generic_id_wrapper').classList.add('hidden');
         document.getElementById('prodTitle').innerText = "Add Product";
 
         const btn = document.getElementById('prodSubmitBtn');
@@ -703,7 +665,6 @@ export function initProductsPage() {
 
     window.openEditProduct = (p) => {
         window.currentEditProductId = p.id;
-
         clearInlineError('p_trade_name', 'prodNameError');
         document.getElementById('prodTitle').innerText = "Edit Product";
 
@@ -725,7 +686,7 @@ export function initProductsPage() {
             select.value = p.generic_id || '';
         }
 
-        const fields = [
+        const allFields = [
             'trade_name','preparation','therapeutic_class','indications',
             'dosage_admin','use_children','use_pregnancy_lactation',
             'contraindications','precautions','side_effects',
@@ -734,9 +695,26 @@ export function initProductsPage() {
             'packaging','official_specification'
         ];
 
-        fields.forEach(f => {
-            const el = document.getElementById('p_' + f);
-            if (el) el.value = p[f] || '';
+        allFields.forEach(f => {
+            const elId = 'p_' + f;
+            const el = document.getElementById(elId);
+            const content = p[f] || '';
+            
+            if (el) el.value = content;
+
+            if (tinyFields.includes(f) && typeof tinymce !== 'undefined') {
+                const editor = tinymce.get(elId);
+                if (editor) {
+                    editor.setContent(content);
+                } else {
+                    initEditor(`#${elId}`);
+                    setTimeout(() => {
+                        if (tinymce.get(elId)) {
+                            tinymce.get(elId).setContent(content);
+                        }
+                    }, 100);
+                }
+            }
         });
 
         document.getElementById('p_active').checked = (p.is_active == 1);
@@ -746,18 +724,22 @@ export function initProductsPage() {
 
         document.getElementById('productModal').classList.remove('hidden');
         setTimeout(() => document.getElementById('productModal').classList.add('active'), 10);
-
-        document.querySelector('#prodForm button[type="submit"]').innerText = "Update Product";
     };
 
     pForm.onsubmit = (e) => {
         e.preventDefault();
+        
+        if (typeof tinymce !== 'undefined') {
+            tinymce.triggerSave();
+        }
+
         const fileInput = document.getElementById('prodInput');
         if (!window.currentEditProductId && fileInput.files.length === 0) { alert("Please select a product image."); return; }
         const url = window.currentEditProductId ? `/admin/products-actions/product-update/${window.currentEditProductId}` : `/admin/products-actions/product-store/${window.currentGenId}`;
         const fd = new FormData(pForm);
         if (window.currentEditProductId) fd.append('_method', 'PUT');
         fd.set('is_active', document.getElementById('p_active').checked ? 1 : 0);
+        
         fetch(url, { method: 'POST', body: fd, headers: fetchHeaders() })
             .then(handleResponse).then(() => window.location.reload())
             .catch(() => showInlineError('p_trade_name', 'prodNameError', "Trade name already exists."));

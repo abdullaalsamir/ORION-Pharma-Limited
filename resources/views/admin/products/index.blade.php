@@ -3,24 +3,28 @@
 
 @section('content')
     @php
-        $fields = [
-            'preparation' => 'Preparation',
-            'therapeutic_class' => 'Therapeutic Class',
+        $col1 = [
             'indications' => 'Indications',
             'dosage_admin' => 'Dosage & Administration',
-            'use_children' => 'Use in Children',
-            'use_pregnancy_lactation' => 'Pregnancy & Lactation',
             'contraindications' => 'Contraindications',
+            'overdosage' => 'Overdosage'
+        ];
+
+        $col2 = [
             'precautions' => 'Precautions',
             'side_effects' => 'Side Effects',
             'drug_interactions' => 'Drug Interactions',
-            'high_risk' => 'High Risk Groups',
-            'overdosage' => 'Overdosage',
-            'storage' => 'Storage',
+            'use_children' => 'Use in Children',
+            'use_pregnancy_lactation' => 'Pregnancy & Lactation',
+            'high_risk' => 'High Risk Groups'
+        ];
+
+        $col3 = [
             'presentation' => 'Presentation',
             'how_supplied' => 'How Supplied',
             'commercial_pack' => 'Commercial Pack',
             'packaging' => 'Packaging',
+            'storage' => 'Storage',
             'official_specification' => 'Official Specification'
         ];
     @endphp
@@ -126,21 +130,11 @@
     </div>
 
     <div id="productModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
+        <div class="modal-content max-w-[95vw]! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 id="prodTitle" class="mb-0!">Add Product</h1>
                 <div class="flex items-center">
-                    <div class="flex items-center gap-1.5 mr-3" id="product-editor-toolbar">
-                        <button type="button" class="btn-toolbar" data-format="b" title="Bold">B</button>
-                        <button type="button" class="btn-toolbar" data-format="i" title="Italic">I</button>
-                        <button type="button" class="btn-toolbar" data-format="p" title="Paragraph">P</button>
-                        <button type="button" class="btn-toolbar" data-format="h1" title="Heading 1">H1</button>
-                        <button type="button" class="btn-toolbar" data-format="h2" title="Heading 2">H2</button>
-                        <button type="button" class="btn-toolbar" data-format="ul" title="Unordered List">UL</button>
-                        <button type="button" class="btn-toolbar" data-format="ol" title="Ordered List">OL</button>
-                        <button type="button" class="btn-toolbar" data-format="br" title="Line Break">Br</button>
-                    </div>
-                    <button onclick="closeModal('productModal')" class="btn-icon ml-2">
+                    <button type="button" onclick="closeModal('productModal')" class="btn-icon ml-2">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -148,56 +142,100 @@
 
             <form id="prodForm" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
                 @csrf
-                <div class="flex flex-col gap-1">
-                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Product Image</label>
-                    <input type="file" name="image" id="prodInput" accept="image/*" class="hidden"
-                        onchange="handlePreview(this, 'prodPreview')">
-                    <div class="relative group cursor-pointer" onclick="document.getElementById('prodInput').click()">
-                        <div class="aspect-video bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-admin-blue"
-                            id="prodPreview">
-                            <i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>
-                            <span
-                                class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select
-                                Image</span>
+
+                <div class="flex gap-8 px-2 items-start flex-wrap lg:flex-nowrap">
+                    <div class="flex flex-col gap-1 w-lg shrink-0">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1 block">Product Image</label>
+                        <input type="file" name="image" id="prodInput" accept="image/*" class="hidden"
+                            onchange="handlePreview(this, 'prodPreview')">
+                        <div class="relative group cursor-pointer" onclick="document.getElementById('prodInput').click()">
+                            <div class="aspect-video bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-admin-blue"
+                                id="prodPreview">
+                                <i class="fas fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i>
+                                <span
+                                    class="text-slate-400 font-bold text-[10px] uppercase tracking-widest text-center px-4">Select
+                                    Image</span>
+                            </div>
+                            <div id="prodReplaceOverlay"
+                                class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-2xl">
+                                <span class="text-white font-bold text-xs uppercase tracking-widest">Click to Replace
+                                    Image</span>
+                            </div>
                         </div>
-                        <div id="prodReplaceOverlay"
-                            class="absolute inset-0 bg-admin-blue/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all rounded-2xl">
-                            <span class="text-white font-bold text-xs uppercase tracking-widest">Click to Replace
-                                Image</span>
+                        <span id="prodImageError"
+                            class="text-[10px] text-red-500 font-bold uppercase ml-1 mt-1 hidden">Please select a product
+                            image</span>
+                    </div>
+
+                    <div class="flex-1 flex flex-col gap-4">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Trade Name</label>
+                            <input type="text" name="trade_name" id="p_trade_name" required class="input-field w-full">
+                            <span id="prodNameError"
+                                class="text-[10px] text-red-500 font-bold uppercase ml-1 mt-1 hidden"></span>
+                        </div>
+
+                        <div class="flex-col gap-1 hidden" id="p_generic_id_wrapper">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Assign Generic
+                                (Optional)</label>
+                            <select name="generic_id" id="p_generic_id" class="input-field w-full">
+                                <option value="">⁝⁝⁝ No Generic / Archived ⁝⁝⁝</option>
+                                @foreach($generics as $g)
+                                    <option value="{{ $g->id }}">{{ $g->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Preparation</label>
+                            <textarea name="preparation" id="p_preparation"
+                                class="input-field w-full h-22 py-2 resize-none custom-scrollbar"></textarea>
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Therapeutic Class</label>
+                            <textarea name="therapeutic_class" id="p_therapeutic_class"
+                                class="input-field w-full h-22 py-2 resize-none custom-scrollbar"></textarea>
                         </div>
                     </div>
-                    <span id="prodImageError" class="text-[10px] text-red-500 font-bold uppercase ml-1 mt-1 hidden">Please
-                        select a product image</span>
                 </div>
 
-                <div class="space-y-5">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Trade Name</label>
-                        <input type="text" name="trade_name" id="p_trade_name" required class="input-field w-full">
-                        <span id="prodNameError"
-                            class="text-[10px] text-red-500 font-bold uppercase ml-1 mt-1 hidden"></span>
-                    </div>
-                    <div class="flex-col gap-1 hidden" id="p_generic_id_wrapper">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Assign Generic (Optional)</label>
-                        <select name="generic_id" id="p_generic_id" class="input-field w-full">
-                            <option value="">⁝⁝⁝ No Generic / Archived ⁝⁝⁝</option>
-                            @foreach($generics as $g)
-                                <option value="{{ $g->id }}">{{ $g->name }}</option>
-                            @endforeach
-                        </select>
+                <div class="grid grid-cols-3 gap-8 mt-6 pt-6 px-2">
+
+                    <div class="space-y-6">
+                        @foreach($col1 as $key => $label)
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">{{ $label }}</label>
+                                <textarea name="{{ $key }}" id="p_{{ $key }}"
+                                    class="input-field w-full h-32 py-3 resize-none"></textarea>
+                            </div>
+                        @endforeach
                     </div>
 
-                    @foreach($fields as $key => $label)
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">{{ $label }}</label>
-                            <textarea name="{{ $key }}" id="p_{{ $key }}"
-                                class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
-                        </div>
-                    @endforeach
+                    <div class="space-y-6">
+                        @foreach($col2 as $key => $label)
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">{{ $label }}</label>
+                                <textarea name="{{ $key }}" id="p_{{ $key }}"
+                                    class="input-field w-full h-32 py-3 resize-none"></textarea>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="space-y-6">
+                        @foreach($col3 as $key => $label)
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">{{ $label }}</label>
+                                <textarea name="{{ $key }}" id="p_{{ $key }}"
+                                    class="input-field w-full h-32 py-3 resize-none"></textarea>
+                            </div>
+                        @endforeach
+                    </div>
+
                 </div>
 
                 <div
-                    class="flex items-center justify-between mt-4 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50">
+                    class="flex items-center justify-between mt-4 sticky bottom-0 bg-white pb-2 pt-4 border-t border-slate-50 z-10">
                     <div id="prodActiveWrapper" class="opacity-0 pointer-events-none">
                         <label class="toggle-switch">
                             <input type="checkbox" id="p_active" name="is_active">

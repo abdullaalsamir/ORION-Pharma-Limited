@@ -26,8 +26,8 @@
                 <div class="flex-1 min-w-0 flex flex-col gap-0.5 ml-5">
                     <span class="font-semibold text-slate-700 text-sm truncate tracking-tight">{{ $p->trade_name }}</span>
                     <span
-                        class="text-admin-blue font-bold text-[11px] truncate uppercase tracking-wider">{{ $p->therapeutic_class ?? 'No Class Defined' }}</span>
-                    <p class="text-[11px] text-slate-400 italic mt-1 truncate">{{ $p->preparation }}</p>
+                        class="text-admin-blue font-bold text-[11px] truncate tracking-wider">{{ $p->therapeutic_class ?? 'No Class Defined' }}</span>
+                    <p class="text-[11px] text-slate-400 mt-1 truncate">{{ $p->preparation }}</p>
                 </div>
 
                 <div class="flex items-center gap-4 shrink-0 px-6">
