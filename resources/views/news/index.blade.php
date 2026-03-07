@@ -83,9 +83,9 @@
                                 <h4 class="text-lg font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
                                     {{ $item->title }}
                                 </h4>
-                                <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
-                                    {{ html_entity_decode(strip_tags($item->description)) }}
-                                </p>
+                                <div class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
+                                    {{ strip_tags($item->description) }}
+                                </div>
                                 <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
                                     {{ $item->news_date->format('d F, Y') }}
                                 </div>
@@ -106,9 +106,9 @@
                                 <h4 class="text-lg font-semibold text-slate-900 capitalize group-hover:text-orion-blue transition-all duraion-300 line-clamp-2 -mt-0.5">
                                     {{ $item->title }}
                                 </h4>
-                                <p class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
-                                    {{ html_entity_decode(strip_tags($item->description)) }}
-                                </p>
+                                <div class="text-slate-500 text-base leading-relaxed line-clamp-1 mt-2">
+                                    {{ strip_tags($item->description) }}
+                                </div>
                                 <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mt-2">
                                     {{ $item->news_date->format('d F, Y') }}
                                 </div>

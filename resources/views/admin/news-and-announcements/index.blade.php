@@ -44,9 +44,9 @@
                                         {{ $item->title }}
                                     </span>
 
-                                    <p class="text-[11px] text-slate-400 line-clamp-1 mt-1">
-                                        {{ html_entity_decode(strip_tags($item->description)) }}
-                                    </p>
+                                    <div class="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                                        {!! $item->description !!}
+                                    </div>
 
                                     <div
                                         class="flex items-center gap-1.5 text-[10px] font-bold text-admin-blue uppercase tracking-wider mt-2">
@@ -95,7 +95,7 @@
     </div>
 
     <div id="addModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
+        <div class="modal-content max-w-2xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Add News Item</h1>
                 <button type="button" onclick="closeModal('addModal')" class="btn-icon">
@@ -154,7 +154,7 @@
 
                 <div class="relative flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Description</label>
-                    <textarea name="description" required
+                    <textarea name="description" id="addDesc" required
                         class="input-field w-full h-32 py-3 resize-none custom-scrollbar"></textarea>
                 </div>
 
@@ -166,7 +166,7 @@
     </div>
 
     <div id="editModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xl! h-[90vh]! flex flex-col">
+        <div class="modal-content max-w-2xl! h-[90vh]! flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100 shrink-0">
                 <h1 class="mb-0!">Edit News Item</h1>
                 <button onclick="closeModal('editModal')" class="btn-icon">

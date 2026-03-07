@@ -1045,11 +1045,18 @@ export function initReportModule() {
 export function initNewsPage() {
     if (!window.location.pathname.includes('news-and-announcements')) return;
 
+    initEditor('#addDesc');
+    initEditor('#editDesc');
+
     setupModule('news-and-announcements', '/admin/news-actions/store', '/admin/news-actions', 'curNewsId');
     
     window.openNewsAddModal = () => {
         const form = document.querySelector('#addModal form');
-        form.reset();
+        if (form) form.reset();
+
+        if (typeof tinymce !== 'undefined' && tinymce.get('addDesc')) {
+            tinymce.get('addDesc').setContent('');
+        }
 
         const pin = form.querySelector('input[name="is_pin"][type="checkbox"]');
         const label = document.getElementById('addPinLabel');
@@ -1068,7 +1075,6 @@ export function initNewsPage() {
         window.curNewsId = item.id;
         document.getElementById('editTitle').value = item.title;
         document.getElementById('editDate').value = item.news_date.split('T')[0];
-        document.getElementById('editDesc').value = item.description;
         document.getElementById('editActive').checked = item.is_active == 1;
         
         if(document.getElementById('editPin')) {
@@ -1080,15 +1086,34 @@ export function initNewsPage() {
         preview.classList.remove('p-6');
         if (item.file_type === 'pdf') {
             preview.classList.add('p-6');
-            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase">PDF Notice</span></div>`;
+            preview.innerHTML = `<div class="flex flex-col items-center justify-center text-center"><i class="fas fa-file-pdf text-red-600 text-5xl mb-3"></i><span class="text-[11px] font-bold text-slate-600 uppercase font-sans">PDF Notice</span></div>`;
         } else {
             preview.innerHTML = `<img src="/${slug}/${item.file_path.split('/').pop()}?t=${Date.now()}" class="w-full h-full object-cover">`;
         }
         
+        const content = item.description || '';
+        const descTextarea = document.getElementById('editDesc');
+        if (descTextarea) descTextarea.value = content;
+
+        if (typeof tinymce !== 'undefined') {
+            const editor = tinymce.get('editDesc');
+            if (editor) {
+                editor.setContent(content);
+            } else {
+                initEditor('#editDesc');
+                setTimeout(() => {
+                    if (tinymce.get('editDesc')) {
+                        tinymce.get('editDesc').setContent(content);
+                    }
+                }, 100);
+            }
+        }
+
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
     };
+
     window.handleNewsPreview = function (input, previewId, fileNameId) {
         const preview = document.getElementById(previewId);
         const fileNameEl = document.getElementById(fileNameId);
@@ -1121,6 +1146,7 @@ export function initNewsPage() {
         label.innerText = el.checked ? "Pin Yes" : "Pin No";
         label.classList.toggle('text-admin-blue', el.checked);
     };
+
     window.deleteNews = (id) => { if(confirm('Delete this News?')) { fetch(`/admin/news-actions/${id}`, { method: 'DELETE', headers: fetchHeaders() }) .then(handleResponse) .then(() => Turbo.visit(window.location.href)); } };
 }
 
