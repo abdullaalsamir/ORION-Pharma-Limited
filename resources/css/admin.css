@@ -224,3 +224,15 @@
   height: 26px !important;
   padding: 2px !important;
 }
+
+.shake {
+    animation: shake .35s ease;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+}
