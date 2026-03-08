@@ -15,7 +15,7 @@
     <main class="flex flex-1 items-center justify-center p-6">
         <div class="w-full max-w-md">
             <div class="flex justify-center mb-4">
-                <img src="{{ asset('images/logo.svg') }}" alt="ORION Pharma Limited" class="h-16 w-auto">
+                <img src="{{ asset('logo.svg') }}" alt="ORION Pharma Limited" class="h-16 w-auto">
             </div>
 
             <div class="bg-white rounded-2xl border border-slate-200 p-8">
