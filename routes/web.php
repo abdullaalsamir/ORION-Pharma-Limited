@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\CorporateGovernanceController;
 use App\Http\Controllers\Admin\ProductComplaintController;
 use App\Http\Controllers\Admin\CareerController;
 use App\Http\Controllers\Admin\FooterController;
+use App\Http\Controllers\Admin\SettingsController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -152,9 +153,11 @@ Route::prefix('admin')
         Route::get('/footer', [FooterController::class, 'index'])->name('footer');
         Route::post('/footer/update', [FooterController::class, 'update'])->name('footer.update');
 
-        Route::get('/settings', function () {
-            return view('admin.settings.index');
-        })->name('settings');
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
+            Route::put('/update-assets', [SettingsController::class, 'updateAssets'])->name('update-assets');
+            Route::put('/update-credentials', [SettingsController::class, 'updateCredentials'])->name('update-credentials');
+        });
 
         Route::get('/{slug}', [MenuController::class, 'showMultifunctional'])->name('multifunctional');
     });

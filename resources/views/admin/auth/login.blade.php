@@ -31,10 +31,10 @@
                 <form method="POST" action="{{ route('admin.login.submit') }}" class="space-y-5">
                     @csrf
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input type="email" name="email" required
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" name="username" required
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-slate-500 outline-none transition-all duration-200 placeholder:text-gray-400"
-                            placeholder="username@orion-group.net">
+                            placeholder="Enter your username">
                     </div>
 
                     <div>

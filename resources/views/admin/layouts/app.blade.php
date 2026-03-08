@@ -80,7 +80,7 @@
                 <span class="font-medium">Footer</span>
             </a>
 
-            <a href="{{ route('admin.settings') }}"
+            <a href="{{ route('admin.settings.index') }}"
                 class="flex items-center gap-3 px-4 py-3 transition-all {{ request()->is('admin/settings*') ? 'bg-white/10 text-accent border-l-4 border-accent' : 'text-slate-300 hover:bg-white/5 hover:text-white border-l-4 border-transparent' }}">
                 <i class="fas fa-cog w-5 text-center"></i>
                 <span class="font-medium">Settings</span>
