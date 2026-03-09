@@ -35,6 +35,8 @@ Route::prefix('admin')
     ->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/menus', [MenuController::class, 'index'])->name('menus');
         Route::post('/menus', [MenuController::class, 'store'])->name('menus.store');
